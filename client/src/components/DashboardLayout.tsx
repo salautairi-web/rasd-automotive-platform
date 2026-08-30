@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, Boxes, Building2, ClipboardCheck, FileText, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Users, Workflow } from "lucide-react";
+import { Activity, Boxes, Building2, ClipboardCheck, FileText, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -30,6 +30,9 @@ import { Button } from "./ui/button";
 const menuItems = [
   { icon: LayoutDashboard, label: "نظرة عامة", path: "/" },
   { icon: Building2, label: "الهيكل المؤسسي", path: "/organization" },
+  { icon: Landmark, label: "سجل كيانات الأعمال", path: "/erp/entities" },
+  { icon: BriefcaseBusiness, label: "دفاتر المحاسبة", path: "/erp/accounting" },
+  { icon: ChartNoAxesCombined, label: "المحفظة والاستثمار", path: "/erp/portfolio" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
   { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },

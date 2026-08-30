@@ -22,6 +22,34 @@
       "when": 1788126074233,
       "tag": "0002_lonely_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1788127195228,
+      "tag": "0003_nebulous_steve_rogers",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1788127242381,
+      "tag": "0004_broad_purple_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1788127532897,
+      "tag": "0005_strange_cerise",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1788127587432,
+      "tag": "0006_warm_alex_power",
+      "breakpoints": true
     }
   ]
 }
