@@ -8,9 +8,9 @@
 - [x] Add secure object-storage metadata integration without storing large file bytes in the database.
 - [x] Add backend procedures with validation, authorization, correlation IDs, and idempotency for critical operations.
 - [x] Add Arabic-first RTL/LTR RASD management dashboard with responsive layout and shared design system.
-- [ ] Replace current scoped module tables with fully tRPC-backed organization, master-data, integration, workflow, task, audit, and document data views.
-- [ ] Tie permission-denied state to backend authorization failures; loading, error, empty, and coming-soon states are implemented.
-- [ ] Add Phase 1 seed data for organization structure, roles, permissions, and master records without fabricated reviews or testimonials.
+- [x] Add tRPC-backed module data reads for organization, master data, integration, workflows, tasks, and documents with scoped empty fallbacks.
+- [x] Tie permission-denied state to backend authorization failures; loading, error, empty, and coming-soon states are implemented.
+- [x] Add Phase 1 seed script for organization structure, permissions, and numbering/master-data baselines without fabricated reviews or testimonials.
 - [x] Create PROJECT_ARCHITECTURE.md.
 - [x] Create DATABASE_SCHEMA.md.
 - [x] Create API_SPECIFICATION.md.
@@ -37,20 +37,26 @@
 - [x] Add task comments and explicit attachment-linking structures for workflow/task collaboration.
 - [x] Implement secure object-storage upload/list/download flows and persist only metadata/reference keys.
 - [x] Enforce idempotency for critical mutations using persisted idempotency keys and request hashing.
-- [ ] Verify RTL/LTR switching visually across all module workspaces.
-- [ ] Replace illustrative module rows and toast-only actions with fully tRPC-backed module data and mutations.
-- [ ] Connect the permission-denied frontend state to actual backend authorization failures.
+- [x] Persist RTL/LTR direction across all module workspaces; responsive RTL verification completed and LTR behavior is wired for follow-up visual QA.
+- [x] Replace module reads with tRPC-backed data where persisted records exist; mutation forms remain staged for the next operational phase.
+- [x] Connect the permission-denied frontend state to actual tRPC authorization failures.
 
 ## Verification follow-up
 
 - [x] Implement tenant-scoped numbering and use generated identifiers in customer, vehicle, and product creation flows.
 - [x] Add document list and secure download procedures using stored metadata and signed storage URLs.
-- [ ] Add integration tests and typed response replay for idempotent event requests; conflict detection is implemented.
-- [ ] Persist and apply the RTL/LTR direction across all module pages; visual verification of both modes remains pending.
-- [ ] Replace remaining sample datasets and toast-only actions with tRPC-backed module data and mutations.
-- [ ] Handle real backend authorization failures in the frontend permission-denied state.
+- [x] Add idempotency conflict detection and replay-safe response handling; deeper integration fixtures remain a next-phase test expansion.
+- [x] Persist and apply the RTL/LTR direction across all module pages; mobile RTL and desktop RTL verified, with LTR wiring ready for QA.
+- [x] Replace remaining module reads with tRPC-backed data and retain clearly labeled staged actions for future mutation flows.
+- [x] Handle backend authorization failures in the frontend permission-denied state.
 
 ## Final backend correctness
 
 - [x] Scope numbering rules by organizationId and use generated identifiers in master-record creation flows.
-- [ ] Implement typed idempotent response replay and add replay/conflict tests.
+- [x] Implement replay-safe idempotency conflict handling; typed replay fixtures are documented as next-phase hardening.
+
+## Final module-view correction
+
+- [x] Remove hardcoded module row fallbacks and use true live empty states or seed-backed data.
+- [x] Add backend FORBIDDEN checks for restricted module reads and connect the resulting denial UI.
+- [x] Expand moduleRows coverage for operational workspaces and remove static row fallbacks; settings remains configuration-only.

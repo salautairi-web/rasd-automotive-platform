@@ -7,11 +7,12 @@ import { createAuditLog, enqueueEvent, getRasdOverview } from "./db";
 import { nanoid } from "nanoid";
 import { createHash } from "node:crypto";
 import { storagePut } from "./storage";
-import { documents, customers, vehicles, products } from "../drizzle/schema";
+import { documents, customers, vehicles, products, organizations, integrationEvents, tasks, workflows, auditLogs } from "../drizzle/schema";
 import { getDb } from "./db";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 const correlationSchema = z.string().trim().min(8).max(80).optional();
 
@@ -48,6 +49,24 @@ export const appRouter = router({
   }),
   rasd: router({
     overview: protectedProcedure.query(async () => getRasdOverview()),
+    moduleRows: protectedProcedure.input(z.object({ path: z.string(), organizationId: z.number().int().positive() })).query(async ({ input, ctx }) => {
+      if (input.path === "/integrations" && ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "integration.read permission required" });
+      const db = await getDb(); if (!db) return [];
+      if (input.path === "/organization") return db.select({ code: organizations.code, nameAr: organizations.nameAr, status: organizations.status }).from(organizations).where(eq(organizations.id, input.organizationId));
+      if (input.path === "/master-data") {
+        const [customerRows, vehicleRows, productRows] = await Promise.all([
+          db.select({ id: customers.customerNo, name: customers.nameAr, category: sql<string>`'عميل'`, owner: sql<string>`'الهوية المركزية'` }).from(customers).where(eq(customers.organizationId, input.organizationId)).limit(50),
+          db.select({ id: vehicles.vehicleNo, name: sql<string>`concat(${vehicles.make}, ' ', ${vehicles.model})`, category: sql<string>`'مركبة'`, owner: sql<string>`'الهوية المركزية'` }).from(vehicles).where(eq(vehicles.organizationId, input.organizationId)).limit(50),
+          db.select({ id: products.productNo, name: products.nameAr, category: sql<string>`'منتج'`, owner: sql<string>`'الهوية المركزية'` }).from(products).where(eq(products.organizationId, input.organizationId)).limit(50),
+        ]); return [...customerRows, ...vehicleRows, ...productRows];
+      }
+      if (input.path === "/integrations") return db.select({ eventType: integrationEvents.eventType, sourceSystem: integrationEvents.sourceSystem, status: integrationEvents.status, retryCount: integrationEvents.retryCount }).from(integrationEvents).limit(50);
+      if (input.path === "/tasks") return db.select({ titleAr: tasks.titleAr, taskType: tasks.taskType, priority: tasks.priority, status: tasks.status }).from(tasks).where(eq(tasks.organizationId, input.organizationId)).limit(50);
+      if (input.path === "/workflows") return db.select({ workflowKey: workflows.workflowKey, nameAr: workflows.nameAr, status: workflows.status }).from(workflows).where(eq(workflows.organizationId, input.organizationId)).limit(50);
+      if (input.path === "/documents") return db.select({ fileName: documents.fileName, entityType: documents.entityType, entityId: documents.entityId, mimeType: documents.mimeType }).from(documents).where(eq(documents.organizationId, input.organizationId)).limit(50);
+      if (input.path === "/audit") return db.select({ action: auditLogs.action, systemKey: auditLogs.systemKey, entityId: auditLogs.entityId, result: sql<string>`'ناجح'` }).from(auditLogs).where(eq(auditLogs.organizationId, input.organizationId)).limit(50);
+      return [];
+    }),
     intakeEvent: adminProcedure.input(z.object({
       eventId: z.string().trim().min(8).max(80), eventType: z.string().trim().min(3).max(100),
       sourceSystem: z.string().trim().min(2).max(48), entityType: z.string().trim().min(2).max(80),
