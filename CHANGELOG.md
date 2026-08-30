@@ -1,0 +1,8 @@
+# Changelog
+
+## Phase 1 foundation
+
+- Added RASD organization, master-data, integration, workflow, task, document, audit, permission, and idempotency schema.
+- Added protected overview and administrator-only event intake procedures.
+- Added Arabic-first RTL dashboard, responsive navigation, module workspaces, loading/error/empty states, and Phase 1 documentation.
+- Added Vitest coverage for authentication, authorization, and input validation.

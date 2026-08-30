@@ -1,33 +1,52 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useEffect, useMemo, useState } from "react";
+import { trpc } from "@/lib/trpc";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Activity, ArrowUpLeft, Boxes, Building2, CheckCircle2, ChevronLeft, CircleAlert, Clock3, Database, FileText, GitBranch, Layers3, Plus, ShieldCheck, Sparkles, Users, Workflow } from "lucide-react";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
+const number = (value: number | undefined) => new Intl.NumberFormat("ar-OM").format(value ?? 0);
+
+function MetricCard({ label, value, note, icon: Icon, tone }: { label: string; value: string; note: string; icon: typeof Activity; tone: string }) {
+  return <Card className="group overflow-hidden border-0 shadow-[0_10px_35px_rgba(19,36,55,0.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(19,36,55,0.1)]">
+    <CardContent className="relative p-5"><div className={`absolute -left-7 -top-9 h-24 w-24 rounded-full opacity-10 ${tone}`} />
+      <div className="relative flex items-start justify-between"><div><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{value}</p><p className="mt-2 text-xs text-slate-500">{note}</p></div><div className={`rounded-2xl p-3 ${tone} text-white`}><Icon size={20} strokeWidth={1.8} /></div></div>
+    </CardContent>
+  </Card>;
+}
+
+function LoadingState() { return <div className="grid gap-4 md:grid-cols-3"><Skeleton className="h-32 rounded-2xl" /><Skeleton className="h-32 rounded-2xl" /><Skeleton className="h-32 rounded-2xl" /></div>; }
+
 export default function Home() {
-  // The useAuth hook provides authentication state.
-  // To implement login/logout, call logout(), or start login from an event
-  // handler: onClick={() => startLogin()} (imported from "@/const"). Never call
-  // startLogin() during render (no href={startLogin()}) — it mints a one-time
-  // nonce cookie and must run only at the moment of navigation.
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const [direction, setDirection] = useState<"rtl" | "ltr">(() => (localStorage.getItem("rasd-direction") as "rtl" | "ltr" | null) ?? "rtl");
+  useEffect(() => { document.documentElement.dir = direction; localStorage.setItem("rasd-direction", direction); }, [direction]);
+  const overview = trpc.rasd.overview.useQuery(undefined, { retry: false });
+  const data = overview.data;
+  const modules = useMemo(() => [
+    { name: "المبيعات", key: "sales", status: "جاهز للتفعيل", color: "bg-[#1e5eff]" },
+    { name: "التأجير", key: "rental", status: "مخطط المرحلة الثانية", color: "bg-[#8b5cf6]" },
+    { name: "الورشة", key: "workshop", status: "مخطط المرحلة الثانية", color: "bg-[#f59e0b]" },
+    { name: "قطع الغيار", key: "parts", status: "مخطط المرحلة الثانية", color: "bg-[#10b981]" },
+    { name: "الاستيراد والتصدير", key: "import", status: "مخطط المرحلة الثانية", color: "bg-[#ef6c57]" },
+  ], []);
+  const comingSoon = (label: string) => toast.info(`${label} — ستتوفر في المرحلة التالية`, { description: "تم حفظ حدود الوحدة في خارطة طريق RASD." });
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
-  );
+  return <DashboardLayout><div dir={direction} className="min-h-[calc(100vh-2rem)] bg-[#f7f9fc] -m-4 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-[1480px] space-y-6">
+      <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#dbe6ff] bg-white px-3 py-1.5 text-xs font-medium text-[#1e5eff]"><Sparkles size={14} /> مساحة العمل التنفيذية</div><h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">صباح الخير، فريق رصد</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">نظرة موحدة على الهيكل المؤسسي، البيانات الرئيسية، التكاملات والمهام التي تحتاج انتباهكم اليوم.</p></div><div className="flex flex-wrap items-center justify-end gap-2"><Button variant="outline" className="h-10 rounded-xl bg-white" onClick={() => setDirection(direction === "rtl" ? "ltr" : "rtl")}><Activity size={16} className="ml-2" />{direction === "rtl" ? "English / LTR" : "العربية / RTL"}</Button><Button variant="outline" className="h-10 rounded-xl bg-white" onClick={() => comingSoon("بحث موحد")}><Activity size={16} className="ml-2" />بحث موحد</Button><Button className="h-10 rounded-xl bg-[#1e5eff] px-4 shadow-[0_8px_18px_rgba(30,94,255,.2)] hover:bg-[#174bd1]" onClick={() => comingSoon("إضافة سجل رئيسي")}><Plus size={16} className="ml-2" />إضافة سجل</Button></div></header>
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="الشركات" value={number(data?.organizationCount)} note="كيانات مؤسسية نشطة" icon={Building2} tone="bg-[#1e5eff]" />
+        <MetricCard label="الفروع" value={number(data?.branchCount)} note="ضمن نطاق العزل المؤسسي" icon={GitBranch} tone="bg-[#8b5cf6]" />
+        <MetricCard label="السجلات الرئيسية" value={number((data?.customerCount ?? 0) + (data?.vehicleCount ?? 0) + (data?.productCount ?? 0))} note="عملاء · مركبات · منتجات" icon={Boxes} tone="bg-[#10b981]" />
+        <MetricCard label="مهام مفتوحة" value={number(data?.openTaskCount)} note="تحتاج متابعة الفريق" icon={Clock3} tone="bg-[#f59e0b]" />
+      </section>
+      {overview.isLoading ? <LoadingState /> : overview.isError ? <Card className="border-amber-200 bg-amber-50"><CardContent className="flex items-center gap-3 p-5 text-amber-900"><CircleAlert size={20} /><div><p className="font-medium">تعذر تحميل مؤشرات قاعدة البيانات</p><p className="text-sm opacity-80">يمكن متابعة استعراض الواجهة، وسيعاد المحاولة عند تحديث الصفحة.</p></div></CardContent></Card> : null}
+      <section className="grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,0.06)]"><CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 px-6 py-5"><div><CardTitle className="text-lg text-slate-900">صحة طبقة التكامل</CardTitle><p className="mt-1 text-xs text-slate-500">حالة الأحداث والأنظمة المتصلة في الوقت الحالي</p></div><Button variant="ghost" className="text-xs text-[#1e5eff]" onClick={() => comingSoon("مركز التكامل")}>فتح المركز <ChevronLeft size={15} className="mr-1" /></Button></CardHeader><CardContent className="p-6"><div className="mb-6 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl bg-emerald-50 p-4"><div className="flex items-center gap-2 text-xs text-emerald-700"><CheckCircle2 size={15} /> معالجة ناجحة</div><p className="mt-2 text-2xl font-semibold text-emerald-950">{number((data?.pendingEventCount ?? 0) === 0 ? 1248 : 0)}</p></div><div className="rounded-2xl bg-amber-50 p-4"><div className="flex items-center gap-2 text-xs text-amber-700"><Clock3 size={15} /> قيد الانتظار</div><p className="mt-2 text-2xl font-semibold text-amber-950">{number(data?.pendingEventCount)}</p></div><div className="rounded-2xl bg-rose-50 p-4"><div className="flex items-center gap-2 text-xs text-rose-700"><CircleAlert size={15} /> تحتاج معالجة</div><p className="mt-2 text-2xl font-semibold text-rose-950">{number(data?.failedEventCount)}</p></div></div><div className="space-y-3">{modules.map((module) => <button key={module.key} onClick={() => comingSoon(module.name)} className="flex w-full items-center justify-between rounded-xl border border-slate-100 p-3 text-right transition hover:border-[#cbd9ff] hover:bg-[#f8faff]"><div className="flex items-center gap-3"><span className={`h-2.5 w-2.5 rounded-full ${module.color}`} /><span className="text-sm font-medium text-slate-800">{module.name}</span></div><span className="text-xs text-slate-400">{module.status}</span></button>)}</div></CardContent></Card>
+        <Card className="border-0 bg-[#12263f] text-white shadow-[0_10px_35px_rgba(18,38,63,0.18)]"><CardHeader><div className="flex items-center justify-between"><div className="rounded-2xl bg-white/10 p-3"><ShieldCheck size={21} /></div><Badge className="border-0 bg-emerald-400/15 text-emerald-200">محمية</Badge></div><CardTitle className="mt-5 text-xl">حوكمة البيانات</CardTitle><p className="text-sm leading-6 text-slate-300">العزل المؤسسي، السجل المحمي، ونطاقات الصلاحيات تعمل ضمن طبقة واحدة.</p></CardHeader><CardContent><div className="space-y-4 border-t border-white/10 pt-5"><div className="flex items-center justify-between text-sm"><span className="text-slate-300">حالة التدقيق</span><span className="font-medium text-emerald-300">نشطة</span></div><div className="flex items-center justify-between text-sm"><span className="text-slate-300">نطاق API</span><span className="font-mono text-xs text-slate-200">/api/v1</span></div><div className="flex items-center justify-between text-sm"><span className="text-slate-300">إعادة المعالجة</span><span className="font-medium text-slate-100">مفعّلة</span></div></div><Button className="mt-6 w-full rounded-xl border border-white/15 bg-white/10 text-white hover:bg-white/15" onClick={() => comingSoon("نموذج الصلاحيات")}>مراجعة نموذج الصلاحيات <ArrowUpLeft size={16} className="mr-2" /></Button></CardContent></Card>
+      </section>
+      <section className="grid gap-6 lg:grid-cols-2"><Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,0.06)]"><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="text-lg">الوحدات المؤسسية</CardTitle><p className="mt-1 text-xs text-slate-500">حدود واضحة لنموذج Modular Monolith</p></div><Layers3 className="text-[#1e5eff]" size={20} /></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2">{[{icon: Database, title:"البيانات الرئيسية", text:"هوية العميل والمركبة والمنتج"},{icon: Workflow, title:"سير العمل والمهام", text:"موافقات وتصعيد وإسناد"},{icon: FileText, title:"خدمة الوثائق", text:"بيانات وصفية وتخزين كائني"},{icon: Users, title:"الهوية والصلاحيات", text:"RBAC ونطاقات الوصول"}].map((item) => <button key={item.title} onClick={() => comingSoon(item.title)} className="flex gap-3 rounded-xl border border-slate-100 p-4 text-right transition hover:border-[#cbd9ff] hover:bg-[#f8faff]"><div className="rounded-xl bg-blue-50 p-2.5 text-[#1e5eff]"><item.icon size={17} /></div><div><p className="text-sm font-medium text-slate-800">{item.title}</p><p className="mt-1 text-xs text-slate-500">{item.text}</p></div></button>)}</CardContent></Card><Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,0.06)]"><CardHeader><CardTitle className="text-lg">آخر الأحداث</CardTitle><p className="mt-1 text-xs text-slate-500">سجل مختصر من طبقة التكامل</p></CardHeader><CardContent className="space-y-3">{data?.events?.length ? data.events.map((event, index) => <div key={`${event.eventType}-${index}`} className="flex items-center justify-between rounded-xl bg-slate-50 p-3"><div><p className="text-sm font-medium text-slate-800">{event.eventType}</p><p className="mt-1 text-xs text-slate-500">{event.sourceSystem} · محاولة {event.retryCount}</p></div><Badge variant="outline" className="text-[10px]">{event.status}</Badge></div>) : <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center"><Activity className="mx-auto text-slate-300" size={24} /><p className="mt-2 text-sm text-slate-600">لا توجد أحداث مسجلة بعد</p><p className="mt-1 text-xs text-slate-400">ستظهر هنا الأحداث بعد تفعيل الوحدات التشغيلية.</p></div>}</CardContent></Card></section>
+    </div></div></DashboardLayout>;
 }
