@@ -162,6 +162,13 @@
       "when": 1788212550211,
       "tag": "0022_wealthy_dexter_bennett",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1788213021451,
+      "tag": "0023_orange_nextwave",
+      "breakpoints": true
     }
   ]
 }

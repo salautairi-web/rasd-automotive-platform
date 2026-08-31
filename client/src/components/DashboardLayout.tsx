@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, Boxes, Building2, ClipboardCheck, FileText, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound } from "lucide-react";
+import { Activity, Boxes, Building2, ClipboardCheck, FileText, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -46,6 +46,7 @@ const menuItems = [
   { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
   { icon: UsersRound, label: "الموارد البشرية", path: "/hr" },
   { icon: Boxes, label: "الأصول الثابتة", path: "/assets" },
+  { icon: Warehouse, label: "المخزون والمستودعات", path: "/inventory" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
   { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },
