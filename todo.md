@@ -106,3 +106,40 @@
 - [x] Build a real Central ERP overview view that renders live executive metrics from erp.executiveOverview.
 - [x] Preserve protected idempotent replay/hash-conflict behavior and cover core invariants in the Step 2 test suite.
 - [x] Implement and validate validated-to-posted and posted-to-reversed journal lifecycle guards.
+
+## Step 3 — Auto Sales in an Independent Entity
+
+- [x] Add entity-scoped Auto Sales registry, customers, and lead foundation; opportunities and representative management are staged.
+- [x] Add independent vehicle inventory availability, reservations, discount threshold approval, and local cost structures; price lists/promotions are staged.
+- [x] Add quotations, reservations, sales orders, invoices, payments, and delivery records; line-item and contract vertical slices are staged.
+- [x] Enforce entity ownership, ready-state reservation availability, entity idempotency, and delivery preconditions.
+- [x] Add protected quotation, discount approval, reservation, payment replay, and delivery lifecycle procedures; full lead/contract automation is staged.
+- [x] Establish event/command integration boundary and Central ERP financial handoff contract without direct cross-entity database access.
+- [x] Add Arabic-first Auto Sales workspace with live inventory and sales-control indicators; quotations and delivery operational panels are staged.
+- [x] Add tests for entity-local rules, reservation availability, approval thresholds, delivery safeguards, and idempotency foundations.
+- [x] Add Step 3 Auto Sales architecture, boundary, lifecycle, and acceptance documentation.
+- [x] Verify the delivered Step 3 foundation with TypeScript, 11 passing tests, production build, and responsive visual verification.
+
+## Step 3 correctness hardening
+
+- [x] Add persisted quotation discount approvals and a threshold-driven approval state; approval decision mutations remain a follow-up slice.
+- [x] Enforce same-entity ownership for customer, vehicle, invoice, and sales-order references in the implemented sales mutations.
+- [x] Validate real same-entity sales-order state and reserved vehicle state before vehicle delivery.
+- [x] Establish persisted Auto Sales event/ERP handoff boundary in the domain model and procedures; downstream adapters remain staged.
+- [x] Add lifecycle rule tests for reservation, approval, delivery, and idempotency foundations; database integration fixtures remain staged.
+- [x] Run desktop and mobile visual QA for the Step 3 Auto Sales workspace.
+
+## Step 3 evidence hardening
+
+- [x] Persist Auto Sales lifecycle events and ERP handoff envelopes from quotation, reservation, payment, and delivery mutations using the existing integration infrastructure.
+- [x] Add protected procedure-contract tests for entity scope, authentication, and idempotency validation alongside lifecycle conflict rules.
+- [x] Re-run final desktop and mobile visual QA for /sales after all hardening edits.
+
+## Step 3 database-backed procedure evidence
+
+- [x] Add procedure-level same-entity denial coverage using mismatched persisted records.
+- [x] Add procedure-level reservation/payment replay and delivery-precondition coverage.
+
+## Step 3 explicit cross-entity evidence
+
+- [x] Add a procedure-level fixture where both related records exist but carry different businessEntityId values, and reject the mutation explicitly.
