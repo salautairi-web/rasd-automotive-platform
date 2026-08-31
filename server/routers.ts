@@ -12,6 +12,7 @@ import { getDb } from "./db";
 import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { importExportRouter } from "./importExport";
 import { portalRouter } from "./portal";
+import { centralOperationsRouter } from "./centralOperations";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -25,6 +26,7 @@ export const appRouter = router({
   rentalAdvanced: rentalAdvancedRouter,
   importExport: importExportRouter,
   portal: portalRouter,
+  centralOperations: centralOperationsRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
