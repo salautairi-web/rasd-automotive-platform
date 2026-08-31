@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { storagePut } from "./storage";
 import { documents, customers, vehicles, products, organizations, integrationEvents, tasks, workflows, auditLogs, businessEntities, accountingBooks, journalEntries, journalLines, portfolioMetrics, salesCustomers, salesVehicles, salesLeads, salesQuotations, salesQuotationApprovals, salesReservations, salesOrders, salesInvoices, salesPayments, salesDeliveries, salesVehicleCosts, partsProducts, partsInventory, partsInventoryMovements, partsReservations, partsSalesOrders, partsInvoices, partsPayments, workshopAppointments, workshopCustomers, workshopVehicles, workshopWorkOrders, workshopPartsRequests, workshopInvoices, workshopPayments, rentalVehicles, rentalCustomers, rentalRatePlans, rentalReservations, rentalContracts, rentalOdometerReadings, rentalMaintenanceProfiles, rentalMaintenanceTasks, rentalMaintenanceRequests, rentalInvoices } from "../drizzle/schema";
 import { getDb } from "./db";
+import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -19,6 +20,7 @@ import { canReserveVehicle, canDeliverVehicle, quotationStatus } from "../shared
 const correlationSchema = z.string().trim().min(8).max(80).optional();
 
 export const appRouter = router({
+  rentalAdvanced: rentalAdvancedRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
