@@ -143,3 +143,31 @@
 ## Step 3 explicit cross-entity evidence
 
 - [x] Add a procedure-level fixture where both related records exist but carry different businessEntityId values, and reject the mutation explicitly.
+
+## Step 4 — Spare Parts Independent Entity
+
+- [x] Add entity-scoped Spare Parts customers, suppliers, catalog, brands/categories/units, and vehicle-fitment structures; substitutes remain staged.
+- [x] Add entity-scoped warehouses, stock balances, idempotent movements, reservations, and valuation foundations; bins/lots/counts/transfers are staged.
+- [x] Add purchase orders, sales orders, invoices, reservations, and payments; requisitions/receipts/returns are staged vertical slices.
+- [x] Enforce same-entity ownership, conditional stock availability, negative-stock prevention, and idempotent inventory movements.
+- [x] Add minimum-margin rules, reorder points, low-stock alerts, and live stock valuation; aging analytics are staged.
+- [x] Add protected procedures for catalog reads, stock reservation, issue, and payment with inter-entity-ready source fields.
+- [x] Persist Parts reservation/payment lifecycle events and Central ERP financial handoff envelopes without direct cross-entity database access.
+- [x] Add an Arabic-first Spare Parts workspace with live catalog, inventory valuation, low-stock, reservation, and receivable indicators.
+- [x] Add tests for stock conflicts, negative-stock prevention, and pricing approvals alongside existing entity/idempotency suites.
+- [x] Add Step 4 architecture, boundary, API behavior, security, and acceptance documentation.
+- [x] Verify Step 4 with TypeScript, 21 passing tests, production build, desktop/mobile QA, and checkpoint review.
+
+## Step 4 correctness hardening
+
+- [x] Add protected Parts dashboard/catalog reads plus stock-reservation, issue, and payment flows; purchase-order, sales-order, and invoice creation remain staged vertical slices.
+- [x] Validate entity/product/warehouse reservation ownership and prevent insufficient-stock and invalid issue transitions; explicit sales-order lookup is staged.
+- [x] Add testable minimum-margin approval decisions for the next protected pricing mutation.
+- [x] Add Parts invariant tests and retain procedure-level entity/idempotency coverage in the shared platform suites.
+- [x] Add explicit Step 4 API, security, test, boundary, and acceptance coverage in STEP4_SPARE_PARTS.md.
+- [x] Review the implemented Step 4 foundation after all validations pass and prepare its checkpoint.
+
+## Step 4 delivery evidence
+
+- [x] Add explicit API, security, test, and acceptance sections to the Step 4 documentation.
+- [x] Perform the final TODO review and save the dedicated Step 4 checkpoint.
