@@ -15,6 +15,7 @@ import { portalRouter } from "./portal";
 import { centralOperationsRouter } from "./centralOperations";
 import { biRouter } from "./bi";
 import { centralFinanceRouter } from "./centralFinance";
+import { governanceRouter } from "./governance";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -31,6 +32,7 @@ export const appRouter = router({
   centralOperations: centralOperationsRouter,
   bi: biRouter,
   centralFinance: centralFinanceRouter,
+  governance: governanceRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

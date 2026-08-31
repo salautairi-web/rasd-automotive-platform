@@ -134,6 +134,13 @@
       "when": 1788210180921,
       "tag": "0018_lame_supreme_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1788211100891,
+      "tag": "0019_harsh_screwball",
+      "breakpoints": true
     }
   ]
 }
