@@ -41,6 +41,7 @@ const menuItems = [
   { icon: Globe2, label: "البوابة الموحدة", path: "/portal" },
   { icon: Command, label: "مركز العمليات", path: "/operations" },
   { icon: ChartNoAxesCombined, label: "الذكاء التحليلي", path: "/bi" },
+  { icon: Landmark, label: "المالية والخزينة", path: "/finance" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
   { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },
@@ -256,7 +257,7 @@ function DashboardLayoutContent({
         />
       </div>
 
-      <SidebarInset>
+      <SidebarInset className={isMobile ? "min-w-0" : `min-w-0 ${isCollapsed ? "ml-[var(--sidebar-width-icon)]" : "ml-[var(--sidebar-width)]"}`}>
         {isMobile && (
           <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">

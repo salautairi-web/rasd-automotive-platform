@@ -127,6 +127,13 @@
       "when": 1788209814255,
       "tag": "0017_tranquil_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1788210180921,
+      "tag": "0018_lame_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }
