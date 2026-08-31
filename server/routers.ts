@@ -11,6 +11,7 @@ import { documents, customers, vehicles, products, organizations, integrationEve
 import { getDb } from "./db";
 import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { importExportRouter } from "./importExport";
+import { portalRouter } from "./portal";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -23,6 +24,7 @@ const correlationSchema = z.string().trim().min(8).max(80).optional();
 export const appRouter = router({
   rentalAdvanced: rentalAdvancedRouter,
   importExport: importExportRouter,
+  portal: portalRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
