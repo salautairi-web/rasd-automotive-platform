@@ -171,3 +171,27 @@
 
 - [x] Add explicit API, security, test, and acceptance sections to the Step 4 documentation.
 - [x] Perform the final TODO review and save the dedicated Step 4 checkpoint.
+
+## Step 5 — Workshop Independent Entity
+
+- [x] Add entity-scoped Workshop customers, vehicles, technicians, appointments, and reception-ready records; service advisors and bays are staged.
+- [x] Add inspections, estimates, work orders, labor entries, parts requests, and quality checks; detailed operation lines and subcontracting are staged.
+- [x] Add invoices, payments, delivery records, and local profitability references; warranty/comeback and local journal vertical slices are staged.
+- [x] Add entity ownership checks plus testable work-order transitions, approval thresholds, and delivery safeguards; capacity scheduling is staged.
+- [x] Add protected Workshop dashboard/work-order reads, entity-validated appointments, and idempotent parts-request procedures; remaining mutations are staged.
+- [x] Persist Workshop appointment and parts-request events with inter-entity and ERP-ready envelopes.
+- [x] Add an Arabic-first Workshop workspace with live appointments, work orders, waiting-parts, approval, and receivable foundations.
+- [x] Add tests for work-order transitions, approval requirements, and delivery safeguards alongside platform entity/idempotency suites.
+- [x] Add Step 5 boundary, API, security, test, and acceptance documentation.
+- [x] Verify Step 5 with TypeScript, 24 passing tests, production build, and desktop/mobile QA; checkpoint pending final TODO review.
+
+## Step 5 correctness hardening
+
+- [x] Establish reception-ready appointment/customer/vehicle persistence; the explicit check-in mutation remains a staged vertical slice.
+- [x] Add testable work-order transition and delivery guards; production transition/delivery mutations remain staged.
+- [x] Add idempotent Workshop parts-request replay by entity/key; request-hash conflict hardening remains staged.
+- [x] Add Workshop source/target entity event fields and ERP-ready event envelopes.
+- [x] Add live appointment and work-order summary metrics to the Workshop workspace; appointment row view remains staged.
+- [x] Add Workshop lifecycle tests alongside protected platform authentication/entity/idempotency suites.
+- [x] Add explicit Step 5 API, security, test, and acceptance coverage in STEP5_WORKSHOP.md.
+- [x] Perform final validation and prepare the Step 5 checkpoint after TODO review.

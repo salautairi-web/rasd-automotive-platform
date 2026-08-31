@@ -71,6 +71,13 @@
       "when": 1788146302652,
       "tag": "0009_tired_jasper_sitwell",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1788146931581,
+      "tag": "0010_long_vulture",
+      "breakpoints": true
     }
   ]
 }
