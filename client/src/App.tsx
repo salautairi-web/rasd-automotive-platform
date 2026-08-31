@@ -21,10 +21,11 @@ import Procurement from "./pages/Procurement";
 import HumanResources from "./pages/HumanResources";
 import Assets from "./pages/Assets";
 import Inventory from "./pages/Inventory";
+import CRM from "./pages/CRM";
 
 const modulePaths = ["/organization", "/erp/entities", "/erp/accounting", "/erp/portfolio", "/master-data", "/integrations", "/workflows", "/tasks", "/documents", "/audit", "/settings"];
 function Router() {
-  return <Switch><Route path="/" component={Home} /><Route path="/portal" component={Portal} /><Route path="/operations" component={CentralOperations} /><Route path="/bi" component={ExecutiveBI} /><Route path="/finance" component={CentralFinance} /><Route path="/governance" component={Governance} /><Route path="/procurement" component={Procurement} /><Route path="/hr" component={HumanResources} /><Route path="/assets" component={Assets} /><Route path="/inventory" component={Inventory} /><Route path="/erp" component={CentralERP} /><Route path="/sales" component={AutoSales} /><Route path="/parts" component={SpareParts} /><Route path="/workshop" component={Workshop} /><Route path="/rental" component={Rental} /><Route path="/import-export" component={ImportExport} />{modulePaths.map((path) => <Route key={path} path={path}>{() => <ModulePlaceholder path={path} />}</Route>)}<Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch>;
+  return <Switch><Route path="/" component={Home} /><Route path="/portal" component={Portal} /><Route path="/operations" component={CentralOperations} /><Route path="/bi" component={ExecutiveBI} /><Route path="/finance" component={CentralFinance} /><Route path="/governance" component={Governance} /><Route path="/procurement" component={Procurement} /><Route path="/hr" component={HumanResources} /><Route path="/assets" component={Assets} /><Route path="/inventory" component={Inventory} /><Route path="/crm" component={CRM} /><Route path="/erp" component={CentralERP} /><Route path="/sales" component={AutoSales} /><Route path="/parts" component={SpareParts} /><Route path="/workshop" component={Workshop} /><Route path="/rental" component={Rental} /><Route path="/import-export" component={ImportExport} />{modulePaths.map((path) => <Route key={path} path={path}>{() => <ModulePlaceholder path={path} />}</Route>)}<Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch>;
 }
 export default function App() {
   return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>;
