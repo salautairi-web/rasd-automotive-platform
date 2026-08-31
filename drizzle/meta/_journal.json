@@ -120,6 +120,13 @@
       "when": 1788209369705,
       "tag": "0016_melted_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1788209814255,
+      "tag": "0017_tranquil_shockwave",
+      "breakpoints": true
     }
   ]
 }

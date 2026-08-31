@@ -40,6 +40,7 @@ const menuItems = [
   { icon: Ship, label: "الاستيراد والتصدير", path: "/import-export" },
   { icon: Globe2, label: "البوابة الموحدة", path: "/portal" },
   { icon: Command, label: "مركز العمليات", path: "/operations" },
+  { icon: ChartNoAxesCombined, label: "الذكاء التحليلي", path: "/bi" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
   { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },
