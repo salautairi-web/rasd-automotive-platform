@@ -11,10 +11,11 @@ import AutoSales from "./pages/AutoSales";
 import SpareParts from "./pages/SpareParts";
 import Workshop from "./pages/Workshop";
 import Rental from "./pages/Rental";
+import ImportExport from "./pages/ImportExport";
 
 const modulePaths = ["/organization", "/erp/entities", "/erp/accounting", "/erp/portfolio", "/master-data", "/integrations", "/workflows", "/tasks", "/documents", "/audit", "/settings"];
 function Router() {
-  return <Switch><Route path="/" component={Home} /><Route path="/erp" component={CentralERP} /><Route path="/sales" component={AutoSales} /><Route path="/parts" component={SpareParts} /><Route path="/workshop" component={Workshop} /><Route path="/rental" component={Rental} />{modulePaths.map((path) => <Route key={path} path={path}>{() => <ModulePlaceholder path={path} />}</Route>)}<Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch>;
+  return <Switch><Route path="/" component={Home} /><Route path="/erp" component={CentralERP} /><Route path="/sales" component={AutoSales} /><Route path="/parts" component={SpareParts} /><Route path="/workshop" component={Workshop} /><Route path="/rental" component={Rental} /><Route path="/import-export" component={ImportExport} />{modulePaths.map((path) => <Route key={path} path={path}>{() => <ModulePlaceholder path={path} />}</Route>)}<Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch>;
 }
 export default function App() {
   return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>;
