@@ -43,6 +43,7 @@ const menuItems = [
   { icon: ChartNoAxesCombined, label: "الذكاء التحليلي", path: "/bi" },
   { icon: Landmark, label: "المالية والخزينة", path: "/finance" },
   { icon: ShieldCheck, label: "حوكمة البيانات", path: "/governance" },
+  { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
   { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },
