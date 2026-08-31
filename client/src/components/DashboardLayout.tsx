@@ -45,6 +45,7 @@ const menuItems = [
   { icon: ShieldCheck, label: "حوكمة البيانات", path: "/governance" },
   { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
   { icon: UsersRound, label: "الموارد البشرية", path: "/hr" },
+  { icon: Boxes, label: "الأصول الثابتة", path: "/assets" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
   { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },

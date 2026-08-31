@@ -155,6 +155,13 @@
       "when": 1788212103908,
       "tag": "0021_safe_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1788212550211,
+      "tag": "0022_wealthy_dexter_bennett",
+      "breakpoints": true
     }
   ]
 }
