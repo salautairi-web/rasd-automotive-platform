@@ -183,6 +183,13 @@
       "when": 1788214034719,
       "tag": "0025_cool_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1788229110378,
+      "tag": "0026_magenta_gamora",
+      "breakpoints": true
     }
   ]
 }

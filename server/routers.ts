@@ -22,6 +22,7 @@ import { assetsRouter } from "./assets";
 import { inventoryRouter } from "./inventory";
 import { crmRouter } from "./crm";
 import { documentManagementRouter } from "./documents";
+import { automationRouter } from "./automation";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -45,6 +46,7 @@ export const appRouter = router({
   inventory: inventoryRouter,
   crm: crmRouter,
   documentManagement: documentManagementRouter,
+  automation: automationRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
