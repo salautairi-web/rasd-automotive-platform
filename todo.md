@@ -1277,3 +1277,20 @@
 - [x] Add tests for entity isolation, duplicate events, provider failure, retry/DLQ, consent/opt-out, template versioning, attachment security, and search authorization.
 - [x] Document and preserve deferred official WhatsApp/voice/provider adapters, malware scanning, native push delivery, and production credentials.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 24 checkpoint.
+
+## Step 25 — Procurement, Supplier & Purchasing Network 2.0
+
+- [x] Document the central Procurement Framework versus entity-local procurement operations and the no-shared-operational-supplier boundary.
+- [x] Add procurement entity settings, local suppliers, contacts, documents, categories, risk, banking references, contracts, and supplier onboarding states as the existing local-operation foundation.
+- [x] Add protected supplier application, due-diligence, approval, bank-verification, activation, suspension, and periodic-review foundations.
+- [x] Add purchase requisitions and lines with requester, department, cost center, budget, required date, justification, approval, and idempotency.
+- [x] Add RFQs, invited suppliers, supplier quotations, quote lines, weighted bid evaluations, and comparison metadata.
+- [x] Add purchase orders and lines with versioning, approval, warehouse, cost center, delivery, tax, and payment-term metadata.
+- [x] Add goods/service receipts, accepted/rejected quantities, inspection, serial/batch references, milestones, and inventory/financial handoff metadata.
+- [x] Add three-way invoice matching, tolerance rules, exceptions, returns, credit notes, and reversal metadata foundations.
+- [x] Add supplier performance, risk, contract, budget, spend, approval, emergency procurement, and audit foundations.
+- [x] Add protected procurement procedures with entity scope, approval separation, masked banking fields, idempotency, and inter-entity boundary checks.
+- [x] Add Arabic RTL/English LTR procurement workspace with supplier, requisition, RFQ, PO, receipt, exception, budget, and performance states.
+- [x] Add tests for supplier isolation, approval thresholds, quote comparison, PO lifecycle, three-way matching, returns, budget variance, and inter-entity denial foundations.
+- [x] Document deferred supplier portal production adapters, external tax/bank integrations, advanced spend analytics, and distributed procurement workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 25 checkpoint.
