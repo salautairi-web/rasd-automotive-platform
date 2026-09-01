@@ -1294,3 +1294,20 @@
 - [x] Add tests for supplier isolation, approval thresholds, quote comparison, PO lifecycle, three-way matching, returns, budget variance, and inter-entity denial foundations.
 - [x] Document deferred supplier portal production adapters, external tax/bank integrations, advanced spend analytics, and distributed procurement workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 25 checkpoint.
+
+## Step 26 — Fleet, Vehicle Lifecycle & Transportation Management 2.0
+
+- [x] Document the central Vehicle & Fleet Framework versus entity-local vehicle operations and the no-shared-operational-vehicle boundary.
+- [x] Add or reuse vehicle identity, ownership, legal/compliance, classification, and status-history foundations with explicit Inventory/Asset/Rental distinctions.
+- [x] Add protected lifecycle transition rules for acquisition, receiving, registration, assignment, rental, maintenance, accident, transfer, sale, and disposal foundations.
+- [x] Add vehicle inspections, registrations, insurance, permits, renewal alerts, and document references with entity scope.
+- [x] Add preventive/corrective maintenance, service history, parts/labor/external cost, thresholds, and workshop handoff foundations.
+- [x] Add fuel, tyres, incidents/damage, drivers, assignments, violations, trips, routes, allocation, and conflict detection foundations through existing rental lifecycle surfaces.
+- [x] Add vehicle expenses and financial-profile/profitability summaries with source transaction and entity metadata.
+- [x] Add reservations, availability, utilization, downtime, and rental conflict safeguards without allowing maintenance vehicles to rent.
+- [x] Add vehicle transfer, disposal/sale, import/export linkage, telematics adapter boundary, and accounting/ERP event metadata foundations.
+- [x] Add protected fleet procedures with entity/vehicle/driver/location/financial data protection, approvals, audit, and idempotency foundations.
+- [x] Add Arabic RTL/English LTR Fleet workspace with live fleet status, compliance, maintenance, utilization, costs, and profitability states.
+- [x] Add tests for Inventory/Asset/Rental separation, lifecycle transitions, reservation conflicts, maintenance thresholds, fuel/expense calculations, transfers, and entity isolation foundations.
+- [x] Document deferred telematics providers, GPS data ingestion, native tracking, and full accounting/insurance integrations.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 26 checkpoint.

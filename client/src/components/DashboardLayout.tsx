@@ -50,6 +50,7 @@ const menuItems = [
   { icon: Landmark, label: "المالية والخزينة", path: "/finance" },
   { icon: ShieldCheck, label: "حوكمة البيانات", path: "/governance" },
   { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
+  { icon: CarFront, label: "الأسطول ودورة المركبات", path: "/fleet" },
   { icon: UsersRound, label: "الموارد البشرية", path: "/hr" },
   { icon: Boxes, label: "الأصول الثابتة", path: "/assets" },
   { icon: Warehouse, label: "المخزون والمستودعات", path: "/inventory" },

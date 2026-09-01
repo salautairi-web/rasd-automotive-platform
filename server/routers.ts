@@ -15,6 +15,7 @@ import { portalRouter } from "./portal";
 import { portalV2Router } from "./portalV2";
 import { communicationRouter } from "./communication";
 import { procurementNetworkRouter } from "./procurementNetwork";
+import { fleetRouter } from "./fleet";
 import { centralOperationsRouter } from "./centralOperations";
 import { biRouter } from "./bi";
 import { centralFinanceRouter } from "./centralFinance";
@@ -45,6 +46,7 @@ export const appRouter = router({
   portalV2: portalV2Router,
   communication: communicationRouter,
   procurementNetwork: procurementNetworkRouter,
+  fleet: fleetRouter,
   centralOperations: centralOperationsRouter,
   bi: biRouter,
   centralFinance: centralFinanceRouter,
