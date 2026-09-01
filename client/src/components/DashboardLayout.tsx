@@ -39,6 +39,7 @@ const menuItems = [
   { icon: KeyRound, label: "تأجير السيارات", path: "/rental" },
   { icon: Ship, label: "الاستيراد والتصدير", path: "/import-export" },
   { icon: Globe2, label: "البوابة الموحدة", path: "/portal" },
+  { icon: Globe2, label: "بوابة العملاء والشركاء 2.0", path: "/customer-portal" },
   { icon: Command, label: "مركز العمليات", path: "/operations" },
   { icon: Zap, label: "مركز الأتمتة", path: "/automation" },
   { icon: Network, label: "مركز التكاملات", path: "/integrations-center" },

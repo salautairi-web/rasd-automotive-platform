@@ -1246,3 +1246,18 @@
 - [x] User selected IAM/MFA hardening as the next priority on 2026-09-01.
 - [x] Do not activate an external MFA provider until the owner supplies/approves the provider and credentials.
 - [x] Keep Manus OAuth as the initial identity provider and avoid replacing its session callback.
+
+## Step 23 — Customer & Partner Portals 2.0
+
+- [x] Document the central Portal Framework, portal types, entity context, and no-shared-operational-customer-data boundary.
+- [x] Add portal users, identities, entity relationships, portal permissions, sessions, devices, and preferences with ownership and status controls.
+- [x] Add protected central account and entity-switch procedures using existing OAuth/IAM/API Gateway foundations.
+- [x] Add portal order, reservation, payment-request, document, signature, ticket, message, notification, and audit foundations with entity scope and idempotency.
+- [x] Add portal dashboard summaries without fabricated orders, payments, reviews, ratings, or satisfaction data.
+- [x] Add customer/partner portal request procedures for scoped order, reservation, quote, and support-ticket creation.
+- [x] Add entity-scoped document access and upload references through existing storage metadata boundaries.
+- [x] Add portal notifications and conversation metadata linked to entity and transaction context.
+- [x] Add Arabic RTL and English LTR portal workspace with central account, relationships, pending actions, documents, support, and notifications.
+- [x] Add protected portal authorization, document isolation, payment idempotency, and multi-entity relationship tests.
+- [x] Document provider-neutral payment/signature/email/SMS boundaries and clearly separate implemented foundations from deferred adapters.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 23 checkpoint.
