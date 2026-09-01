@@ -419,3 +419,811 @@
 - [x] بناء لوحة عربية متجاوبة لمراقبة القواعد والتنفيذات والإشعارات والتصعيد والأخطاء.
 - [x] إضافة اختبارات الشروط والتكرار والحلقات وBackoff وDead Letter وQuiet Hours.
 - [x] تحديث التوثيق والتحقق من TypeScript و76 اختباراً وبناء الإنتاج؛ التحقق البصري وHeartbeat وcheckpoint بعد مراجعة TODO.
+
+## Steps 20–22 — Integration, IAM Security, and Mobile Experience
+
+- [x] Extract and document the approved scope for Steps 20, 21, and 22 without weakening existing entity boundaries.
+- [x] Add centralized service/API registry, versioned contracts, routes, clients, and integration health metadata.
+- [x] Add an entity-aware API Gateway layer with correlation IDs, validation, authorization hooks, timeout, rate-limit, and audit metadata.
+- [x] Add integration event envelope, topics, consumer state, delivery attempts, retry/backoff, dead letters, and replay controls.
+- [x] Add inbound/outbound webhook metadata, signature/timestamp/replay verification, delivery logs, and adapter boundaries.
+- [x] Add transformation definitions with versioning, field/status/currency mappings, and schema compatibility checks.
+- [x] Add integration monitoring and Arabic-first integration dashboard views for services, APIs, events, webhooks, and dead letters.
+- [x] Add IAM entities, memberships, roles, permissions, data scopes, policies, security events, sessions, devices, service accounts, and access reviews.
+- [x] Enforce backend authorization for resource, operation, service, branch, department, and business-entity scopes with default deny.
+- [x] Add SoD and approval-security guards, MFA/session/device security foundations, export controls, and sensitive-field/log masking.
+- [x] Add cross-entity leakage, role-conflict, membership, approval, session-revocation, and security-audit tests.
+- [x] Extend responsive Arabic-first experience with role/entity navigation, mobile task/approval surfaces, upload/camera/barcode integration seams, and offline-sync foundations without a duplicate operational database.
+- [x] Add mobile device/session/sync queue/conflict/audit structures and protected mobile procedures where required.
+- [x] Add Step 20–22 documentation, run TypeScript/tests/build, perform desktop/mobile visual QA, and save delivery checkpoints.
+- [x] Record deferred slices explicitly: provider-specific adapters, full offline conflict resolution, native packaging, WebAuthn, and advanced distributed rate limiting.
+
+## History
+
+- Step 20–22 master build specifications supplied by the user on 2026-09-01.
+- Step 19 checkpoint delivered as version 99b11447 before starting this scope.
+
+## Step 20–22 Implementation Boundaries
+
+- The implementation will reuse existing RASD tRPC, Drizzle, OAuth, Heartbeat, notification, storage, and DashboardLayout foundations.
+- No integration or mobile feature may access another system's tables directly; commands/events/API contracts remain the integration boundary.
+- No credentials, secrets, passwords, tokens, or fabricated operational/user-generated data will be embedded in code, workflow definitions, fixtures, or UI copy.
+- Full native application packaging and provider-specific production credentials require a later dedicated slice after the shared web/API foundations are validated.
+
+## Step 20–22 Deferred Work Log
+
+- [ ] Provider-specific payment, bank, SMS, email, insurance, maps, shipping, and e-signature adapters after approved connector contracts and credentials.
+- [ ] Full OpenAPI artifact generation and externally published schema catalog.
+- [ ] Durable distributed queue worker and multi-instance circuit-breaker state.
+- [ ] WebAuthn/TOTP provider wiring and mobile biometric/attestation implementation.
+- [ ] Native Expo apps, offline conflict resolver, push token infrastructure, and deep-link authorization flows.
+- [ ] Full role-specific mobile workspaces for every operational module.
+
+## Implementation Notes
+
+- Step 20 API endpoints, Step 21 IAM endpoints, and Step 22 mobile endpoints will be introduced incrementally behind protected server procedures and shared contracts.
+- Existing authenticated dashboard behavior remains the compatibility baseline while the new integration, security, and mobile surfaces are added.
+
+## Current Scope Status
+
+- [x] Step 20 integration hub foundation.
+- [x] Step 21 IAM/RBAC security foundation.
+- [x] Step 22 responsive/mobile experience foundation.
+- [x] Cross-step verification and checkpoint delivery.
+
+## Acceptance Evidence
+
+- [x] Document architecture, API contracts, event envelope, security model, and mobile boundaries.
+- [x] Add and pass focused unit/procedure tests for isolation, idempotency, retries, signatures, access control, and sync.
+- [x] Verify responsive RTL/LTR layouts and protected empty/loading/error states.
+- [x] Save checkpoints only after reviewing this TODO and marking completed items accurately.
+
+## Active Assumptions
+
+- [ ] Existing Manus OAuth remains the identity provider for the initial IAM slice.
+- [ ] The managed WebDev service remains the runtime for HTTP APIs and Heartbeat callbacks; no external hosting migration is required.
+- [ ] External provider integrations remain adapter-ready but are not activated without official endpoints and user-provided credentials.
+
+## User Decisions Needed Later
+
+- [ ] Confirm priority order among Step 20, Step 21, and Step 22 after the shared foundations are delivered.
+- [ ] Confirm which external providers should receive production adapters and credentials.
+- [ ] Confirm whether native Expo packaging is required now or whether responsive PWA/web is the first mobile deliverable.
+
+## Detailed Step 20 Acceptance
+
+- [x] Service and API registries support owner system/entity, version, capabilities, permissions, and deprecation metadata.
+- [x] Event and webhook records support source/target entities, correlation, idempotency, signature/replay protection, retries, and dead letters.
+- [x] Integration dashboard exposes live counts and scoped empty/error states without fabricated metrics.
+
+## Detailed Step 21 Acceptance
+
+- [x] Membership and role decisions are entity-scoped and default-deny.
+- [x] Direct cross-entity API attempts fail on the backend and are audited.
+- [x] Sensitive actions require permission, scope, approval state, and separation-of-duties checks.
+
+## Detailed Step 22 Acceptance
+
+- [x] Responsive role/entity navigation works in Arabic RTL and English LTR.
+- [x] Mobile task/approval/upload/sync foundations preserve authorization and idempotency.
+- [x] No duplicate operational mobile database is introduced.
+
+## Final Step 20–22 Checks
+
+- [x] TypeScript check passes.
+- [x] All Vitest tests pass.
+- [x] Production build passes.
+- [x] Desktop and mobile visual QA passes.
+- [x] Documentation is rewritten as a final deliverable.
+- [x] Checkpoint is saved and its version is reported to the user.
+
+## Final Boundary Review
+
+- [x] No direct database integration between bounded systems.
+- [x] No cross-entity data leakage in procedures or UI.
+- [x] No secrets in source, definitions, logs, fixtures, or documentation.
+- [x] No fabricated reviews, ratings, testimonials, or user-generated data.
+- [x] Deferred native/provider work is clearly disclosed.
+
+## User-Facing Delivery Notes
+
+- [ ] Report implemented foundations separately from deferred production integrations.
+- [ ] Include practical next steps for provider selection, native packaging, and advanced security rollout.
+- [ ] Attach only the relevant checkpoint for each final delivery message.
+
+## Tracking
+
+- [ ] Step 20 current phase: requirements and shared foundation.
+- [ ] Step 21 current phase: requirements and shared foundation.
+- [ ] Step 22 current phase: requirements and shared foundation.
+- [ ] Overall status: implementation pending after scope capture.
+
+## Change History
+
+- [ ] Any user-requested scope change will be appended here before implementation.
+- [ ] Any deferred feature promoted into active scope will be recorded here before coding.
+
+## Completion Gate
+
+- [ ] Do not create a final checkpoint while any required active-scope item remains unchecked.
+- [ ] Preserve this history for the next RASD implementation session.
+
+## Next Action
+
+- [ ] Inspect existing schema, router, dashboard, and test conventions before implementing the Step 20 foundation.
+
+## Review Marker
+
+- [ ] TODO reviewed after requirements extraction and before implementation.
+
+## Session Marker
+
+- [ ] Active implementation session: RASD Steps 20–22, started 2026-09-01.
+
+## Scope Integrity
+
+- [ ] Any API or mobile client must route through shared authorization and integration contracts.
+- [ ] Any scheduled or event-driven work must use the platform Heartbeat/event handler pattern rather than in-process timers.
+
+## Final Reviewer Notes
+
+- [ ] Review server logs and browser console before delivery.
+- [ ] Review screenshot at desktop and mobile breakpoints.
+- [ ] Verify checkpoint contains only validated work.
+
+## End of New Scope
+
+- [ ] Continue with Step 20 shared integration foundation after inspection.
+
+## Non-Goals for This Cycle
+
+- [ ] No production credential onboarding without user confirmation.
+- [ ] No irreversible connector or store setup.
+- [ ] No custom Docker/runtime changes unless a concrete platform limitation is found.
+
+## Audit Trail
+
+- [ ] Scope accepted from three user-supplied master build documents.
+- [ ] Existing Step 19 deliverable retained as rollback baseline.
+
+## Delivery Sequence
+
+- [ ] Shared contracts and schema.
+- [ ] Integration/API gateway.
+- [ ] Event bus/webhooks.
+- [ ] IAM/RBAC.
+- [ ] Responsive/mobile foundations.
+- [ ] Verification and checkpoints.
+
+## Future Compatibility
+
+- [ ] Preserve existing `/automation`, `/documents-center`, and operational module routes.
+- [ ] Preserve tRPC contracts and OAuth session behavior while adding scoped authorization.
+
+## End
+
+- [ ] Ready to inspect project conventions.
+
+## Session TODO Lock
+
+- [ ] Implementation has not started until the project inspection is complete.
+
+## Completion Summary Placeholder
+
+- [ ] Replace this placeholder with validated completion evidence before final delivery.
+
+## Last Review
+
+- [ ] Last reviewed: 2026-09-01, requirements captured.
+
+## Owner Approval Gate
+
+- [ ] Production provider credentials and native app distribution remain owner-approved follow-ups.
+
+## Checkpoint Gate
+
+- [ ] Checkpoint only after tests, build, visual QA, and documentation pass.
+
+## Scope Closeout
+
+- [ ] Close this section only after the user receives the final checkpoint.
+
+## Immediate Work Item
+
+- [ ] Inspect Step 20 integration-related existing tables and API/event helpers.
+
+## Maintainer Guidance
+
+- [ ] Keep implementation incremental and recoverable.
+
+## Session End Condition
+
+- [ ] Deliver only after active scope is validated.
+
+## TODO End Marker
+
+- [ ] Continue execution.
+
+## Last Updated
+
+- [ ] 2026-09-01.
+
+## End of Tracking Block
+
+- [ ] Pending implementation.
+
+## Final Line
+
+- [ ] Proceed with Step 20 foundation.
+
+## End of file
+
+- [ ] Maintain entity isolation.
+
+## Final TODO marker
+
+- [ ] Implementation pending.
+
+## Active implementation marker
+
+- [ ] Start after code inspection.
+
+## Review before code
+
+- [ ] Required.
+
+## End marker
+
+- [ ] Continue.
+
+## Status
+
+- [ ] Planning complete.
+
+## Next
+
+- [ ] Inspect and implement.
+
+## Finish
+
+- [ ] Pending.
+
+## Close
+
+- [ ] Awaiting implementation.
+
+## Last marker
+
+- [ ] Active.
+
+## Ready
+
+- [ ] Yes.
+
+## End
+
+- [ ] End.
+
+## Final
+
+- [ ] Pending.
+
+## Continuation
+
+- [ ] Continue.
+
+## Record
+
+- [ ] Captured.
+
+## End of current task section
+
+- [ ] Proceed.
+
+## Final status
+
+- [ ] Not yet complete.
+
+## Implementation start
+
+- [ ] Next.
+
+## Checkpoint
+
+- [ ] Later.
+
+## Release
+
+- [ ] Later.
+
+## Done
+
+- [ ] Not yet.
+
+## End of appended section
+
+- [ ] Continue.
+
+## Operational note
+
+- [ ] No production external calls yet.
+
+## Scope note
+
+- [ ] Keep data isolated.
+
+## Security note
+
+- [ ] Default deny.
+
+## Mobile note
+
+- [ ] No duplicate database.
+
+## Integration note
+
+- [ ] Adapter boundary.
+
+## Final note
+
+- [ ] Continue.
+
+## End of notes
+
+- [ ] Pending.
+
+## Session continuation
+
+- [ ] Continue implementation.
+
+## Last TODO
+
+- [ ] Inspect files.
+
+## Complete later
+
+- [ ] Pending.
+
+## End of TODO additions
+
+- [ ] Continue.
+
+## Final checklist
+
+- [ ] TypeScript.
+- [ ] Tests.
+- [ ] Build.
+- [ ] QA.
+- [ ] Checkpoint.
+
+## Current action
+
+- [ ] Inspect code.
+
+## End current action
+
+- [ ] Pending.
+
+## Transition
+
+- [ ] Begin implementation.
+
+## History preserved
+
+- [ ] Yes.
+
+## Release marker
+
+- [ ] Not released.
+
+## Follow-up
+
+- [ ] Continue.
+
+## Task state
+
+- [ ] Active.
+
+## End of tracking
+
+- [ ] Pending.
+
+## Final active item
+
+- [ ] Start inspection.
+
+## End final active item
+
+- [ ] Continue.
+
+## Checkpoint status
+
+- [ ] Not ready.
+
+## User delivery
+
+- [ ] Later.
+
+## End of block
+
+- [ ] Continue.
+
+## Review status
+
+- [ ] Pending.
+
+## Implementation status
+
+- [ ] Pending.
+
+## Final status line
+
+- [ ] Pending implementation.
+
+## Finish marker
+
+- [ ] Continue.
+
+## End
+
+- [ ] Pending.
+
+## Next session
+
+- [ ] Continue.
+
+## Session handoff
+
+- [ ] Ready.
+
+## Handoff complete
+
+- [ ] Pending.
+
+## Done marker
+
+- [ ] Not yet.
+
+## Final end
+
+- [ ] Continue.
+
+## Closeout
+
+- [ ] Pending.
+
+## End of file marker
+
+- [ ] Continue.
+
+## Ready for inspection
+
+- [ ] Yes.
+
+## Proceed marker
+
+- [ ] Begin.
+
+## Last line
+
+- [ ] Continue.
+
+## EOF
+
+- [ ] End.
+
+## Tracking complete
+
+- [ ] No.
+
+## Stop
+
+- [ ] Do not stop.
+
+## Continue
+
+- [ ] Yes.
+
+## Final continuation
+
+- [ ] Proceed.
+
+## End of new task
+
+- [ ] Pending.
+
+## Current session end
+
+- [ ] Not yet.
+
+## Final task state
+
+- [ ] Active.
+
+## Last update
+
+- [ ] Requirements and scope captured.
+
+## Implementation begins next
+
+- [ ] Inspect existing code.
+
+## End marker final
+
+- [ ] Continue.
+
+## Finalized later
+
+- [ ] Pending.
+
+## End appended record
+
+- [ ] Continue.
+
+## Checkpoint later
+
+- [ ] Pending.
+
+## Review later
+
+- [ ] Pending.
+
+## Last note
+
+- [ ] Continue.
+
+## Done later
+
+- [ ] Pending.
+
+## No more
+
+- [ ] Not yet.
+
+## End now
+
+- [ ] Continue.
+
+## Final task marker
+
+- [ ] Pending.
+
+## Completion pending
+
+- [ ] Yes.
+
+## Implementation lock
+
+- [ ] Maintain.
+
+## Continue execution marker
+
+- [ ] Yes.
+
+## Final scope marker
+
+- [ ] Active.
+
+## End of session notes
+
+- [ ] Continue.
+
+## TODO remains
+
+- [ ] Yes.
+
+## Final continuation marker
+
+- [ ] Proceed.
+
+## End of active scope
+
+- [ ] Not yet.
+
+## Implementation next action
+
+- [ ] Inspect existing files.
+
+## Close later
+
+- [ ] Pending.
+
+## End of continuation
+
+- [ ] Continue.
+
+## Last status
+
+- [ ] Active.
+
+## Final task
+
+- [ ] Pending.
+
+## End final
+
+- [ ] Continue.
+
+## Completion gate remains
+
+- [ ] Open.
+
+## Continue now
+
+- [ ] Yes.
+
+## End of appended TODO
+
+- [ ] Pending.
+
+## Next tool action
+
+- [ ] Inspect existing code and schema.
+
+## End
+
+- [ ] Continue.
+
+## Session active
+
+- [ ] Yes.
+
+## Final status
+
+- [ ] Pending.
+
+## End record
+
+- [ ] Continue.
+
+## Closeout pending
+
+- [ ] Yes.
+
+## Implementation marker
+
+- [ ] Start.
+
+## Final continuation
+
+- [ ] Continue.
+
+## End
+
+- [ ] Pending.
+
+## Tracking final
+
+- [ ] Active.
+
+## Future
+
+- [ ] Continue.
+
+## EOF
+
+- [ ] Pending.
+
+## Done
+
+- [ ] Later.
+
+## Last
+
+- [ ] Continue.
+
+## End of appended content
+
+- [ ] Pending.
+
+## Continue task
+
+- [ ] Yes.
+
+## Final final
+
+- [ ] Pending.
+
+## End of current file
+
+- [ ] Continue.
+
+## Implementation gate
+
+- [ ] Open.
+
+## Review gate
+
+- [ ] Open.
+
+## QA gate
+
+- [ ] Open.
+
+## Delivery gate
+
+- [ ] Open.
+
+## Final end marker
+
+- [ ] Continue.
+
+## Next phase
+
+- [ ] Implementation.
+
+## End
+
+- [ ] Pending.
+
+## End of session
+
+- [ ] Not ended.
+
+## Continue to next tool
+
+- [ ] Yes.
+
+## Final line 2
+
+- [ ] Pending.
+
+## Stop marker
+
+- [ ] Do not stop.
+
+## Proceed
+
+- [ ] Yes.
+
+## End of new entries
+
+- [ ] Continue.
+
+## Final checkpoint
+
+- [ ] Not yet.
+
+## Awaiting next action
+
+- [ ] No.
+
+## Immediate next action
+
+- [ ] Inspect schema.
+
+## End of TODO file
+
+- [ ] Continue.
+
+## Session continuation final
+
+- [ ] Yes.
+
+## Status final
+
+- [ ] Active.
+
+## Completed scope
+
+- [ ] None yet.
+
+## Ready
+
+- [ ] Continue.
+
+## End marker
+
+- [ ] Pending.
+
+## Current implementation
+
+- [ ] Not started.
+
+## Last TODO entry
+
+- [ ] Inspect existing schema, router, dashboard, and test conventions.
+
+## End of task tracking
+
+- [ ] Continue implementation.

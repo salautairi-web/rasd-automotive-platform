@@ -1,0 +1,11 @@
+import DashboardLayout from "@/components/DashboardLayout";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc";
+import { KeyRound, LockKeyhole, ShieldCheck, UsersRound } from "lucide-react";
+
+export default function Security() {
+  const { data, isError, isLoading } = trpc.iam.dashboard.useQuery(undefined, { retry: false });
+  const metrics = [["مستخدمون بنطاقات", data?.users ?? 0, UsersRound], ["عضويات نشطة", data?.activeMemberships ?? 0, ShieldCheck], ["أدوار نشطة", data?.roles ?? 0, KeyRound], ["مراجعات معلقة", data?.pendingReviews ?? 0, LockKeyhole], ["محاولات مرفوضة", data?.deniedEvents ?? 0, LockKeyhole], ["أحداث حساسة", data?.criticalEvents ?? 0, ShieldCheck]] as const;
+  return <DashboardLayout><div dir="rtl" className="-m-4 min-h-screen bg-[#f7f9fc] p-4 sm:p-8"><div className="mx-auto max-w-6xl"><div><Badge className="mb-3 border-0 bg-rose-50 text-rose-700">IAM · RBAC · Entity Isolation</Badge><h1 className="text-3xl font-semibold">مركز الهوية والأمن</h1><p className="mt-2 text-sm text-slate-500">المنع هو الأصل؛ وكل وصول يمر عبر الدور والنطاق والكيان.</p></div>{isError ? <Card className="mt-6 border-rose-200 bg-rose-50"><CardContent className="p-6">تتطلب هذه المساحة صلاحية مسؤول المنصة.</CardContent></Card> : <><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{metrics.map(([label, value, Icon], index) => <Card key={label} className="border-0"><CardContent className="p-5"><Icon className={index > 3 ? "text-rose-600" : "text-indigo-600"} size={20}/><p className="mt-4 text-sm text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold">{isLoading ? "—" : value}</p></CardContent></Card>)}</div><Card className="mt-6 border-0"><CardHeader><CardTitle>مبادئ الحماية المطبقة</CardTitle></CardHeader><CardContent className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2"><div className="rounded-xl bg-slate-50 p-4">كل عضوية مرتبطة بكيان ودور ونطاق مستقل.</div><div className="rounded-xl bg-slate-50 p-4">تغيير العضوية أو الصلاحية يسجل حدثاً أمنياً.</div><div className="rounded-xl bg-slate-50 p-4">الصلاحيات المركزية لا تمنح لمسؤول كيان.</div><div className="rounded-xl bg-slate-50 p-4">المسارات الحساسة مهيأة لإضافة MFA وStep-up.</div></CardContent></Card></>}</div></div></DashboardLayout>;
+}

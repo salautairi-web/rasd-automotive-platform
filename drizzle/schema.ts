@@ -592,3 +592,219 @@ export const idempotencyKeys = mysqlTable("idempotency_keys", {
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+
+// Step 20 — centralized Integration Hub and Event Bus foundations.
+export const integrationServices = mysqlTable("integration_services", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId"),
+  serviceKey: varchar("serviceKey", { length: 100 }).notNull(),
+  nameAr: varchar("nameAr", { length: 180 }).notNull(),
+  ownerSystem: varchar("ownerSystem", { length: 100 }).notNull(),
+  baseUrl: varchar("baseUrl", { length: 500 }),
+  version: varchar("version", { length: 40 }).default("v1").notNull(),
+  capabilitiesJson: text("capabilitiesJson").notNull(),
+  authMethod: mysqlEnum("authMethod", ["oauth2", "oidc", "api_key", "jwt", "mtls", "internal"]).default("internal").notNull(),
+  healthStatus: mysqlEnum("healthStatus", ["unknown", "healthy", "degraded", "offline"]).default("unknown").notNull(),
+  status: mysqlEnum("status", ["draft", "active", "paused", "deprecated"]).default("draft").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({ service: uniqueIndex("integration_service_entity_key_unique").on(t.businessEntityId, t.serviceKey) }));
+
+export const integrationApis = mysqlTable("integration_apis", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceId: int("serviceId").notNull(),
+  apiKey: varchar("apiKey", { length: 120 }).notNull(),
+  nameAr: varchar("nameAr", { length: 180 }).notNull(),
+  version: varchar("version", { length: 40 }).default("v1").notNull(),
+  method: mysqlEnum("method", ["GET", "POST", "PUT", "PATCH", "DELETE"]).notNull(),
+  endpoint: varchar("endpoint", { length: 240 }).notNull(),
+  scope: mysqlEnum("scope", ["central", "entity", "cross_entity"]).default("entity").notNull(),
+  schemaJson: text("schemaJson").notNull(),
+  permissionsJson: text("permissionsJson").notNull(),
+  rateLimitPerMinute: int("rateLimitPerMinute").default(60).notNull(),
+  deprecationDate: timestamp("deprecationDate"),
+  status: mysqlEnum("status", ["draft", "active", "deprecated"]).default("draft").notNull(),
+}, (t) => ({ api: uniqueIndex("integration_api_service_key_version_unique").on(t.serviceId, t.apiKey, t.version) }));
+
+export const integrationRequests = mysqlTable("integration_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  requestId: varchar("requestId", { length: 80 }).notNull().unique(),
+  businessEntityId: int("businessEntityId"),
+  sourceSystem: varchar("sourceSystem", { length: 100 }).notNull(),
+  targetSystem: varchar("targetSystem", { length: 100 }).notNull(),
+  apiKey: varchar("apiKey", { length: 120 }),
+  method: varchar("method", { length: 10 }).notNull(),
+  endpoint: varchar("endpoint", { length: 500 }).notNull(),
+  correlationId: varchar("correlationId", { length: 100 }).notNull(),
+  idempotencyKey: varchar("idempotencyKey", { length: 180 }),
+  requestHash: varchar("requestHash", { length: 128 }),
+  status: mysqlEnum("status", ["received", "validated", "routed", "succeeded", "failed", "timeout", "rate_limited"]).default("received").notNull(),
+  latencyMs: int("latencyMs"),
+  errorCode: varchar("errorCode", { length: 80 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({ idempotency: uniqueIndex("integration_request_entity_idempotency_unique").on(t.businessEntityId, t.idempotencyKey) }));
+
+export const integrationBusEvents = mysqlTable("integration_bus_events", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: varchar("eventId", { length: 100 }).notNull().unique(),
+  eventType: varchar("eventType", { length: 120 }).notNull(),
+  eventVersion: varchar("eventVersion", { length: 40 }).default("1").notNull(),
+  sourceSystem: varchar("sourceSystem", { length: 100 }).notNull(),
+  sourceEntityId: int("sourceEntityId"),
+  targetSystem: varchar("targetSystem", { length: 100 }),
+  targetEntityId: int("targetEntityId"),
+  aggregateId: varchar("aggregateId", { length: 120 }),
+  commandId: varchar("commandId", { length: 100 }),
+  correlationId: varchar("correlationId", { length: 100 }).notNull(),
+  payload: text("payload").notNull(),
+  payloadHash: varchar("payloadHash", { length: 128 }),
+  idempotencyKey: varchar("idempotencyKey", { length: 180 }).notNull().unique(),
+  status: mysqlEnum("status", ["queued", "processing", "processed", "failed", "dead_lettered"]).default("queued").notNull(),
+  occurredAt: timestamp("occurredAt").defaultNow().notNull(),
+  processedAt: timestamp("processedAt"),
+});
+
+export const integrationEventConsumers = mysqlTable("integration_event_consumers", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: int("eventId").notNull(),
+  consumerKey: varchar("consumerKey", { length: 120 }).notNull(),
+  consumerGroup: varchar("consumerGroup", { length: 120 }).notNull(),
+  status: mysqlEnum("status", ["pending", "processing", "succeeded", "failed", "dead_lettered"]).default("pending").notNull(),
+  attempts: int("attempts").default(0).notNull(),
+  lastError: text("lastError"),
+  nextAttemptAt: timestamp("nextAttemptAt"),
+  processedAt: timestamp("processedAt"),
+}, (t) => ({ consumer: uniqueIndex("integration_event_consumer_unique").on(t.eventId, t.consumerKey) }));
+
+export const integrationWebhooks = mysqlTable("integration_webhooks", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId"),
+  providerKey: varchar("providerKey", { length: 100 }).notNull(),
+  endpoint: varchar("endpoint", { length: 500 }).notNull(),
+  direction: mysqlEnum("direction", ["inbound", "outbound"]).notNull(),
+  signatureMethod: mysqlEnum("signatureMethod", ["hmac_sha256", "jwt", "none"]).default("hmac_sha256").notNull(),
+  secretMetadataJson: text("secretMetadataJson"),
+  eventTypesJson: text("eventTypesJson").notNull(),
+  status: mysqlEnum("status", ["active", "paused", "failed"]).default("active").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const integrationWebhookDeliveries = mysqlTable("integration_webhook_deliveries", {
+  id: int("id").autoincrement().primaryKey(),
+  webhookId: int("webhookId").notNull(),
+  eventId: int("eventId"),
+  deliveryId: varchar("deliveryId", { length: 100 }).notNull().unique(),
+  timestampMs: int("timestampMs").notNull(),
+  signatureValid: boolean("signatureValid").default(false).notNull(),
+  replayDetected: boolean("replayDetected").default(false).notNull(),
+  status: mysqlEnum("status", ["received", "queued", "delivered", "failed", "rejected"]).default("received").notNull(),
+  attempts: int("attempts").default(0).notNull(),
+  responseCode: int("responseCode"),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const integrationDeadLetters = mysqlTable("integration_dead_letters", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: int("eventId"),
+  requestId: int("requestId"),
+  businessEntityId: int("businessEntityId"),
+  reason: varchar("reason", { length: 240 }).notNull(),
+  payloadHash: varchar("payloadHash", { length: 128 }),
+  status: mysqlEnum("status", ["open", "replayed", "discarded"]).default("open").notNull(),
+  replayedBy: int("replayedBy"),
+  replayedAt: timestamp("replayedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const integrationTransformations = mysqlTable("integration_transformations", {
+  id: int("id").autoincrement().primaryKey(),
+  transformationKey: varchar("transformationKey", { length: 120 }).notNull(),
+  version: varchar("version", { length: 40 }).notNull(),
+  sourceSchema: varchar("sourceSchema", { length: 120 }).notNull(),
+  targetSchema: varchar("targetSchema", { length: 120 }).notNull(),
+  mappingsJson: text("mappingsJson").notNull(),
+  status: mysqlEnum("status", ["draft", "active", "deprecated"]).default("draft").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({ transformation: uniqueIndex("integration_transformation_version_unique").on(t.transformationKey, t.version) }));
+
+export const integrationAudit = mysqlTable("integration_audit", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId"),
+  requestId: varchar("requestId", { length: 80 }).notNull(),
+  correlationId: varchar("correlationId", { length: 100 }).notNull(),
+  sourceSystem: varchar("sourceSystem", { length: 100 }).notNull(),
+  targetSystem: varchar("targetSystem", { length: 100 }).notNull(),
+  actorRef: varchar("actorRef", { length: 120 }).notNull(),
+  operation: varchar("operation", { length: 120 }).notNull(),
+  result: mysqlEnum("result", ["accepted", "succeeded", "failed", "rejected"]).notNull(),
+  errorCode: varchar("errorCode", { length: 80 }),
+  payloadHash: varchar("payloadHash", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const integrationHealthChecks = mysqlTable("integration_health_checks", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceId: int("serviceId").notNull(),
+  status: mysqlEnum("status", ["healthy", "degraded", "offline"]).notNull(),
+  latencyMs: int("latencyMs"),
+  checkedAt: timestamp("checkedAt").defaultNow().notNull(),
+});
+
+export const integrationApiClients = mysqlTable("integration_api_clients", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId"),
+  clientKey: varchar("clientKey", { length: 120 }).notNull(),
+  nameAr: varchar("nameAr", { length: 180 }).notNull(),
+  allowedSystemsJson: text("allowedSystemsJson").notNull(),
+  allowedOperationsJson: text("allowedOperationsJson").notNull(),
+  scopesJson: text("scopesJson").notNull(),
+  status: mysqlEnum("status", ["active", "revoked", "expired"]).default("active").notNull(),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({ client: uniqueIndex("integration_client_entity_key_unique").on(t.businessEntityId, t.clientKey) }));
+
+export const integrationIncidents = mysqlTable("integration_incidents", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId"),
+  serviceId: int("serviceId"),
+  incidentKey: varchar("incidentKey", { length: 120 }).notNull().unique(),
+  severity: mysqlEnum("severity", ["low", "medium", "high", "critical"]).notNull(),
+  titleAr: varchar("titleAr", { length: 220 }).notNull(),
+  status: mysqlEnum("status", ["open", "acknowledged", "resolved"]).default("open").notNull(),
+  detailsJson: text("detailsJson"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  resolvedAt: timestamp("resolvedAt"),
+});
+
+export const integrationRetries = mysqlTable("integration_retries", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: int("eventId"),
+  requestId: int("requestId"),
+  attemptNo: int("attemptNo").notNull(),
+  scheduledAt: timestamp("scheduledAt").notNull(),
+  backoffSeconds: int("backoffSeconds").notNull(),
+  status: mysqlEnum("status", ["scheduled", "running", "succeeded", "failed", "cancelled"]).default("scheduled").notNull(),
+  errorMessage: text("errorMessage"),
+});
+
+export type IntegrationService = typeof integrationServices.$inferSelect;
+export type IntegrationEvent = typeof integrationBusEvents.$inferSelect;
+export type IntegrationWebhook = typeof integrationWebhooks.$inferSelect;
+
+
+// Steps 21–22 — IAM/RBAC and mobile session/sync foundations.
+export const iamRoles = mysqlTable("iam_roles", { id: int("id").autoincrement().primaryKey(), roleKey: varchar("roleKey", { length: 100 }).notNull().unique(), nameAr: varchar("nameAr", { length: 160 }).notNull(), scopeType: mysqlEnum("scopeType", ["central", "company", "entity", "branch", "own", "assigned"]).notNull(), systemRole: boolean("systemRole").default(false).notNull(), status: mysqlEnum("status", ["active", "disabled"]).default("active").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const iamPermissions = mysqlTable("iam_permissions", { id: int("id").autoincrement().primaryKey(), permissionKey: varchar("permissionKey", { length: 160 }).notNull().unique(), nameAr: varchar("nameAr", { length: 180 }).notNull(), resource: varchar("resource", { length: 100 }).notNull(), action: varchar("action", { length: 80 }).notNull(), sensitivity: mysqlEnum("sensitivity", ["normal", "sensitive", "critical"]).default("normal").notNull() });
+export const iamRolePermissions = mysqlTable("iam_role_permissions", { id: int("id").autoincrement().primaryKey(), roleId: int("roleId").notNull(), permissionId: int("permissionId").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() }, (t) => ({ grant: uniqueIndex("iam_role_permission_unique").on(t.roleId, t.permissionId) }));
+export const iamMemberships = mysqlTable("iam_memberships", { id: int("id").autoincrement().primaryKey(), userId: int("userId").notNull(), businessEntityId: int("businessEntityId").notNull(), roleId: int("roleId").notNull(), scopeJson: text("scopeJson").notNull(), status: mysqlEnum("status", ["pending", "active", "suspended", "revoked"]).default("active").notNull(), startsAt: timestamp("startsAt").defaultNow().notNull(), endsAt: timestamp("endsAt"), defaultEntity: boolean("defaultEntity").default(false).notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() }, (t) => ({ membership: uniqueIndex("iam_membership_user_entity_role_unique").on(t.userId, t.businessEntityId, t.roleId) }));
+export const iamPolicies = mysqlTable("iam_policies", { id: int("id").autoincrement().primaryKey(), policyKey: varchar("policyKey", { length: 120 }).notNull().unique(), nameAr: varchar("nameAr", { length: 180 }).notNull(), effect: mysqlEnum("effect", ["allow", "deny"]).notNull(), expressionJson: text("expressionJson").notNull(), version: int("version").default(1).notNull(), status: mysqlEnum("status", ["draft", "active", "retired"]).default("draft").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const iamSecurityEvents = mysqlTable("iam_security_events", { id: int("id").autoincrement().primaryKey(), userId: int("userId"), businessEntityId: int("businessEntityId"), eventType: varchar("eventType", { length: 100 }).notNull(), outcome: mysqlEnum("outcome", ["success", "failure", "denied"]).notNull(), resourceType: varchar("resourceType", { length: 100 }), resourceId: varchar("resourceId", { length: 120 }), correlationId: varchar("correlationId", { length: 100 }).notNull(), detailsJson: text("detailsJson"), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const iamAccessReviews = mysqlTable("iam_access_reviews", { id: int("id").autoincrement().primaryKey(), businessEntityId: int("businessEntityId"), reviewerUserId: int("reviewerUserId").notNull(), subjectUserId: int("subjectUserId").notNull(), decision: mysqlEnum("decision", ["pending", "approved", "revoked"]).default("pending").notNull(), reason: varchar("reason", { length: 500 }), dueAt: timestamp("dueAt"), decidedAt: timestamp("decidedAt") });
+export const iamImpersonationSessions = mysqlTable("iam_impersonation_sessions", { id: int("id").autoincrement().primaryKey(), supportUserId: int("supportUserId").notNull(), subjectUserId: int("subjectUserId").notNull(), reason: varchar("reason", { length: 500 }).notNull(), approvalRef: varchar("approvalRef", { length: 120 }).notNull(), startsAt: timestamp("startsAt").defaultNow().notNull(), endsAt: timestamp("endsAt").notNull(), status: mysqlEnum("status", ["pending", "active", "expired", "revoked"]).default("pending").notNull() });
+export const mobileDevices = mysqlTable("mobile_devices", { id: int("id").autoincrement().primaryKey(), userId: int("userId").notNull(), businessEntityId: int("businessEntityId"), deviceKey: varchar("deviceKey", { length: 160 }).notNull().unique(), platform: mysqlEnum("platform", ["ios", "android", "web"]).notNull(), appVersion: varchar("appVersion", { length: 40 }).notNull(), status: mysqlEnum("status", ["active", "revoked", "offline"]).default("active").notNull(), lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const mobilePushTokens = mysqlTable("mobile_push_tokens", { id: int("id").autoincrement().primaryKey(), deviceId: int("deviceId").notNull(), tokenHash: varchar("tokenHash", { length: 128 }).notNull().unique(), provider: varchar("provider", { length: 40 }).notNull(), status: mysqlEnum("status", ["active", "invalid", "revoked"]).default("active").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const mobileSyncCursors = mysqlTable("mobile_sync_cursors", { id: int("id").autoincrement().primaryKey(), deviceId: int("deviceId").notNull(), streamKey: varchar("streamKey", { length: 120 }).notNull(), cursor: varchar("cursor", { length: 160 }).notNull(), updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull() }, (t) => ({ cursor: uniqueIndex("mobile_device_stream_cursor_unique").on(t.deviceId, t.streamKey) }));
+export const mobileSyncQueue = mysqlTable("mobile_sync_queue", { id: int("id").autoincrement().primaryKey(), deviceId: int("deviceId").notNull(), businessEntityId: int("businessEntityId"), operationKey: varchar("operationKey", { length: 160 }).notNull(), operationType: varchar("operationType", { length: 100 }).notNull(), payloadJson: text("payloadJson").notNull(), idempotencyKey: varchar("idempotencyKey", { length: 180 }).notNull().unique(), status: mysqlEnum("status", ["queued", "processing", "succeeded", "conflict", "failed"]).default("queued").notNull(), errorJson: text("errorJson"), createdAt: timestamp("createdAt").defaultNow().notNull(), processedAt: timestamp("processedAt") });
+export const mobileSyncConflicts = mysqlTable("mobile_sync_conflicts", { id: int("id").autoincrement().primaryKey(), queueId: int("queueId").notNull(), businessEntityId: int("businessEntityId"), resourceType: varchar("resourceType", { length: 100 }).notNull(), resourceId: varchar("resourceId", { length: 120 }).notNull(), serverVersion: varchar("serverVersion", { length: 100 }), clientVersion: varchar("clientVersion", { length: 100 }), resolution: mysqlEnum("resolution", ["pending", "server_wins", "client_wins", "merged"]).default("pending").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const mobileAudit = mysqlTable("mobile_audit", { id: int("id").autoincrement().primaryKey(), userId: int("userId").notNull(), deviceId: int("deviceId"), businessEntityId: int("businessEntityId"), action: varchar("action", { length: 100 }).notNull(), resourceType: varchar("resourceType", { length: 100 }), resourceId: varchar("resourceId", { length: 120 }), correlationId: varchar("correlationId", { length: 100 }).notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });

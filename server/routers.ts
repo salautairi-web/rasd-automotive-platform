@@ -23,6 +23,9 @@ import { inventoryRouter } from "./inventory";
 import { crmRouter } from "./crm";
 import { documentManagementRouter } from "./documents";
 import { automationRouter } from "./automation";
+import { integrationsRouter } from "./integrations";
+import { iamRouter } from "./iam";
+import { mobileRouter } from "./mobile";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -47,6 +50,9 @@ export const appRouter = router({
   crm: crmRouter,
   documentManagement: documentManagementRouter,
   automation: automationRouter,
+  integrations: integrationsRouter,
+  iam: iamRouter,
+  mobile: mobileRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

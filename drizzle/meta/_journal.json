@@ -190,6 +190,20 @@
       "when": 1788229110378,
       "tag": "0026_magenta_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1788231910062,
+      "tag": "0027_loud_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "5",
+      "when": 1788232172024,
+      "tag": "0028_chubby_wallflower",
+      "breakpoints": true
     }
   ]
 }
