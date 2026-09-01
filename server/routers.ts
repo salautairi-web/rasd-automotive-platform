@@ -13,6 +13,7 @@ import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { importExportRouter } from "./importExport";
 import { portalRouter } from "./portal";
 import { portalV2Router } from "./portalV2";
+import { communicationRouter } from "./communication";
 import { centralOperationsRouter } from "./centralOperations";
 import { biRouter } from "./bi";
 import { centralFinanceRouter } from "./centralFinance";
@@ -41,6 +42,7 @@ export const appRouter = router({
   importExport: importExportRouter,
   portal: portalRouter,
   portalV2: portalV2Router,
+  communication: communicationRouter,
   centralOperations: centralOperationsRouter,
   bi: biRouter,
   centralFinance: centralFinanceRouter,

@@ -1261,3 +1261,19 @@
 - [x] Add protected portal authorization, document isolation, payment idempotency, and multi-entity relationship tests.
 - [x] Document provider-neutral payment/signature/email/SMS boundaries and clearly separate implemented foundations from deferred adapters.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 23 checkpoint.
+
+## Step 24 — Communication, Messaging & Notification Center
+
+- [x] Document the centralized Communication Platform boundary and entity-scoped conversation/template/campaign rules.
+- [x] Add communication entities, channels, provider metadata, and provider-neutral adapter contracts without storing credentials in source.
+- [x] Add message, conversation, participant, attachment-reference, delivery-attempt, and audit data structures with entity and transaction scope.
+- [x] Add versioned multilingual templates with variable validation, approval state, branding metadata, and Arabic fallback.
+- [x] Add notification preferences, quiet hours, marketing/transactional separation, consent records, withdrawal, and suppression controls.
+- [x] Add idempotent message queue, lifecycle statuses, retry/backoff, dead-letter, rate-limit, and provider-failure foundations.
+- [x] Add conversation assignment, team/agent scope, SLA, escalation, transfer, and CRM-ticket linkage foundations.
+- [x] Add campaign and bulk-send foundations with consent filters, preview/approval, frequency caps, cost metadata, and audit.
+- [x] Add protected Communication API procedures for messages, conversations, templates, preferences, consents, webhooks, and reports.
+- [x] Add Arabic RTL/English LTR Communication Center workspace with scoped health, queue, conversation, provider, and consent states.
+- [x] Add tests for entity isolation, duplicate events, provider failure, retry/DLQ, consent/opt-out, template versioning, attachment security, and search authorization.
+- [x] Document and preserve deferred official WhatsApp/voice/provider adapters, malware scanning, native push delivery, and production credentials.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 24 checkpoint.
