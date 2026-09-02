@@ -62,11 +62,11 @@ export const iamRouter = router({
     return { id: Number(result[0].insertId), replay: false as const };
   }),
   authorize: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), permissionKey: z.string().min(3), resourceOwnerUserId: z.number().int().positive().optional(), sensitive: z.boolean().default(false) })).query(async ({ ctx, input }) => {
-    const allowedByAdmin = ctx.user.role === "admin";
     const db = await getDb();
-    const granted = db ? await db.select({ permissionId: iamPermissions.id }).from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id)).innerJoin(iamRolePermissions, eq(iamRolePermissions.roleId, iamRoles.id)).innerJoin(iamPermissions, eq(iamRolePermissions.permissionId, iamPermissions.id)).where(and(eq(iamMemberships.userId, ctx.user.id), eq(iamMemberships.businessEntityId, input.businessEntityId), eq(iamMemberships.status, "active"), eq(iamRoles.status, "active"), eq(iamPermissions.permissionKey, input.permissionKey))).limit(1) : [];
-    const allowed = allowedByAdmin || Boolean(granted[0]);
-    const ownerAllowed = !input.resourceOwnerUserId || input.resourceOwnerUserId === ctx.user.id || allowedByAdmin;
+    if (!db) return { allowed: false, reason: "database_unavailable", permissionKey: input.permissionKey, sensitive: input.sensitive, entityId: input.businessEntityId };
+    const [grant] = await db.select({ permissionId: iamPermissions.id, scopeType: iamRoles.scopeType }).from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id)).innerJoin(iamRolePermissions, eq(iamRolePermissions.roleId, iamRoles.id)).innerJoin(iamPermissions, eq(iamRolePermissions.permissionId, iamPermissions.id)).where(and(eq(iamMemberships.userId, ctx.user.id), eq(iamMemberships.businessEntityId, input.businessEntityId), eq(iamMemberships.status, "active"), eq(iamRoles.status, "active"), eq(iamPermissions.permissionKey, input.permissionKey))).limit(1);
+    const allowed = Boolean(grant);
+    const ownerAllowed = !input.resourceOwnerUserId || input.resourceOwnerUserId === ctx.user.id || ["entity", "company", "central"].includes(grant?.scopeType ?? "");
     return { allowed: allowed && ownerAllowed, reason: allowed && ownerAllowed ? "scoped_permission" : "default_deny", permissionKey: input.permissionKey, sensitive: input.sensitive, entityId: input.businessEntityId };
   }),
   recordSecurityEvent: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive().optional(), eventType: z.string().min(3).max(100), outcome: z.enum(["success", "failure", "denied"]), resourceType: z.string().max(100).optional(), resourceId: z.string().max(120).optional(), details: z.record(z.string(), z.unknown()).default({}) })).mutation(async ({ ctx, input }) => {
