@@ -38,20 +38,21 @@ export const rentalAdvancedRouter = router({
     assertSameEntity(customer?.entity, input.businessEntityId);
     assertSameEntity(rate?.entity, input.businessEntityId);
     if (input.reservationId) {
-      const [reservation] = await db.select().from(rentalReservations).where(and(eq(rentalReservations.id, input.reservationId), eq(rentalReservations.businessEntityId, input.businessEntityId))).limit(1);
-      if (!reservation) throw new TRPCError({ code: "FORBIDDEN", message: "Reservation is outside the rental entity" });
-      assertSameEntity(reservation.customerId === input.customerId ? input.businessEntityId : null, input.businessEntityId);
-      if (reservation.vehicleId != null) assertSameEntity(reservation.vehicleId === input.vehicleId ? input.businessEntityId : null, input.businessEntityId);
-      if (!['confirmed','pending'].includes(reservation.status)) throw new TRPCError({ code: "CONFLICT", message: "Reservation is not eligible for contract conversion" });
+      const [reservation] = await db.select({ businessEntityId: rentalReservations.businessEntityId, customerId: rentalReservations.customerId, vehicleId: rentalReservations.vehicleId, status: rentalReservations.status }).from(rentalReservations).where(eq(rentalReservations.id, input.reservationId)).limit(1);
+      if (!reservation) throw new TRPCError({ code: "NOT_FOUND", message: "Reservation not found" });
+      assertSameEntity(reservation.businessEntityId, input.businessEntityId);
+      if (reservation.customerId !== input.customerId) throw new TRPCError({ code: "CONFLICT", message: "Reservation customer does not match contract customer" });
+      if (reservation.vehicleId != null && reservation.vehicleId !== input.vehicleId) throw new TRPCError({ code: "CONFLICT", message: "Reservation vehicle does not match contract vehicle" });
+      if (!["confirmed", "pending"].includes(reservation.status)) throw new TRPCError({ code: "CONFLICT", message: "Reservation is not eligible for contract conversion" });
     }
-    if (!['available','reserved','ready'].includes(vehicle.status)) throw new TRPCError({ code: "CONFLICT", message: "Vehicle is not eligible for contracting" });
+    if (!["available", "reserved", "ready"].includes(vehicle.status)) throw new TRPCError({ code: "CONFLICT", message: "Vehicle is not eligible for contracting" });
     const conflict = await db.select({ id: rentalContracts.id }).from(rentalContracts).where(and(eq(rentalContracts.businessEntityId, input.businessEntityId), eq(rentalContracts.vehicleId, input.vehicleId), sql`${rentalContracts.status} in ('active','extended')`, sql`${rentalContracts.startsAt} < ${input.endsAt}`, sql`${rentalContracts.endsAt} > ${input.startsAt}`)).limit(1);
     if (conflict[0]) throw new TRPCError({ code: "CONFLICT", message: "Vehicle has an overlapping active contract" });
     const contractNo = `RENT-CON-${nanoid(8).toUpperCase()}`;
     await db.transaction(async tx => {
       await tx.insert(rentalContracts).values({ businessEntityId: input.businessEntityId, reservationId: input.reservationId, customerId: input.customerId, vehicleId: input.vehicleId, ratePlanId: input.ratePlanId, startsAt: input.startsAt, endsAt: input.endsAt, allowedMileage: input.allowedMileage, depositMinor: input.depositMinor, totalMinor: input.totalMinor, contractNo, status: "draft" });
       await tx.insert(rentalDrivers).values({ businessEntityId: input.businessEntityId, customerId: input.customerId, nameAr: input.driverName, licenseNo: input.licenseNo, licenseExpiry: input.licenseExpiry, status: input.licenseExpiry > new Date() ? "active" : "expired" });
-      if (input.reservationId) await tx.update(rentalReservations).set({ status: "converted" }).where(and(eq(rentalReservations.id, input.reservationId), eq(rentalReservations.businessEntityId, input.businessEntityId)));
+      if (input.reservationId) await tx.update(rentalReservations).set({ status: "converted" }).where(and(eq(rentalReservations.id, input.reservationId), eq(rentalReservations.businessEntityId, input.businessEntityId), sql`${rentalReservations.status} in ('confirmed','pending')`));
     });
     return { contractNo };
   }),
@@ -62,7 +63,7 @@ export const rentalAdvancedRouter = router({
     if (!contract || contract.status !== "draft") throw new TRPCError({ code: "CONFLICT", message: "Contract is not eligible for checkout" });
     const vehicle = await requireVehicle(db, input.businessEntityId, contract.vehicleId);
     assertSameEntity(contract.businessEntityId, vehicle.businessEntityId);
-    if (!['available','reserved','ready'].includes(vehicle.status) || input.odometer < vehicle.odometer) throw new TRPCError({ code: "CONFLICT", message: "Vehicle or odometer is not eligible" });
+    if (!["available", "reserved", "ready"].includes(vehicle.status) || input.odometer < vehicle.odometer) throw new TRPCError({ code: "CONFLICT", message: "Vehicle or odometer is not eligible" });
     await db.transaction(async tx => { await tx.insert(rentalCheckouts).values({ businessEntityId: input.businessEntityId, contractId: contract.id, vehicleId: contract.vehicleId, odometer: input.odometer, fuelLevel: input.fuelLevel, conditionJson: input.conditionJson }); await tx.update(rentalContracts).set({ status: "active" }).where(and(eq(rentalContracts.id, contract.id), eq(rentalContracts.businessEntityId, input.businessEntityId))); await tx.update(rentalVehicles).set({ status: "rented", odometer: input.odometer }).where(and(eq(rentalVehicles.id, contract.vehicleId), eq(rentalVehicles.businessEntityId, input.businessEntityId))); });
     await enqueueEvent({ eventId: nanoid(16), eventType: "VehicleCheckedOut", sourceSystem: "RENTAL", entityType: "contract", entityId: contract.contractNo, correlationId: nanoid(12), payload: JSON.stringify(input), idempotencyKey: `rental-checkout-${contract.id}`, requestHash: `checkout-${contract.id}-${input.odometer}` });
     return { checkedOut: true as const };
@@ -71,7 +72,7 @@ export const rentalAdvancedRouter = router({
     await assertEntityAccess(ctx.user.id, ctx.user.role, input.businessEntityId, "rental.manage");
     const db = await getDb(); if (!db) throw new Error("database_unavailable");
     const [contract] = await db.select().from(rentalContracts).where(and(eq(rentalContracts.id, input.contractId), eq(rentalContracts.businessEntityId, input.businessEntityId))).limit(1);
-    if (!contract || !['active','extended'].includes(contract.status)) throw new TRPCError({ code: "CONFLICT", message: "Contract is not active" });
+    if (!contract || !["active", "extended"].includes(contract.status)) throw new TRPCError({ code: "CONFLICT", message: "Contract is not active" });
     const vehicle = await requireVehicle(db, input.businessEntityId, contract.vehicleId);
     assertSameEntity(contract.businessEntityId, vehicle.businessEntityId);
     if (input.odometer < vehicle.odometer) throw new TRPCError({ code: "CONFLICT", message: "Odometer cannot decrease" });
