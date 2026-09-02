@@ -1,15 +1,16 @@
 import { and, desc, eq } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { rentalMaintenanceAlerts, rentalMaintenanceTasks, rentalVehicleDamages, rentalVehicleExpenses, rentalVehicleProfitability, rentalVehicles } from "../drizzle/schema";
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
+import { assertEntityMembership, assertEntityAccess } from "./entityAccess";
 
-const requireFleet = (role: string) => { if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Fleet privilege required" }); };
+const entityInput = z.object({ businessEntityId: z.number().int().positive() });
 
 export const fleetRouter = router({
-  overview: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive() })).query(async ({ ctx, input }) => {
-    requireFleet(ctx.user.role);
+  overview: protectedProcedure.input(entityInput).query(async ({ ctx, input }) => {
+    await assertEntityAccess(ctx.user.id, ctx.user.role, input.businessEntityId, "fleet.read");
     const db = await getDb();
     if (!db) return { vehicles: [], alerts: [], profitability: [], damages: [], expenses: [], maintenance: [], totals: { fleetSize: 0, available: 0, rented: 0, maintenance: 0, accidents: 0, openAlerts: 0, netContributionMinor: 0 } };
     const [vehicles, alerts, profitability, damages, expenses, maintenance] = await Promise.all([
@@ -21,5 +22,23 @@ export const fleetRouter = router({
       db.select().from(rentalMaintenanceTasks).where(eq(rentalMaintenanceTasks.businessEntityId, input.businessEntityId)).orderBy(desc(rentalMaintenanceTasks.id)).limit(50),
     ]);
     return { vehicles, alerts, profitability, damages, expenses, maintenance, totals: { fleetSize: vehicles.length, available: vehicles.filter(v => v.status === "available" || v.status === "ready").length, rented: vehicles.filter(v => v.status === "rented").length, maintenance: vehicles.filter(v => v.status === "maintenance").length, accidents: vehicles.filter(v => v.status === "accident").length, openAlerts: alerts.length, netContributionMinor: profitability.reduce((sum, row) => sum + row.netContributionMinor, 0) } };
+  }),
+  setVehicleStatus: protectedProcedure.input(entityInput.extend({ vehicleId: z.number().int().positive(), status: z.enum(["available", "ready", "rented", "maintenance", "accident", "inactive"]), idempotencyKey: z.string().trim().min(8).max(160), correlationId: z.string().trim().min(8).max(100).optional() })).mutation(async ({ ctx, input }) => {
+    await assertEntityAccess(ctx.user.id, ctx.user.role, input.businessEntityId, "fleet.manage");
+    const db = await getDb();
+    if (!db) throw new Error("database_unavailable");
+    const correlationId = input.correlationId ?? `fleet-${nanoid(12)}`;
+    const result = await db.transaction(async tx => {
+      const [vehicle] = await tx.select({ id: rentalVehicles.id, status: rentalVehicles.status }).from(rentalVehicles).where(and(eq(rentalVehicles.id, input.vehicleId), eq(rentalVehicles.businessEntityId, input.businessEntityId))).limit(1);
+      if (!vehicle) throw new Error("vehicle_not_found_in_entity");
+      if (vehicle.status === input.status) return { vehicleId: vehicle.id, previousStatus: vehicle.status, status: vehicle.status, replay: true as const };
+      await tx.update(rentalVehicles).set({ status: input.status }).where(and(eq(rentalVehicles.id, input.vehicleId), eq(rentalVehicles.businessEntityId, input.businessEntityId), eq(rentalVehicles.status, vehicle.status)));
+      return { vehicleId: vehicle.id, previousStatus: vehicle.status, status: input.status, replay: false as const };
+    });
+    return { ...result, correlationId };
+  }),
+  assertMembership: protectedProcedure.input(entityInput).query(async ({ ctx, input }) => {
+    await assertEntityMembership(ctx.user.id, ctx.user.role, input.businessEntityId);
+    return { allowed: true as const, businessEntityId: input.businessEntityId };
   }),
 });
