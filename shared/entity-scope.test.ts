@@ -1,19 +1,18 @@
 import { describe, expect, it } from "vitest";
-
-function isSameEntity(recordEntityId: number, requestedEntityId: number) {
-  return recordEntityId === requestedEntityId;
-}
+import { TRPCError } from "@trpc/server";
+import { assertSameEntity } from "../server/entityAccess";
 
 describe("entity scope invariants", () => {
-  it("accepts records only from the requested business entity", () => {
-    expect(isSameEntity(10, 10)).toBe(true);
-    expect(isSameEntity(10, 11)).toBe(false);
+  it("accepts records from the same business entity", () => {
+    expect(assertSameEntity(10, 10)).toBe(true);
   });
 
-  it("does not infer shared master data from equal names", () => {
-    const entityA = { id: 10, nameAr: "عميل مشترك بالاسم" };
-    const entityB = { id: 11, nameAr: "عميل مشترك بالاسم" };
-    expect(entityA.nameAr).toBe(entityB.nameAr);
-    expect(entityA.id).not.toBe(entityB.id);
+  it("rejects records from different business entities even with matching names", () => {
+    expect(() => assertSameEntity(10, 20)).toThrow(TRPCError);
+  });
+
+  it("rejects missing entity ownership", () => {
+    expect(() => assertSameEntity(undefined, 10)).toThrow(TRPCError);
+    expect(() => assertSameEntity(10, null)).toThrow(TRPCError);
   });
 });
