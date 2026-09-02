@@ -4,7 +4,17 @@
 
 الانتقال من foundations إلى تشغيل إنتاجي متكامل مع الحفاظ على مبدأ استقلال كل `businessEntity`، وعدم تحويل Central ERP إلى operational master مشترك.
 
-## نطاق التنفيذ
+## المنجز حتى الآن
+
+- إضافة `server/entityAccess.ts` لحماية القراءة والتغييرات التشغيلية حسب الكيان مع default-deny.
+- تشديد `iam.authorize` لإزالة تجاوز `admin` المخفي؛ الإدارة المركزية لـIAM ما زالت محكومة بـ`requireAdmin`.
+- تشديد Fleet على ملكية الكيان، الصلاحية، correlation ID، وسلوك replay لمفتاح idempotency.
+- تشديد Rental Advanced على كامل القراءة والدورة التشغيلية للحجز/العقد/checkout/check-in/الوديعة/المخالفات/التأمين/الربحية ضمن الكيان.
+- تحسين فحوص المراجع في عقد التأجير، المخالفات، وتحديثات checkout/check-in لتبقى entity-scoped.
+- إضافة عقود التحقق من القيود المالية والأحداث المالية المشتركة، مع اختبارات pure-function للاتزان والعكس.
+- توثيق معايير القبول الخاصة باستقلال الكيانات والاعتمادية والمحاسبة.
+
+## نطاق التنفيذ المتبقي
 
 ### 1. Finance execution layer
 - ربط الأحداث المالية المعتمدة من الوحدات التشغيلية بدفاتر الكيان المحلية.
@@ -19,7 +29,7 @@
 - توحيد حالة المركبة بين sales, rental, workshop, fleet وفق حدود واضحة للمصدر المالك للحالة.
 
 ### 3. Rental & Fleet production slice
-- lifecycle كامل للحجز → العقد → checkout → rental → check-in → settlement.
+- إكمال lifecycle الحجز → العقد → checkout → rental → check-in → settlement.
 - ربط الأضرار والمخالفات والتأمين والوديعة بالتسوية النهائية.
 - دعم النقل بين المواقع داخل الكيان، مع سجل تدقيقي.
 - تجهيز interfaces لمزودي GPS/Telematics دون ربط provider داخل domain core.
@@ -32,7 +42,7 @@
 - correlation IDs عبر command/event chains.
 
 ### 5. Security & governance
-- entity-scoped default-deny authorization في كل mutation وread.
+- تعميم entity-scoped default-deny على بقية الوحدات التشغيلية.
 - maker/checker للعمليات الحساسة.
 - audit trail للقرارات المالية والتشغيلية والإدارية.
 - MFA/step-up enforcement عندما تتطلب العملية حساسية أعلى.
@@ -40,7 +50,7 @@
 ### 6. Acceptance & QA
 - اختبارات استقلال الكيانات.
 - اختبارات المحاسبة المتوازنة وعدم قابلية التعديل بعد الترحيل.
-- اختبارات idempotency والـreplay.
+- اختبارات idempotency والـreplay، بما فيها السباقات المتزامنة عند مستوى قاعدة البيانات.
 - production build وTypeScript validation.
 - فحص RTL desktop/mobile.
 
@@ -60,6 +70,10 @@
 6. تنفيذ consolidation.
 7. التأكد من عدم تغير أي local ledger وعدم ظهور operational records عبر scope غير مصرح به.
 8. إعادة إرسال نفس event/command والتأكد من عدم إنشاء أثر مكرر.
+
+## حالة التحقق الحالية
+
+لم يتم حتى هذه النقطة إثبات `pnpm check`, `pnpm test`, أو `pnpm build` بواسطة CI لهذا الفرع؛ GitHub Actions لا يعرض workflow run مرتبطًا بآخر commit. لذلك تعتبر هذه البوابات غير محققة إلى أن تُنفذ فعليًا في بيئة المشروع.
 
 ## Definition of Done
 
