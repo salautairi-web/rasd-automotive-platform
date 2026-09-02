@@ -1311,3 +1311,23 @@
 - [x] Add tests for Inventory/Asset/Rental separation, lifecycle transitions, reservation conflicts, maintenance thresholds, fuel/expense calculations, transfers, and entity isolation foundations.
 - [x] Document deferred telematics providers, GPS data ingestion, native tracking, and full accounting/insurance integrations.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 26 checkpoint.
+
+## Fleet Operations Expansion — Lifecycle, Fuel, Tyres, Trips & Telematics
+
+- [x] Add idempotent vehicle lifecycle transition procedure with allowed-state matrix, source/target classification checks, transition reason, actor, and correlation ID.
+- [x] Persist an immutable vehicle status history record for every successful transition and expose the latest timeline per vehicle.
+- [x] Enforce lifecycle guards: no rental while maintenance/accident/out-of-service, no duplicate active reservation, no sale without sellable state, and no cross-entity transfer without approved transaction foundations.
+- [x] Add protected vehicle status, status-history, and lifecycle timeline procedures with entity and vehicle scope.
+- [x] Add detailed fuel-entry procedure with liters, unit/total price, station, odometer, fuel type, receipt reference, and idempotency.
+- [x] Add fuel-consumption and cost-per-km calculations with odometer monotonicity and abnormal-consumption detection foundations.
+- [x] Add tyre records and protected installation/removal/replacement procedures with position, brand, size, tread, cost, dates, and vehicle scope.
+- [x] Add detailed trip creation/update/completion procedures with origin, destination, driver, vehicle, schedule, distance, fuel, purpose, cost, conflict checks, and idempotency foundations.
+- [x] Add protected trip timeline and driver/vehicle allocation reads without exposing unauthorized location or driver data.
+- [x] Add actual-cost aggregation for fuel, maintenance, tyres, insurance, registration, fines, cleaning, and other vehicle expenses by entity and vehicle foundations.
+- [x] Add cost-per-km, revenue-per-day, utilization, downtime, maintenance ratio, and net-contribution calculations from persisted records only foundations.
+- [x] Add provider-neutral telematics device/provider/telemetry metadata and normalized position/trip/diagnostic ingestion boundaries.
+- [x] Add idempotent telematics ingestion contract with timestamp freshness, replay protection, device ownership, and sensitive-location masking.
+- [x] Keep GPS/Telematics optional; do not activate an external provider or request secrets until the owner approves the provider and endpoint/auth model.
+- [x] Add Arabic fleet operations UI for lifecycle timeline, fuel, tyres, trips, actual costs, and telematics connection status.
+- [x] Add unit/procedure tests for lifecycle transitions, history immutability, fuel monotonicity, tyre scope, trip conflicts, cost aggregation, telematics replay, and entity isolation foundations.
+- [x] Add documentation and visual QA notes, run TypeScript/full tests/build, verify desktop/mobile, and save the fleet operations checkpoint.
