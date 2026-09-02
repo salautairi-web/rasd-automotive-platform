@@ -7,11 +7,12 @@ This workstream starts from the current `main` branch after the Step 27 merge.
 ## Completed in 27B so far
 
 - Added explicit Step 27B status tracking and verification policy.
-- Added pure entity-scope invariants proving that operational ownership is keyed by `businessEntityId`; matching names do not create shared master data.
-- Added `assertSameEntity` helper for linked-record ownership checks.
+- Added pure entity-scope invariants and a reusable same-entity ownership guard.
 - Hardened the rental advanced lifecycle with entity-scoped authorization: `rental.read` for reads and `rental.manage` for mutations.
-- Added explicit same-entity checks across rental contract, vehicle, customer, rate plan, fine, and deposit relationships.
-- Strengthened mutation update predicates so contract and vehicle state changes remain entity-scoped inside transactions.
+- Enforced same-entity relationships across rental customers, vehicles, rate plans, contracts, fines, reservations, and deposits.
+- Preserved reservation → contract linkage and converted the source reservation inside the same transaction.
+- Strengthened entity-scoped state-update predicates for rental checkout/check-in.
+- Hardened the ERP local-accounting boundary: entity ledger reads require entity scope; journal creation, posting, and reversal require explicit `accounting.manage` access and verify journal ownership before mutation.
 
 ## Immediate priorities
 
