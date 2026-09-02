@@ -1,10 +1,11 @@
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { idempotencyKeys, iamSecurityEvents, rentalMaintenanceAlerts, rentalMaintenanceTasks, rentalVehicleDamages, rentalVehicleExpenses, rentalVehicleProfitability, rentalVehicles } from "../drizzle/schema";
-import { getDb } from "./db";
+import { iamSecurityEvents, rentalMaintenanceAlerts, rentalMaintenanceTasks, rentalVehicleDamages, rentalVehicleExpenses, rentalVehicleProfitability, rentalVehicles } from "../drizzle/schema";
 import { protectedProcedure, router } from "./_core/trpc";
 import { assertEntityMembership, assertEntityAccess } from "./entityAccess";
+import { hashIdempotencyRequest, readIdempotency, storeIdempotency } from "./idempotency";
+import { getDb } from "./db";
 
 const entityInput = z.object({ businessEntityId: z.number().int().positive() });
 
@@ -28,27 +29,19 @@ export const fleetRouter = router({
     const db = await getDb();
     if (!db) throw new Error("database_unavailable");
     const correlationId = input.correlationId ?? `fleet-${nanoid(12)}`;
-    const requestHash = Buffer.from(`${ctx.user.id}:${input.businessEntityId}:${input.vehicleId}:${input.status}`).toString("hex").slice(0, 128);
+    const requestHash = hashIdempotencyRequest([ctx.user.id, input.businessEntityId, input.vehicleId, input.status, correlationId]);
+    const prior = await readIdempotency(input.idempotencyKey, requestHash);
+    if (prior) return { ...prior, replay: true as const };
     const result = await db.transaction(async tx => {
-      const [existing] = await tx.select({ responsePayload: idempotencyKeys.responsePayload, requestHash: idempotencyKeys.requestHash }).from(idempotencyKeys).where(eq(idempotencyKeys.key, input.idempotencyKey)).limit(1);
-      if (existing) {
-        if (existing.requestHash !== requestHash) throw new Error("idempotency_key_reused_with_different_request");
-        return existing.responsePayload ? { ...JSON.parse(existing.responsePayload), replay: true as const } : { vehicleId: input.vehicleId, replay: true as const };
-      }
       const [vehicle] = await tx.select({ id: rentalVehicles.id, status: rentalVehicles.status }).from(rentalVehicles).where(and(eq(rentalVehicles.id, input.vehicleId), eq(rentalVehicles.businessEntityId, input.businessEntityId))).limit(1);
       if (!vehicle) throw new Error("vehicle_not_found_in_entity");
-      if (vehicle.status === input.status) {
-        const response = { vehicleId: vehicle.id, previousStatus: vehicle.status, status: vehicle.status, correlationId, replay: true as const };
-        await tx.insert(idempotencyKeys).values({ key: input.idempotencyKey, operation: "fleet.setVehicleStatus", requestHash, responsePayload: JSON.stringify(response) });
-        return response;
-      }
+      if (vehicle.status === input.status) return { vehicleId: vehicle.id, previousStatus: vehicle.status, status: vehicle.status, correlationId, replay: true as const };
       const updated = await tx.update(rentalVehicles).set({ status: input.status }).where(and(eq(rentalVehicles.id, input.vehicleId), eq(rentalVehicles.businessEntityId, input.businessEntityId), eq(rentalVehicles.status, vehicle.status)));
       if (!updated[0].affectedRows) throw new Error("vehicle_status_conflict");
-      const response = { vehicleId: vehicle.id, previousStatus: vehicle.status, status: input.status, correlationId, replay: false as const };
-      await tx.insert(idempotencyKeys).values({ key: input.idempotencyKey, operation: "fleet.setVehicleStatus", requestHash, responsePayload: JSON.stringify(response) });
-      await tx.insert(iamSecurityEvents).values({ userId: ctx.user.id, businessEntityId: input.businessEntityId, eventType: "FleetVehicleStatusChanged", outcome: "success", resourceType: "rental_vehicle", resourceId: String(vehicle.id), correlationId, detailsJson: JSON.stringify({ previousStatus: vehicle.status, status: input.status }) });
-      return response;
+      return { vehicleId: vehicle.id, previousStatus: vehicle.status, status: input.status, correlationId, replay: false as const };
     });
+    await storeIdempotency(input.idempotencyKey, "fleet.setVehicleStatus", requestHash, result);
+    await db.insert(iamSecurityEvents).values({ userId: ctx.user.id, businessEntityId: input.businessEntityId, eventType: "FleetVehicleStatusChanged", outcome: "success", resourceType: "rental_vehicle", resourceId: String(result.vehicleId), correlationId, detailsJson: JSON.stringify({ previousStatus: result.previousStatus, status: result.status }) });
     return result;
   }),
   assertMembership: protectedProcedure.input(entityInput).query(async ({ ctx, input }) => {
