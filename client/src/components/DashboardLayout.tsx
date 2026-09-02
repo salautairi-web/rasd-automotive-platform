@@ -61,6 +61,7 @@ const menuItems = [
   { icon: Workflow, label: "سير العمل", path: "/workflows" },
   { icon: ClipboardCheck, label: "المهام والموافقات", path: "/tasks" },
   { icon: FileText, label: "الوثائق", path: "/documents" },
+  { icon: ShieldCheck, label: "مركز الامتثال القانوني", path: "/compliance" },
   { icon: ShieldCheck, label: "التدقيق والأمن", path: "/audit" },
   { icon: Settings2, label: "الإعدادات", path: "/settings" },
 ];

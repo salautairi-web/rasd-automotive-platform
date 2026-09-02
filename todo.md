@@ -1331,3 +1331,26 @@
 - [x] Add Arabic fleet operations UI for lifecycle timeline, fuel, tyres, trips, actual costs, and telematics connection status.
 - [x] Add unit/procedure tests for lifecycle transitions, history immutability, fuel monotonicity, tyre scope, trip conflicts, cost aggregation, telematics replay, and entity isolation foundations.
 - [x] Add documentation and visual QA notes, run TypeScript/full tests/build, verify desktop/mobile, and save the fleet operations checkpoint.
+
+## Step 27 — Legal, Compliance, Licensing & Regulatory Management
+
+- [x] Document central Compliance Framework governance versus entity-owned legal records; central visibility must not replace local legal ownership.
+- [x] Add configurable license types, authorities, jurisdictions, activities, compliance profiles, responsible roles, and entity-scoped rules.
+- [x] Add entity-owned licenses and permits for business, commercial, municipal, vehicle, rental, workshop, supplier, employee, import/export, and activity contexts as extensible resource foundations.
+- [x] Add protected license lifecycle transitions, renewal records, reminder intervals, required documents, submissions, approvals, confirmations, and escalation foundations.
+- [x] Add regulatory obligations, filings, due dates, required data, evidence, reviewers, approvals, overdue state, and recurrence metadata.
+- [x] Add evidence/document references with integrity, submitted/verified actors, timestamps, legal-document access controls, and no direct legal advice generation.
+- [x] Add compliance tasks and checklists with assignment, due dates, evidence, approval, completion, escalation, and entity scope foundations.
+- [x] Add risk records with likelihood, impact, score, mitigation, owner, due date, status, and entity/category scope.
+- [x] Add compliance incidents with severity, root cause, corrective action, evidence, closure, and audit history.
+- [x] Add legal case register with sensitive access, court/authority, important dates, counsel reference, documents, and entity ownership.
+- [x] Add legal holds with immutable retention guard, scope, approver, release date, and deletion prevention for held documents.
+- [x] Add central/entity policy management with versions, approvals, effective/review dates, and acknowledgments foundations.
+- [x] Add protected compliance procedures with IAM/MFA step-up, entity scope, audit events, idempotency, document integrity, and masked sensitive fields.
+- [x] Add compliance automation hooks foundations for expiry, overdue escalation, missing evidence, renewal, insurance/inspection due, filing due, and risk review.
+- [x] Add Central Compliance and Entity Compliance dashboards without fabricated scores, licenses, incidents, cases, or obligations.
+- [x] Add Arabic RTL/English LTR compliance workspace for licenses, renewals, obligations, evidence, risks, incidents, cases, holds, policies, and calendar foundations.
+- [x] Add ERP handoff metadata for approved fees, penalties, renewal payments, insurance/prepaid treatment; do not create legal financial entries without approved transactions.
+- [x] Add tests for license scope, renewal lifecycle, overdue escalation, legal hold deletion denial, case authorization, dashboard isolation, and document leakage prevention foundations.
+- [x] Document deferred jurisdiction-specific rules, regulator integrations, e-filing adapters, legal provider connectors, and jurisdictional advice boundaries.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 27 checkpoint.
