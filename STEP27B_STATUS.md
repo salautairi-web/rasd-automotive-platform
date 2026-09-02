@@ -14,10 +14,16 @@ This workstream starts from the current `main` branch after the Step 27 merge.
 - Strengthened entity-scoped state-update predicates for rental checkout/check-in.
 - Added reusable accounting access helpers for entity-scoped ledger reads, accounting-management permission checks, and journal ownership validation.
 - Added focused accounting access invariants alongside the existing entity-scope tests.
+- Added a reusable Sales authorization/payment guard with explicit `sales.read`, `sales.manage`, and `sales.payment` boundaries.
+- Added pure Sales invoice payment invariants to prevent overpayment and invalid payment amounts.
+
+## In progress
+
+- Wire the Sales guards into the existing `routers.ts` procedures without replacing the large router file or risking unrelated regressions.
 
 ## Immediate priorities
 
-1. Apply entity-scoped authorization consistently across remaining operational read/mutation procedures, starting with sales.
+1. Finish entity-scoped authorization across remaining operational read/mutation procedures, starting with Sales.
 2. Complete rental settlement and financial-event integration without changing the established entity-owned data model.
 3. Wire the accounting access helpers into the existing ERP journal procedures and preserve immutable posting semantics.
 4. Connect operational financial events to central consolidation through explicit contracts and idempotency.
