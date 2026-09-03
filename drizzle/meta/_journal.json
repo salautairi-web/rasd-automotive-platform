@@ -239,6 +239,13 @@
       "when": 1788380392357,
       "tag": "0033_green_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1788382227455,
+      "tag": "0034_military_firebrand",
+      "breakpoints": true
     }
   ]
 }

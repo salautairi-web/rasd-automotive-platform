@@ -1354,3 +1354,23 @@
 - [x] Add tests for license scope, renewal lifecycle, overdue escalation, legal hold deletion denial, case authorization, dashboard isolation, and document leakage prevention foundations.
 - [x] Document deferred jurisdiction-specific rules, regulator integrations, e-filing adapters, legal provider connectors, and jurisdictional advice boundaries.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 27 checkpoint.
+
+## Step 28 — BI, Data Warehouse & Advanced Analytics 2.0
+
+- [x] Document operational systems as source of truth and BI as read-only analytical projection; no cross-system operational writes from BI.
+- [x] Add BI source-system registry, data contracts, ingestion jobs, raw/staging metadata, refresh SLA, failure state, and correlation/idempotency fields.
+- [x] Add conformed entity, branch, date, currency, department, customer-context, supplier-context, vehicle, product, employee, account, location, channel, and document-type dimension foundations with surrogate/version keys.
+- [x] Add warehouse facts/data marts for sales, rental, workshop, parts, inventory, procurement, payments, receivables/payables, cash, vehicle cost/revenue/utilization, HR/payroll, assets, import/export, and compliance foundations.
+- [x] Add SCD/versioned dimension handling, source-row identity, event lineage, period grain, entity/branch context, and duplicate-ingestion controls foundations.
+- [x] Add centralized KPI catalog and versioned semantic definitions with formula, source, grain, refresh frequency, owner, scope, effective date, and certification state.
+- [x] Add executive, portfolio, entity, finance, sales, rental/fleet, workshop, parts, procurement, HR, compliance, customer, and vehicle-profitability data-mart summary foundations.
+- [x] Add data-quality rules for completeness, accuracy, consistency, timeliness, uniqueness, validity, score, issue queue, owner, and remediation status.
+- [x] Add end-to-end data lineage from source table/event through transformation and warehouse field to KPI/report/dashboard owner and version.
+- [x] Add refresh jobs and events for ingestion, quality issues, warehouse refresh success/failure, KPI updates, anomalies, forecasts, and dashboard publication foundations.
+- [x] Add forecast/anomaly/variance/scenario/driver-analysis foundations with model and version metadata, confidence, sources, explainability, human review, and AI-output audit.
+- [x] Add BI RBAC, entity/branch row-level scope, column masking, sensitive classification, export controls, and audit metadata foundations.
+- [x] Add protected BI procedures for KPIs, dashboards, reports, datasets, forecast, anomalies, quality, lineage, refresh, and exports without operational bypass foundations.
+- [x] Add Arabic RTL/English LTR BI workspace with portfolio, entity, KPI, quality, lineage, refresh, forecast, and risk states without fabricated metrics.
+- [x] Add tests for revenue/ledger reconciliation, inventory-value reconciliation, vehicle profitability, utilization, margins, turnover, P&L, RLS, export control, lineage, refresh failure, and duplicate ingestion foundations.
+- [x] Document deferred full ETL workers, external lake/warehouse deployment, predictive models requiring sufficient data, and provider-specific BI integrations.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 28 checkpoint.
