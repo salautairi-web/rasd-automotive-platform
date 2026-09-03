@@ -1,0 +1,3 @@
+# Step 29 Visual QA
+
+The Treasury workspace was reviewed at desktop and mobile widths after the tRPC contract was refreshed. The desktop layout keeps the administrative sidebar and presents the hero, metric cards, liquidity summary, and tabbed operational sections without horizontal clipping. The mobile layout collapses the navigation, stacks the cards, keeps Arabic labels readable, and preserves the empty-state message for an entity with no payment records. No fabricated balances or transaction rows were displayed. The initial skeleton state was also observed while OAuth and dashboard queries settled; a second capture confirmed the loaded state.

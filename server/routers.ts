@@ -21,6 +21,7 @@ import { centralOperationsRouter } from "./centralOperations";
 import { biRouter } from "./bi";
 import { biWarehouseRouter } from "./biWarehouse";
 import { centralFinanceRouter } from "./centralFinance";
+import { treasuryRouter } from "./treasury";
 import { governanceRouter } from "./governance";
 import { procurementRouter } from "./procurement";
 import { hrRouter } from "./hr";
@@ -54,6 +55,7 @@ export const appRouter = router({
   bi: biRouter,
   biWarehouse: biWarehouseRouter,
   centralFinance: centralFinanceRouter,
+  treasury: treasuryRouter,
   governance: governanceRouter,
   procurement: procurementRouter,
   hr: hrRouter,

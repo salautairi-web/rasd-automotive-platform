@@ -1374,3 +1374,23 @@
 - [x] Add tests for revenue/ledger reconciliation, inventory-value reconciliation, vehicle profitability, utilization, margins, turnover, P&L, RLS, export control, lineage, refresh failure, and duplicate ingestion foundations.
 - [x] Document deferred full ETL workers, external lake/warehouse deployment, predictive models requiring sufficient data, and provider-specific BI integrations.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 28 checkpoint.
+
+## Step 29 — Treasury, Cash, Banking & Payment Infrastructure 2.0
+
+- [x] Document central Treasury Framework versus entity-owned cash, bank, wallet, and payment operations; no shared operational cash ledger.
+- [x] Add treasury entities, bank accounts, cash accounts, petty cash, payment methods, currencies, branches, custodians, signatories, documents, and status controls.
+- [x] Add protected receipt, payment, payment-request, beneficiary, transfer, and inter-entity-funding foundations with source transaction and entity scope.
+- [x] Add payment approval matrix with amount/entity/department/type/urgency rules, maker-checker, sequential/parallel approvals, SoD, MFA/step-up, and idempotency foundations.
+- [x] Add payment batches with totals, currency, approval, submission, execution, settlement, failure, exception, and remittance metadata.
+- [x] Add bank statement and transaction import boundaries with provider-neutral adapter metadata, signature/replay protection, and no credentials in source.
+- [x] Add reconciliation rules, exact/reference/amount/date matching, tolerance, bank-fee recognition, duplicate detection, manual match, approval, and audit foundations.
+- [x] Add payment-gateway intent/checkout/webhook/settlement/refund/chargeback metadata with provider reconciliation and idempotency.
+- [x] Add customer collections and supplier/payroll/regulatory payment lifecycle foundations with due items, reminders, allocation, refund, and exceptions.
+- [x] Add cash transfer, inter-entity funding, financing, investment, restricted-fund, and accounting/ERP handoff metadata without bypassing local ledgers.
+- [x] Add cash position, liquidity forecast, scenario/version, committed payments, expected collections, and threshold-alert foundations from persisted records only.
+- [x] Add cash controls, beneficiary change approval/cooling period, duplicate/unusual transaction risk alerts, human review, and audit metadata.
+- [x] Add protected Treasury procedures with IAM/MFA, entity/branch scope, masked bank/beneficiary data, export controls, approvals, and audit foundations.
+- [x] Add Arabic RTL/English LTR Treasury workspace with cash position, bank/cash accounts, pending payments, failed payments, reconciliation, forecasts, funding, and risk states without fabricated balances.
+- [x] Add tests for cross-entity bank isolation, approval/SoD, duplicate callbacks, statement import, reconciliation, refund, beneficiary changes, funding, forecast, liquidity alerts, fraud signals, and entity boundaries foundations.
+- [x] Document deferred official bank/payment-gateway adapters, external statement feeds, execution credentials, and jurisdiction-specific payment controls.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 29 checkpoint.

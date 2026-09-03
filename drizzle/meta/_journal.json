@@ -246,6 +246,13 @@
       "when": 1788382227455,
       "tag": "0034_military_firebrand",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "5",
+      "when": 1788478433956,
+      "tag": "0035_true_lethal_legion",
+      "breakpoints": true
     }
   ]
 }
