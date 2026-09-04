@@ -260,6 +260,13 @@
       "when": 1788479180740,
       "tag": "0036_lame_darkhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1788556423061,
+      "tag": "0037_smooth_lockjaw",
+      "breakpoints": true
     }
   ]
 }

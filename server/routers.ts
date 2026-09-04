@@ -23,6 +23,7 @@ import { biWarehouseRouter } from "./biWarehouse";
 import { centralFinanceRouter } from "./centralFinance";
 import { treasuryRouter } from "./treasury";
 import { planningRouter } from "./planning";
+import { costAccountingRouter } from "./costAccounting";
 import { governanceRouter } from "./governance";
 import { procurementRouter } from "./procurement";
 import { hrRouter } from "./hr";
@@ -58,6 +59,7 @@ export const appRouter = router({
   centralFinance: centralFinanceRouter,
   treasury: treasuryRouter,
   planning: planningRouter,
+  costAccounting: costAccountingRouter,
   governance: governanceRouter,
   procurement: procurementRouter,
   hr: hrRouter,

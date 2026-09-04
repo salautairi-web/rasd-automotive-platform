@@ -1413,3 +1413,21 @@
 - [x] Add tests for budget version isolation, period locking, approval/SoD, allocation arithmetic, variance, forecast confidence, commitment inclusion, threshold alerts, export scope, and entity isolation foundations.
 - [x] Document deferred full ERP posting, external planning integrations, advanced predictive models requiring sufficient historical data, and distributed planning workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 30 checkpoint.
+
+## Step 31 — Cost Accounting, Profitability & Activity-Based Costing 2.0
+
+- [x] Document cost-accounting source-of-truth boundaries versus operational and general-ledger records.
+- [x] Add entity-scoped cost centers, hierarchies, departments, branches, projects, activities, cost pools, and responsibility owners foundations.
+- [x] Add allocation bases and drivers for headcount, hours, kilometers, transactions, revenue, floor area, fuel, maintenance, and operational units foundations.
+- [x] Add versioned allocation rules with effective dates, priority, source pool, target dimensions, driver formula, approval, lock, and audit metadata foundations.
+- [x] Add ABC activities, cost pools, cost objects, driver rates, consumption quantities, allocated costs, allocation runs, and reversals foundations.
+- [x] Add direct/indirect cost classification, fixed/variable/semi-variable treatment, traceability, source transaction, period, currency, and entity scope.
+- [x] Add product, vehicle, rental contract, customer, supplier, workshop order, service, project, branch, and channel profitability foundations.
+- [x] Add contribution margin, gross margin, net contribution, cost-to-serve, utilization, unit economics, break-even, and profitability ranking calculations from persisted records only foundations.
+- [x] Add standard-versus-actual cost, purchase/usage/efficiency/volume/rate/mix/overhead variances and root-cause metadata foundations.
+- [x] Add period lock, close/reopen, allocation preview, approval, posting/handoff, reversal, and immutable run audit controls foundations.
+- [x] Add protected cost-accounting procedures with IAM/MFA, entity/period/department scope, masked sensitive amounts, export controls, idempotency, and SoD foundations.
+- [x] Add Arabic RTL/English LTR cost and profitability workspace with pools, rules, runs, ABC, profitability, variance, and control states without fabricated figures.
+- [x] Add tests for allocation conservation, driver validation, rule versioning, cross-entity denial, period locking, ABC consumption, reversal, margin calculations, and source lineage foundations.
+- [x] Document deferred full GL posting, external costing engines, predictive unit economics, and provider-specific accounting integrations.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 31 checkpoint.
