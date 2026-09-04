@@ -253,6 +253,13 @@
       "when": 1788478433956,
       "tag": "0035_true_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1788479180740,
+      "tag": "0036_lame_darkhawk",
+      "breakpoints": true
     }
   ]
 }

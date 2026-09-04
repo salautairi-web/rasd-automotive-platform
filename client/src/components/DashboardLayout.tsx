@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, Boxes, Building2, ClipboardCheck, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards } from "lucide-react";
+import { Activity, Boxes, Building2, ClipboardCheck, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -49,6 +49,7 @@ const menuItems = [
   { icon: ChartNoAxesCombined, label: "الذكاء التحليلي", path: "/bi" },
   { icon: Landmark, label: "المالية والخزينة", path: "/finance" },
   { icon: WalletCards, label: "الخزينة والمدفوعات", path: "/treasury" },
+  { icon: Target, label: "التخطيط والميزانيات", path: "/planning" },
   { icon: ShieldCheck, label: "حوكمة البيانات", path: "/governance" },
   { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
   { icon: CarFront, label: "الأسطول ودورة المركبات", path: "/fleet" },

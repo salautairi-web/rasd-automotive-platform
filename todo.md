@@ -1394,3 +1394,22 @@
 - [x] Add tests for cross-entity bank isolation, approval/SoD, duplicate callbacks, statement import, reconciliation, refund, beneficiary changes, funding, forecast, liquidity alerts, fraud signals, and entity boundaries foundations.
 - [x] Document deferred official bank/payment-gateway adapters, external statement feeds, execution credentials, and jurisdiction-specific payment controls.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 29 checkpoint.
+
+## Step 30 — Budget Planning, Forecasting & Management Control 2.0
+
+- [x] Document the central planning and control framework versus entity-owned budgets and local accounting sources of truth.
+- [x] Add planning cycles, fiscal periods, scenarios, versions, assumptions, owners, workflow status, approval gates, and entity/branch scope.
+- [x] Add budget headers and lines by account, cost center, department, project, vehicle, product, channel, month/period, currency, and entity foundations.
+- [x] Add driver-based planning inputs, allocations, spreading rules, transfer rules, adjustment reasons, and change history foundations.
+- [x] Add budget approval workflow with maker-checker, SoD, IAM/MFA step-up, thresholds, version lock, and audit foundations.
+- [x] Add actual-versus-budget, forecast-versus-budget, prior-period, prior-year, commitment, and remaining-availability comparison foundations from persisted records only.
+- [x] Add rolling forecast, scenario, sensitivity, best/base/worst case, confidence, assumptions, model/version, explainability, and human-review foundations.
+- [x] Add commitment control for requisitions, purchase orders, contracts, payroll, reservations, and approved obligations without duplicating operational records foundations.
+- [x] Add budget alerts for overspend, underutilization, margin erosion, cash pressure, threshold variance, missing forecast, and stale data foundations.
+- [x] Add management-control actions with owner, root cause, corrective plan, due date, status, evidence, approval, and closure.
+- [x] Add financial/operational KPI and scorecard foundations linked to certified BI definitions and source lineage.
+- [x] Add protected planning procedures with entity/branch/department/cost-center scope, sensitive-field masking, export controls, idempotency, and audit foundations.
+- [x] Add Arabic RTL/English LTR planning workspace with cycles, versions, budget lines, scenarios, variance, forecasts, commitments, alerts, and actions without fabricated figures.
+- [x] Add tests for budget version isolation, period locking, approval/SoD, allocation arithmetic, variance, forecast confidence, commitment inclusion, threshold alerts, export scope, and entity isolation foundations.
+- [x] Document deferred full ERP posting, external planning integrations, advanced predictive models requiring sufficient historical data, and distributed planning workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 30 checkpoint.
