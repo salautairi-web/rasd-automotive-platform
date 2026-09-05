@@ -1431,3 +1431,25 @@
 - [x] Add tests for allocation conservation, driver validation, rule versioning, cross-entity denial, period locking, ABC consumption, reversal, margin calculations, and source lineage foundations.
 - [x] Document deferred full GL posting, external costing engines, predictive unit economics, and provider-specific accounting integrations.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 31 checkpoint.
+
+## Step 32 — Project, Tasks, Milestones & Portfolio Management 2.0
+
+- [x] Document central Portfolio Governance versus entity-owned Project Operations and the rule that local finance remains the source of actual costs.
+- [x] Add portfolios, programs, projects, workstreams, project owners, sponsors, managers, branches, locations, strategic objectives, and entity scope.
+- [x] Add project types and lifecycle transitions from idea through assessment, business case, approval, planning, execution, monitoring, go-live, closure, and post-implementation review.
+- [x] Add business cases with investment, expected revenue/cost/return, payback, risks, assumptions, recommendation, and approval metadata.
+- [x] Add project budgets, capital requests/allocations, commitments, disbursements, remaining funds, expected/actual return, reallocation, and audit metadata.
+- [x] Add milestones, tasks, subtasks, checklists, evidence, comments, assignments, priorities, dates, statuses, and protected project scope.
+- [x] Add task-to-task, project-to-project, milestone-to-milestone, and external dependencies with owner, impact, resolution, and cycle prevention.
+- [x] Add resource planning for employees, vehicles, equipment, vendors, capacity, allocation, and project procurement handoff metadata.
+- [x] Add project costs for labor, material, equipment, external services, overhead, capitalizable cost, expense, and actual-vs-budget lineage.
+- [x] Add project benefits for revenue, savings, capacity, customers, asset value, and operational benefit with expected-vs-actual comparisons.
+- [x] Add project risks, issues, change requests, corrective actions, escalations, severity, impact, approvals, baseline update, and audit history.
+- [x] Add stage gates, readiness checklists, go-live approval, licenses, people, systems, inventory, vehicles, suppliers, cash, portal, marketing, and training controls.
+- [x] Add project closure with acceptance, financial close, commitments, asset handover, documents, lessons learned, final report, and post-implementation review.
+- [x] Add protected portfolio analytics for status, capital, budget-vs-actual, ROI, risk exposure, delays, value realization, and capital utilization without fabricated figures.
+- [x] Add project/portfolio procedures with IAM/MFA, entity/project scope, financial masking, approvals, idempotency, audit, and no operational database bypass.
+- [x] Add Arabic RTL/English LTR project workspace with portfolio, project, timeline, tasks, milestones, budgets, risks, issues, gates, go-live, closure, and analytics states.
+- [x] Add tests for project entity isolation, lifecycle guards, budget/capital conservation, task dependencies, milestone approvals, procurement linkage, risk escalation, change requests, stage gates, go-live, closure, and portfolio RLS.
+- [x] Document deferred full ERP posting, external project scheduling integrations, advanced earned-value models, and distributed project workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 32 checkpoint.

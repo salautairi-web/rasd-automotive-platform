@@ -50,6 +50,7 @@ const menuItems = [
   { icon: Landmark, label: "المالية والخزينة", path: "/finance" },
   { icon: WalletCards, label: "الخزينة والمدفوعات", path: "/treasury" },
   { icon: Target, label: "التخطيط والميزانيات", path: "/planning" },
+  { icon: BriefcaseBusiness, label: "المشاريع والمحفظة", path: "/projects" },
   { icon: Calculator, label: "التكاليف والربحية", path: "/cost-accounting" },
   { icon: ShieldCheck, label: "حوكمة البيانات", path: "/governance" },
   { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
