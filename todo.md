@@ -1453,3 +1453,13 @@
 - [x] Add tests for project entity isolation, lifecycle guards, budget/capital conservation, task dependencies, milestone approvals, procurement linkage, risk escalation, change requests, stage gates, go-live, closure, and portfolio RLS.
 - [x] Document deferred full ERP posting, external project scheduling integrations, advanced earned-value models, and distributed project workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 32 checkpoint.
+
+## Step 32 Extension — Secure Stage-Gate, Interactive Forms & Project Cost Linkage
+
+- [x] Add multi-stage Stage-Gate role matrix, gate requirements, separation of duties, step-up/MFA checks, and approval audit trail.
+- [x] Add secure procedures to submit, approve, reject, return, and waive gates with ordered-stage and maker-checker guards.
+- [x] Add interactive Arabic forms for project creation, business case submission, and change requests with validation, loading, error, success, and replay states.
+- [x] Add project procurement cost-link records connecting same-entity purchase orders and invoices to project costs without duplicating local accounting postings.
+- [x] Add protected procedure for linking procurement documents to project cost lineage with same-entity and idempotency enforcement.
+- [x] Add tests for gate role authorization, stage ordering, MFA/step-up requirement, maker-checker, form validation, cross-entity procurement denial, and cost-link replay.
+- [x] Update Step 32 documentation, run TypeScript/Vitest/build, perform desktop/mobile QA, and save the extension checkpoint.
