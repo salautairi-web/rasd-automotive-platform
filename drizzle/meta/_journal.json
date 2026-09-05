@@ -288,6 +288,13 @@
       "when": 1788643004302,
       "tag": "0040_polite_professor_monster",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1788643283326,
+      "tag": "0041_foamy_madrox",
+      "breakpoints": true
     }
   ]
 }

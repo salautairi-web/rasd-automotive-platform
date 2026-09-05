@@ -23,4 +23,19 @@ describe("MDM governance invariants", () => {
     expect(resolveConflict("source_of_truth", "erp", "crm")).toBe("erp");
     expect(resolveConflict("entity_owned", "erp", "crm")).toBe("entity-owned-local-record");
   });
+  it("keeps same-name local customers independent by entity", () => {
+    const rental = { businessEntityId: 1, nameAr: "شركة الاختبار", balanceMinor: 1000 };
+    const workshop = { businessEntityId: 2, nameAr: "شركة الاختبار", balanceMinor: 9000 };
+    expect(rental.nameAr).toBe(workshop.nameAr);
+    expect(sameEntityScope(rental.businessEntityId, workshop.businessEntityId)).toBe(false);
+    expect(rental.balanceMinor).not.toBe(workshop.balanceMinor);
+  });
+  it("keeps local product values independent from one global reference", () => {
+    const productReference = { globalReferenceId: 77, sku: "OEM-1" };
+    const rentalProduct = { businessEntityId: 1, globalReferenceId: productReference.globalReferenceId, localPriceMinor: 1200, localStockQty: 3 };
+    const partsProduct = { businessEntityId: 2, globalReferenceId: productReference.globalReferenceId, localPriceMinor: 1450, localStockQty: 18 };
+    expect(rentalProduct.globalReferenceId).toBe(partsProduct.globalReferenceId);
+    expect(rentalProduct.localPriceMinor).not.toBe(partsProduct.localPriceMinor);
+    expect(sameEntityScope(rentalProduct.businessEntityId, partsProduct.businessEntityId)).toBe(false);
+  });
 });
