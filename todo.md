@@ -1463,3 +1463,23 @@
 - [x] Add protected procedure for linking procurement documents to project cost lineage with same-entity and idempotency enforcement.
 - [x] Add tests for gate role authorization, stage ordering, MFA/step-up requirement, maker-checker, form validation, cross-entity procurement denial, and cost-link replay.
 - [x] Update Step 32 documentation, run TypeScript/Vitest/build, perform desktop/mobile QA, and save the extension checkpoint.
+
+## Step 33 — Master Data Governance & Enterprise Data Management 2.0
+
+- [x] Document source-of-truth boundaries, central reference IDs, and the rule that local operational records remain entity-owned.
+- [x] Add global references and entity-local records for customers, suppliers, vehicles, products, employees, accounts, and locations.
+- [x] Add versioned reference data for currencies, countries, tax codes, units, vehicle makes/models, product categories, document types, and payment methods.
+- [ ] Add data ownership metadata for owners, stewards, systems of record, creation/update rights, approval, scope, and classification.
+- [x] Add identity resolution, exact/fuzzy duplicate candidates, survivorship rules, manual review, merge/reject decisions, and entity-safe duplicate prevention.
+- [x] Add data quality rules, quality scores, issue queues, SLA fields, and entity data health metrics.
+- [ ] Add data lifecycle states, retention safeguards, privacy controls, PII classification, correction/access request metadata, and protected disposal markers.
+- [x] Add versioned entity-to-central mappings for products, customers, suppliers, accounts, vehicles, and reference values with revocation/audit.
+- [x] Add change requests with field-level old/new values, reason, requester, approver, effective date, and audit trail.
+- [x] Add synchronization metadata for API/event/batch sources, retries, dead letters, conflicts, status, frequency, and source-of-truth resolution.
+- [x] Add lineage records for origin, transformation, mapping, consumer, version, and owner.
+- [x] Add governance policies for naming, required fields, allowed values, retention, classification, access, quality SLA, and change control.
+- [x] Add protected MDM procedures with entity isolation, field-level protection, PII/financial masking, approvals, idempotency, and audit.
+- [x] Add Arabic RTL MDM governance dashboard for data quality, duplicates, changes, mappings, sync health, lineage, and exceptions.
+- [ ] Add tests for same-name customers across entities, supplier contracts, vehicle reference ownership, product price/stock isolation, account mapping, duplicate detection, conflicts, entity isolation, and audit changes.
+- [x] Document deferred provider-specific MDM connectors, fuzzy matching engines, distributed sync workers, and destructive merge execution.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 33 checkpoint.

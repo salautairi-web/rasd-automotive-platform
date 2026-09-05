@@ -26,6 +26,7 @@ import { planningRouter } from "./planning";
 import { costAccountingRouter } from "./costAccounting";
 import { governanceRouter } from "./governance";
 import { projectsRouter } from "./projects";
+import { mdmRouter } from "./mdm";
 import { procurementRouter } from "./procurement";
 import { hrRouter } from "./hr";
 import { assetsRouter } from "./assets";
@@ -63,6 +64,7 @@ export const appRouter = router({
   costAccounting: costAccountingRouter,
   governance: governanceRouter,
   projects: projectsRouter,
+  mdm: mdmRouter,
   procurement: procurementRouter,
   hr: hrRouter,
   assets: assetsRouter,

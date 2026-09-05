@@ -281,6 +281,13 @@
       "when": 1788642563879,
       "tag": "0039_quick_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "5",
+      "when": 1788643004302,
+      "tag": "0040_polite_professor_monster",
+      "breakpoints": true
     }
   ]
 }
