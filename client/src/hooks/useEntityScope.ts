@@ -14,18 +14,24 @@ export function useEntityScope() {
 
   const activeMembership = useMemo(() => {
     if (!memberships?.length) return null;
-    return memberships.find(m => m.businessEntityId === storedId) ?? memberships[0];
+    return memberships.find(membership => membership.businessEntityId === storedId) ?? memberships[0];
   }, [memberships, storedId]);
 
   useEffect(() => {
-    if (!activeMembership) return;
-    setStoredId(activeMembership.businessEntityId);
+    if (!activeMembership || typeof window === "undefined") return;
+    if (storedId !== activeMembership.businessEntityId) {
+      setStoredId(activeMembership.businessEntityId);
+    }
     window.localStorage.setItem(STORAGE_KEY, String(activeMembership.businessEntityId));
-  }, [activeMembership]);
+  }, [activeMembership, storedId]);
 
   const setBusinessEntityId = (businessEntityId: number) => {
+    const allowed = memberships?.some(membership => membership.businessEntityId === businessEntityId) ?? false;
+    if (!allowed) return;
     setStoredId(businessEntityId);
-    window.localStorage.setItem(STORAGE_KEY, String(businessEntityId));
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, String(businessEntityId));
+    }
   };
 
   return {
