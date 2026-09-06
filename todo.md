@@ -1483,3 +1483,21 @@
 - [x] Add tests for same-name customers across entities, supplier contracts, vehicle reference ownership, product price/stock isolation, account mapping, duplicate detection, conflicts, entity isolation, and audit changes.
 - [x] Document deferred provider-specific MDM connectors, fuzzy matching engines, distributed sync workers, and destructive merge execution.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 33 checkpoint.
+
+## Step 34 — Document Management, Digital Archive & E-Signature 2.0
+
+- [x] Document entity-owned repository principles, source-of-truth boundaries, and server-side authorization for every document action.
+- [x] Add document entities, document types, classifications, metadata, owners, related records, status, expiry, retention, and entity scope.
+- [x] Add document versions with author, change note, previous/current markers, rollback policy, checksum, storage key, and scan state.
+- [x] Add document links to customers, suppliers, vehicles, transactions, projects, contracts, and operational modules without mutating source transactions.
+- [x] Add approval workflows, reviewer/approver scope, rejection/return decisions, maker-checker, and approval history.
+- [x] Add provider-neutral e-signature requests, signers, order, consent, authentication, evidence, completion artifact, webhook metadata, and failure handling.
+- [x] Add contracts, parties, values, renewals, notice periods, obligations, attachments, and signature status.
+- [x] Add expiry reminders, retention policies, legal holds, disposition approvals, protected archive, and deletion safeguards.
+- [x] Add OCR adapter metadata, Arabic/English extraction confidence, human review, document templates, generated artifact lineage, and entity branding metadata.
+- [x] Add secure shares with expiry, recipient, purpose, password/OTP marker, view/download controls, revocation, and access audit.
+- [x] Add protected document procedures for upload metadata, versioning, search, approval, signature, archive, retention, legal hold, share, and signed URL authorization.
+- [x] Add Arabic RTL document center dashboard with entity filters, approvals, signatures, expiry, legal holds, storage, access activity, and exceptions.
+- [x] Add tests for entity isolation, versioning, approval, signature evidence, expiry, legal hold deletion block, secure share expiry, OCR review, search authorization, signed URL authorization, and audit.
+- [x] Document deferred provider-specific e-sign adapters, malware/OCR workers, full-text index, PDF generation engine, and distributed retention workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 34 checkpoint.
