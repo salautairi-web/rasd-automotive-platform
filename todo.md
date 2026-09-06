@@ -1545,28 +1545,28 @@
 
 ## Step 37 — CRM, Customer Experience, Loyalty & Omnichannel
 
-- [ ] Analyze the Step 37 requirements and preserve entity-owned customer transactions with MDM identity references only.
-- [ ] Add customer 360, interactions, journeys, segments, consent, cases, campaigns, loyalty accounts, points, tiers, rewards, and omnichannel history.
-- [ ] Add protected CRM procedures, Arabic RTL workspace, isolation/lifecycle tests, documentation, build, and visual QA.
+- [x] Analyze the Step 37 requirements and preserve entity-owned customer transactions with MDM identity references only.
+- [x] Add customer 360, interactions, journeys, segments, consent, cases, campaigns, loyalty accounts, points, tiers, rewards, and omnichannel history.
+- [x] Add protected CRM procedures, Arabic RTL workspace, isolation/lifecycle tests, documentation, build, and visual QA.
 
 ## Step 38 — Procurement, Supplier & Strategic Sourcing
 
-- [ ] Analyze the Step 38 requirements and preserve entity-owned supplier contracts, purchase orders, receipts, invoices, and financial postings.
-- [ ] Add strategic sourcing events, supplier qualification, scorecards, bids, evaluations, negotiations, contracts, savings, risks, and approvals.
-- [ ] Add protected sourcing procedures, Arabic RTL workspace, isolation/approval tests, documentation, build, and visual QA.
+- [x] Analyze the Step 38 requirements and preserve entity-owned supplier contracts, purchase orders, receipts, invoices, and financial postings.
+- [x] Add strategic sourcing events, supplier qualification, scorecards, bids, evaluations, negotiations, contracts, savings, risks, and approvals.
+- [x] Add protected sourcing procedures, Arabic RTL workspace, isolation/approval tests, documentation, build, and visual QA.
 
 ## Step 39 — Inventory, Warehouse & Stock Control
 
-- [ ] Analyze the Step 39 requirements and preserve warehouse/product ownership and immutable stock movement lineage by entity.
-- [ ] Add warehouse zones/bins, lots/serials, reservations, replenishment, transfers, counts, adjustments, valuation, aging, and controls.
-- [ ] Add protected inventory procedures, Arabic RTL workspace, conservation/isolation tests, documentation, build, and visual QA.
+- [x] Analyze the Step 39 requirements and preserve warehouse/product ownership and immutable stock movement lineage by entity.
+- [x] Add warehouse zones/bins, lots/serials, reservations, replenishment, transfers, counts, adjustments, valuation, aging, and controls.
+- [x] Add protected inventory procedures, Arabic RTL workspace, conservation/isolation tests, documentation, build, and visual QA.
 
 ## Step 40 — Asset Management, Fixed Assets, Depreciation & Lifecycle
 
-- [ ] Analyze the Step 40 requirements and preserve the distinction between fixed assets, vehicle inventory, rental fleet, and maintenance records.
-- [ ] Add asset classes, capitalization, components, locations/custodians, depreciation books/runs, impairment, revaluation, transfer, disposal, and audit.
-- [ ] Add protected asset procedures, Arabic RTL workspace, depreciation/isolation tests, documentation, build, and visual QA.
+- [x] Analyze the Step 40 requirements and preserve the distinction between fixed assets, vehicle inventory, rental fleet, and maintenance records.
+- [x] Add asset classes, capitalization, components, locations/custodians, depreciation books/runs, impairment, revaluation, transfer, disposal, and audit.
+- [x] Add protected asset procedures, Arabic RTL workspace, depreciation/isolation tests, documentation, build, and visual QA.
 
 ## Steps 37–40 Integrated Delivery
 
-- [ ] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Steps 37–40 checkpoint.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Steps 37–40 checkpoint.
