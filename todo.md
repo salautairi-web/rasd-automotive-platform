@@ -1501,3 +1501,24 @@
 - [x] Add tests for entity isolation, versioning, approval, signature evidence, expiry, legal hold deletion block, secure share expiry, OCR review, search authorization, signed URL authorization, and audit.
 - [x] Document deferred provider-specific e-sign adapters, malware/OCR workers, full-text index, PDF generation engine, and distributed retention workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 34 checkpoint.
+
+## Step 35 — Workflow & Business Process Automation 2.0
+
+- [x] Document central Workflow Engine boundaries, entity context, owning-system APIs/events, and no business-rule bypass.
+- [x] Add versioned workflow definitions with draft/test/approved/published/deprecated/archived lifecycle and pinned execution versions.
+- [x] Add triggers for record changes, status changes, schedules, thresholds, events, manual starts, and webhooks.
+- [x] Add workflow steps for tasks, approvals, conditions, parallel/sequential branches, timers, notifications, integrations, sub-workflows, and end states.
+- [x] Add conditions, decision tables, rule versions, priorities, conflict handling, test mode, effective dates, variables, and rule audit.
+- [x] Add entity-scoped tasks, assignees, teams, priorities, due dates, SLA, evidence, comments, statuses, reminders, and escalations.
+- [x] Add approval engine with role/entity/branch/department/threshold routing, sequential/parallel modes, delegation, maker-checker, escalation, and sensitive-transaction human approval.
+- [x] Add workflow instances, pinned versions, step executions, actions, events, variables, execution logs, correlation IDs, and idempotency results.
+- [x] Add exception, timeout, integration failure, retry, dead-letter, manual resolution, compensation, and rollback records.
+- [x] Add cross-system actions through Finance, Procurement, Treasury, Documents, Communication, Projects, Compliance, and BI without bypassing ownership.
+- [x] Add explicit source/target entity controls for inter-entity workflows and dual-scope approvals for financial or ownership effects.
+- [x] Add notifications and Communication Center handoff metadata with templates, preferences, channel, and entity scope.
+- [x] Add workflow templates for purchase, payment, vehicle transfer, maintenance, contract renewal, document signature, project gate, and service escalation.
+- [x] Add protected Workflow procedures for create, version, test, publish, run, approve, task completion, retry, compensate, resolve, and audit.
+- [x] Add Arabic RTL workflow dashboard/designer foundation for active runs, tasks, approvals, SLA breaches, failures, exceptions, success rate, and cycle time.
+- [x] Add tests for purchase/payment/rental/workshop/sales/parts/import-export/project workflows, cross-entity controls, duplicate events, timeout/escalation, compensation, version pinning, authorization, and isolation.
+- [x] Document deferred visual graph designer, provider-specific workers, external connectors, business calendar engine, and distributed queue execution.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 35 checkpoint.
