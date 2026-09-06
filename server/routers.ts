@@ -35,6 +35,7 @@ import { crmRouter } from "./crm";
 import { documentManagementRouter } from "./documents";
 import { automationRouter } from "./automation";
 import { alertsRouter } from "./alerts";
+import { enterpriseExtensionsRouter } from "./enterpriseExtensions";
 import { integrationsRouter } from "./integrations";
 import { iamRouter } from "./iam";
 import { mobileRouter } from "./mobile";
@@ -74,6 +75,7 @@ export const appRouter = router({
   documentManagement: documentManagementRouter,
   automation: automationRouter,
   alerts: alertsRouter,
+  enterpriseExtensions: enterpriseExtensionsRouter,
   integrations: integrationsRouter,
   iam: iamRouter,
   mobile: mobileRouter,

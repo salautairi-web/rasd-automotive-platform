@@ -1542,3 +1542,31 @@
 - [x] Add tests for rental maintenance/insurance, stockout, budget/liquidity, project delay, compliance expiry, deduplication, escalation, alert-to-workflow, AI human approval, and entity isolation.
 - [x] Document deferred provider-specific delivery adapters, anomaly model workers, distributed alert evaluation, and advanced predictive models.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 36 checkpoint.
+
+## Step 37 — CRM, Customer Experience, Loyalty & Omnichannel
+
+- [ ] Analyze the Step 37 requirements and preserve entity-owned customer transactions with MDM identity references only.
+- [ ] Add customer 360, interactions, journeys, segments, consent, cases, campaigns, loyalty accounts, points, tiers, rewards, and omnichannel history.
+- [ ] Add protected CRM procedures, Arabic RTL workspace, isolation/lifecycle tests, documentation, build, and visual QA.
+
+## Step 38 — Procurement, Supplier & Strategic Sourcing
+
+- [ ] Analyze the Step 38 requirements and preserve entity-owned supplier contracts, purchase orders, receipts, invoices, and financial postings.
+- [ ] Add strategic sourcing events, supplier qualification, scorecards, bids, evaluations, negotiations, contracts, savings, risks, and approvals.
+- [ ] Add protected sourcing procedures, Arabic RTL workspace, isolation/approval tests, documentation, build, and visual QA.
+
+## Step 39 — Inventory, Warehouse & Stock Control
+
+- [ ] Analyze the Step 39 requirements and preserve warehouse/product ownership and immutable stock movement lineage by entity.
+- [ ] Add warehouse zones/bins, lots/serials, reservations, replenishment, transfers, counts, adjustments, valuation, aging, and controls.
+- [ ] Add protected inventory procedures, Arabic RTL workspace, conservation/isolation tests, documentation, build, and visual QA.
+
+## Step 40 — Asset Management, Fixed Assets, Depreciation & Lifecycle
+
+- [ ] Analyze the Step 40 requirements and preserve the distinction between fixed assets, vehicle inventory, rental fleet, and maintenance records.
+- [ ] Add asset classes, capitalization, components, locations/custodians, depreciation books/runs, impairment, revaluation, transfer, disposal, and audit.
+- [ ] Add protected asset procedures, Arabic RTL workspace, depreciation/isolation tests, documentation, build, and visual QA.
+
+## Steps 37–40 Integrated Delivery
+
+- [ ] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Steps 37–40 checkpoint.
