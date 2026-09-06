@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target } from "lucide-react";
+import { Activity, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target, AlertTriangle } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -42,6 +42,7 @@ const menuItems = [
   { icon: Globe2, label: "بوابة العملاء والشركاء 2.0", path: "/customer-portal" },
   { icon: Command, label: "مركز العمليات", path: "/operations" },
   { icon: Zap, label: "مركز الأتمتة", path: "/automation" },
+  { icon: AlertTriangle, label: "الإنذار المبكر", path: "/early-warnings" },
   { icon: Network, label: "مركز التكاملات", path: "/integrations-center" },
   { icon: MessageSquare, label: "مركز الاتصالات", path: "/communication-center" },
   { icon: ShieldCheck, label: "الهوية والأمن", path: "/security" },

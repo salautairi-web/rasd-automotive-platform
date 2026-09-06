@@ -1522,3 +1522,23 @@
 - [x] Add tests for purchase/payment/rental/workshop/sales/parts/import-export/project workflows, cross-entity controls, duplicate events, timeout/escalation, compensation, version pinning, authorization, and isolation.
 - [x] Document deferred visual graph designer, provider-specific workers, external connectors, business calendar engine, and distributed queue execution.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 35 checkpoint.
+
+## Step 36 — Notification Intelligence, Alerts & Early Warning System 2.0
+
+- [x] Document alert source ownership, entity context, evidence requirements, and prohibition on automatic sensitive financial/legal decisions.
+- [x] Add alerts with source system/record, rule, entity, severity, priority, owner, due date, evidence, recommended action, and lifecycle.
+- [x] Add versioned alert rules with metrics, operators, thresholds, time windows, entity/activity conditions, actions, effective dates, and audit.
+- [x] Add threshold, trend, moving-average, baseline, deviation, outlier, trend-break, model version, and confidence metadata without fabricating measurements.
+- [x] Add notification channels for in-app, email, SMS, push, dashboard, webhook, and Communication Center handoff.
+- [x] Add user/role/entity preferences, severity policies, quiet hours, digest/immediate modes, consent, and suppression.
+- [x] Add deduplication, correlation keys, alert groups, root-cause grouping, digest windows, and suppression windows.
+- [x] Add owner/backup/manager/central escalation routes, time/severity escalation, escalation history, and SLA.
+- [x] Add alert actions for tasks, workflow starts, approvals, notifications, cases, maintenance, purchasing, and compliance while respecting owning-system permissions.
+- [x] Add domain early-warning templates for rental, workshop, parts, sales, import/export, finance, treasury, projects, compliance, security, and executive risk.
+- [x] Add feedback, false-positive handling, rule tuning, threshold adjustment, model review, and alert evidence.
+- [x] Add protected alert procedures for detect, acknowledge, assign, escalate, act, resolve, verify, close, suppress, and audit.
+- [x] Add Arabic RTL early-warning dashboard with critical alerts, overdue alerts, resolution SLA, risk heatmap, recurring alerts, root causes, and alert-to-action.
+- [x] Add controlled AI assistance metadata for prioritization, clustering, root-cause suggestion, action recommendation, evidence summary, confidence, and human approval.
+- [x] Add tests for rental maintenance/insurance, stockout, budget/liquidity, project delay, compliance expiry, deduplication, escalation, alert-to-workflow, AI human approval, and entity isolation.
+- [x] Document deferred provider-specific delivery adapters, anomaly model workers, distributed alert evaluation, and advanced predictive models.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the Step 36 checkpoint.

@@ -302,6 +302,13 @@
       "when": 1788643616921,
       "tag": "0042_vengeful_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1788664132524,
+      "tag": "0043_powerful_stark_industries",
+      "breakpoints": true
     }
   ]
 }
