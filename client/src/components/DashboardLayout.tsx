@@ -58,6 +58,7 @@ const menuItems = [
   { icon: ClipboardCheck, label: "المشتريات والموردون", path: "/procurement" },
   { icon: CarFront, label: "الأسطول ودورة المركبات", path: "/fleet" },
   { icon: UsersRound, label: "الموارد البشرية", path: "/hr" },
+  { icon: Network, label: "المخطط التنظيمي", path: "/hr/organization-chart" },
   { icon: Boxes, label: "الأصول الثابتة", path: "/assets" },
   { icon: Warehouse, label: "المخزون والمستودعات", path: "/inventory" },
   { icon: Handshake, label: "إدارة علاقات العملاء", path: "/crm" },

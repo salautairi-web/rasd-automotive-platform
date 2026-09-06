@@ -1589,3 +1589,10 @@
 - [x] Add tests for PII masking, entity isolation, effective dating, leave conservation, overtime approval, payroll gross-to-net, lock/reversal, allocation conservation, and restricted audit.
 - [x] Document deferred statutory payroll adapters, government integrations, biometric/time-clock connectors, bank disbursement, tax engine, and distributed payroll workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 41 checkpoint.
+
+## Organizational Chart Interactive UI Extension
+
+- [x] Add a protected organizational-chart query with entity scope, parent-child relationships, manager, positions, headcount, and employee summaries.
+- [x] Add Arabic RTL interactive chart with search, unit-type/branch filters, expand/collapse, selected-node details, and employee-safe masking.
+- [x] Add responsive mobile navigation, empty/loading/error states, accessibility labels, and no cross-entity data leakage.
+- [x] Add chart tests, run TypeScript/Vitest/build, perform desktop/mobile visual QA, and save the extension checkpoint.
