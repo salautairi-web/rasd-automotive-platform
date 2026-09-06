@@ -1596,3 +1596,11 @@
 - [x] Add Arabic RTL interactive chart with search, unit-type/branch filters, expand/collapse, selected-node details, and employee-safe masking.
 - [x] Add responsive mobile navigation, empty/loading/error states, accessibility labels, and no cross-entity data leakage.
 - [x] Add chart tests, run TypeScript/Vitest/build, perform desktop/mobile visual QA, and save the extension checkpoint.
+
+## Organizational Chart Navigation, Export & Workforce Details
+
+- [x] Add zoom in/out/reset and pointer drag-pan controls for the organizational chart viewport.
+- [x] Add export of the current filtered organizational chart as high-resolution PNG and PDF, with RTL title and entity context.
+- [x] Extend chart data with manager name, position capacity, filled positions, and vacancies per unit without cross-entity leakage.
+- [x] Show manager and vacancy details in the selected-unit panel with safe loading/empty states.
+- [x] Add tests for chart metrics and export-ready filtered state, run TypeScript/Vitest/build, perform desktop/mobile QA, and save the extension checkpoint.
