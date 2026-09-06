@@ -1570,3 +1570,22 @@
 ## Steps 37–40 Integrated Delivery
 
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Steps 37–40 checkpoint.
+
+## Step 41 — HR, Organization, Payroll & Workforce Management 2.0
+
+- [x] Document HR source-of-truth boundaries, employee privacy classification, entity scope, IAM roles, and separation from user authentication.
+- [x] Add workforce master data for employees, worker types, employee numbers, national/identity references, contacts, dependents, emergency contacts, and protected PII metadata.
+- [x] Add organization structures for legal entities, branches, departments, teams, positions, grades, job families, reporting lines, cost centers, and effective-dated assignments.
+- [x] Add employment lifecycle for recruitment handoff, onboarding, probation, transfers, promotions, leave of absence, suspension, termination, offboarding, and final settlement metadata.
+- [x] Add employment contracts, amendments, compensation components, allowances, deductions, benefits, eligibility, and approval history.
+- [x] Add attendance, shifts, schedules, holidays, timesheets, overtime, remote work, absences, leave balances, requests, approvals, and payroll inputs.
+- [x] Add payroll calendars, periods, pay groups, payroll runs, gross-to-net components, statutory/tax metadata, deductions, employer contributions, payslips, reversals, and lock controls.
+- [x] Add payroll allocation to entity, branch, department, project, cost center, and activity without bypassing accounting source records.
+- [x] Add performance goals, reviews, competencies, training, certifications, skills, workforce capacity, succession, and development plans.
+- [x] Add HR cases, grievances, disciplinary actions, investigations, documents, approvals, legal holds, and restricted access audit.
+- [x] Add employee self-service metadata for profile corrections, leave, attendance, payslip access, approvals, notifications, and consent.
+- [x] Add protected HR procedures with field-level masking, entity isolation, maker-checker, payroll locking, idempotency, audit, and step-up controls.
+- [x] Add Arabic RTL workforce and payroll dashboard with headcount, structure, attendance, leave, payroll status, expiring contracts, skills, and exceptions.
+- [x] Add tests for PII masking, entity isolation, effective dating, leave conservation, overtime approval, payroll gross-to-net, lock/reversal, allocation conservation, and restricted audit.
+- [x] Document deferred statutory payroll adapters, government integrations, biometric/time-clock connectors, bank disbursement, tax engine, and distributed payroll workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 41 checkpoint.
