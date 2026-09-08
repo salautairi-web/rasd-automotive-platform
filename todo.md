@@ -1623,3 +1623,13 @@
 - [x] Add tests for entity isolation, license expiry, obligation SLA, evidence immutability, legal hold, privileged masking, conflict approval, board resolutions, and restricted access.
 - [x] Document deferred jurisdiction-specific legal content, external regulator portals, legal research providers, e-discovery workers, and automated legal advice.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 42 checkpoint.
+
+## Compliance Renewal Early-Warning Dashboard
+
+- [x] Add an Arabic RTL renewal dashboard for permits and contracts with entity-scoped data and no fabricated dates.
+- [x] Add deterministic renewal urgency bands, overdue detection, remaining-day calculations, and risk summaries for permits and contracts.
+- [x] Add filters by document type, urgency, status, owner, and renewal horizon, plus search and reset states.
+- [x] Add actionable renewal cards with evidence, responsible owner, due date, source record, and links to the compliance workflow.
+- [x] Add responsive timeline/calendar-style visualization and accessible loading, empty, and error states.
+- [x] Add tests for date bands, overdue renewals, entity isolation, filtering, and deterministic summaries.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the dashboard checkpoint.
