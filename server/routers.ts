@@ -17,6 +17,7 @@ import { communicationRouter } from "./communication";
 import { procurementNetworkRouter } from "./procurementNetwork";
 import { fleetRouter } from "./fleet";
 import { complianceRouter } from "./compliance";
+import { compliance42Router } from "./compliance42";
 import { centralOperationsRouter } from "./centralOperations";
 import { biRouter } from "./bi";
 import { biWarehouseRouter } from "./biWarehouse";
@@ -58,6 +59,7 @@ export const appRouter = router({
   procurementNetwork: procurementNetworkRouter,
   fleet: fleetRouter,
   compliance: complianceRouter,
+  compliance42: compliance42Router,
   centralOperations: centralOperationsRouter,
   bi: biRouter,
   biWarehouse: biWarehouseRouter,

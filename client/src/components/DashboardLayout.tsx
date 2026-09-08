@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target, AlertTriangle } from "lucide-react";
+import { Activity, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target, AlertTriangle, Gavel } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -69,6 +69,7 @@ const menuItems = [
   { icon: ClipboardCheck, label: "المهام والموافقات", path: "/tasks" },
   { icon: FileText, label: "الوثائق", path: "/documents" },
   { icon: ShieldCheck, label: "مركز الامتثال القانوني", path: "/compliance" },
+  { icon: Gavel, label: "حوكمة الامتثال والشؤون القانونية", path: "/compliance-governance" },
   { icon: ShieldCheck, label: "التدقيق والأمن", path: "/audit" },
   { icon: Settings2, label: "الإعدادات", path: "/settings" },
 ];
