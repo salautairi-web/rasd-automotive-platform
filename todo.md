@@ -1615,8 +1615,8 @@
 - [x] Add risks, incidents, investigations, cases, complaints, whistleblowing, legal matters, claims, disputes, settlements, and restricted access.
 - [x] Add conflicts of interest, related parties, gifts, hospitality, disclosures, insider/access restrictions, and approval history.
 - [x] Add board, committee, meeting, agenda, resolution, action, attendance, minutes, decision evidence, and disclosure metadata.
-- [ ] Add corporate records, shareholders, directors, officers, beneficial ownership, delegations, authorities, and entity governance.
-- [ ] Add regulatory submissions, correspondence, inspections, regulator requests, responses, deadlines, and evidence chains.
+- [x] Add corporate records, shareholders, directors, officers, beneficial ownership, delegations, authorities, and entity governance.
+- [x] Add regulatory submissions, correspondence, inspections, regulator requests, responses, deadlines, and evidence chains.
 - [x] Add legal holds, retention, privacy, privileged document classification, secure shares, and immutable audit evidence.
 - [x] Add protected compliance/legal procedures with entity isolation, role and matter scope, field masking, step-up, maker-checker, idempotency, and audit.
 - [x] Add Arabic RTL compliance and governance dashboard with obligations, licenses, risk heatmap, incidents, cases, controls, committees, actions, and deadlines.

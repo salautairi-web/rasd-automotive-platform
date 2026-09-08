@@ -11,7 +11,9 @@ import {
   complianceRequirements42,
   governanceConflicts42,
   governanceResolutions42,
+  governanceMembers42,
   regulatoryReports42,
+  regulatorySubmissions42,
 } from "../drizzle/schema";
 import { getDb } from "./db";
 import { assertEntityAccess } from "./entityAccess";
@@ -27,7 +29,7 @@ export const compliance42Router = router({
   overview: protectedProcedure.input(entityInput).query(async ({ ctx, input }) => {
     await assertEntityAccess(ctx.user.id, ctx.user.role, input.businessEntityId, "compliance.read");
     const db = await getDb();
-    if (!db) return { requirements: [], permits: [], contracts: [], obligations: [], controls: [], findings: [], remediation: [], conflicts: [], resolutions: [], reports: [], totals: { permits: 0, expiringPermits: 0, contracts: 0, renewingContracts: 0, openFindings: 0, overdueRemediation: 0, openConflicts: 0, pendingReports: 0 } };
+    if (!db) return { requirements: [], permits: [], contracts: [], obligations: [], controls: [], findings: [], remediation: [], conflicts: [], resolutions: [], members: [], reports: [], submissions: [], totals: { permits: 0, expiringPermits: 0, contracts: 0, renewingContracts: 0, openFindings: 0, overdueRemediation: 0, openConflicts: 0, pendingReports: 0, pendingSubmissions: 0 } };
     const [permits, contracts, obligations, controls, findings, remediation, conflicts, resolutions, reports] = await Promise.all([
       db.select().from(compliancePermits42).where(eq(compliancePermits42.businessEntityId, input.businessEntityId)).orderBy(desc(compliancePermits42.expiryDate)).limit(100),
       db.select().from(complianceContracts42).where(eq(complianceContracts42.businessEntityId, input.businessEntityId)).orderBy(desc(complianceContracts42.endDate)).limit(100),
@@ -40,8 +42,12 @@ export const compliance42Router = router({
       db.select().from(regulatoryReports42).where(eq(regulatoryReports42.businessEntityId, input.businessEntityId)).orderBy(desc(regulatoryReports42.createdAt)).limit(100),
     ]);
     const requirements = await db.select().from(complianceRequirements42).where(eq(complianceRequirements42.status, "active")).orderBy(desc(complianceRequirements42.updatedAt)).limit(100);
+    const [members, submissions] = await Promise.all([
+      db.select().from(governanceMembers42).where(eq(governanceMembers42.businessEntityId, input.businessEntityId)).orderBy(desc(governanceMembers42.createdAt)).limit(100),
+      db.select().from(regulatorySubmissions42).where(eq(regulatorySubmissions42.businessEntityId, input.businessEntityId)).orderBy(desc(regulatorySubmissions42.dueDate)).limit(100),
+    ]);
     return {
-      requirements, permits, contracts, obligations, controls, findings, remediation, conflicts, resolutions, reports,
+      requirements, permits, contracts, obligations, controls, findings, remediation, conflicts, resolutions, members, reports, submissions,
       totals: {
         permits: permits.length,
         expiringPermits: permits.filter((item) => ["expiring", "expired"].includes(item.status)).length,
@@ -51,6 +57,7 @@ export const compliance42Router = router({
         overdueRemediation: remediation.filter((item) => ["submitted", "in_progress"].includes(item.status) && item.dueDate < new Date()).length,
         openConflicts: conflicts.filter((item) => item.status !== "closed").length,
         pendingReports: reports.filter((item) => ["draft", "pending_approval"].includes(item.approvalStatus)).length,
+        pendingSubmissions: submissions.filter((item) => ["received", "in_progress"].includes(item.status)).length,
       },
     };
   }),

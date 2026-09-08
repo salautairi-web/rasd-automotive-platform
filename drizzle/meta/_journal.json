@@ -330,6 +330,13 @@
       "when": 1788833395286,
       "tag": "0046_smart_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1788833855097,
+      "tag": "0047_sticky_monster_badoon",
+      "breakpoints": true
     }
   ]
 }
