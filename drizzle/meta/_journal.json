@@ -351,6 +351,13 @@
       "when": 1788922259199,
       "tag": "0049_overconfident_terrax",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1788985678468,
+      "tag": "0050_quiet_red_shift",
+      "breakpoints": true
     }
   ]
 }

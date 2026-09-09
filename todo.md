@@ -1668,3 +1668,23 @@
 - [x] Add tests for API auth, entity scope, duplicate requests/events, retry/DLQ, webhook signatures, provider outage, schema compatibility, saga compensation, inter-entity approval, redaction, and reporting immutability.
 - [x] Document deferred provider-specific adapters, external credentials, distributed workers, full tracing backend, and production queue infrastructure.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 44 checkpoint.
+
+## Step 45 — BI, Data Warehouse, Executive Analytics & Management Cockpit 3.0
+
+- [x] Document BI source-of-truth boundaries, approved-data consumption, entity context, no operational mutation, and financial traceability.
+- [x] Add BI entities, sources, ingestion runs, raw/validated/conformed/curated/semantic/presentation zones, retention, status, and refresh metadata.
+- [x] Add warehouse dimensions for entity, branch, activity, customer, supplier, vehicle, product, employee, project, cost center, account, date, currency, and channel.
+- [x] Add governed facts for revenue, expenses, cash, AR/AP, sales, rental, workshop, parts, inventory, procurement, payroll, projects, assets, and maintenance.
+- [x] Add data marts, semantic metrics, KPI definitions and versions with formula, source, owner, period, target, threshold, scope, and effective date.
+- [x] Add dashboards, widgets, executive cockpit, entity cockpit, domain analytics, filters, drill-down permissions, and export controls.
+- [x] Add forecasts and scenarios for revenue, cash, demand, inventory, fleet cost, payroll, projects, with assumptions, versions, owners, approval, and comparisons.
+- [x] Add reconciliations between BI and Finance, Inventory, Payroll, Procurement/AP, Fleet, Workshop, and Projects.
+- [x] Add data quality scores and exceptions for completeness, accuracy, timeliness, consistency, duplicates, and reconciliation.
+- [x] Add lineage from dashboard to KPI, semantic metric, mart, warehouse fact, source system, and transaction with refresh status.
+- [x] Add KPI-to-alert and KPI-to-workflow metadata without fabricating metrics or automatically making sensitive decisions.
+- [x] Add controlled AI analytics metadata for metric-grounded explanations, confidence, limitations, and human review.
+- [x] Add protected BI procedures with row-level entity security, financial/salary/legal masking, export permission, refresh access, and audit.
+- [x] Add Arabic RTL executive BI dashboard for group/entity performance, finance, operations, risks, compliance, projects, HR, procurement, inventory, assets, and customer experience.
+- [x] Add tests for entity isolation, reconciliation, drill-down authorization, KPI versioning, explicit inter-entity elimination, source immutability, refresh failure, quality exceptions, scenarios, and AI traceability.
+- [x] Document deferred warehouse-scale infrastructure, external BI exporters, advanced forecasting models, AI provider connectors, and distributed ingestion workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 45 checkpoint.
