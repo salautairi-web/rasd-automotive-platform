@@ -337,6 +337,13 @@
       "when": 1788833855097,
       "tag": "0047_sticky_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "5",
+      "when": 1788836845978,
+      "tag": "0048_silent_patch",
+      "breakpoints": true
     }
   ]
 }

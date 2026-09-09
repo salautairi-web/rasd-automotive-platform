@@ -1633,3 +1633,19 @@
 - [x] Add responsive timeline/calendar-style visualization and accessible loading, empty, and error states.
 - [x] Add tests for date bands, overdue renewals, entity isolation, filtering, and deterministic summaries.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, and save the dashboard checkpoint.
+
+## Step 43 — Enterprise Security, IAM, RBAC, ABAC & Zero Trust 2.0
+
+- [x] Document security source-of-truth boundaries, default-deny policy, entity isolation, and separation between authentication, authorization, and business ownership.
+- [x] Add role and permission governance with least privilege, separation of duties, privileged access, temporary elevation, approval, and periodic review metadata.
+- [x] Add ABAC policy model for user, device, entity, resource, action, location, network, risk, time, and transaction attributes with explainable decisions.
+- [x] Add zero-trust context and continuous verification for sessions, devices, MFA freshness, risk, network, and sensitive actions.
+- [x] Add session, device, token, trusted-device, revocation, concurrent-session, and step-up policy controls with audit evidence.
+- [x] Add conditional access policies for geography, IP/network, device posture, time windows, risk score, application, and transaction sensitivity.
+- [x] Add access-request and privileged-access workflows with maker-checker, expiry, reason, evidence, and automatic revocation.
+- [x] Add security events, detections, incidents, response actions, containment, recovery, evidence, and notification handoff.
+- [x] Add protected IAM/security procedures with entity and resource scope, field masking, idempotency, replay protection, and audit.
+- [x] Add Arabic RTL security workspace for access decisions, policies, sessions, devices, privileged requests, risk, events, and incidents.
+- [x] Add tests for default deny, RBAC/ABAC decisions, entity isolation, step-up freshness, device trust, conditional access, privilege expiry, revocation, and incident response.
+- [x] Document deferred IdP/SCIM/SAML/OIDC provider adapters, EDR/MDM integrations, SIEM/SOAR connectors, biometric/WebAuthn delivery, and distributed policy workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 43 checkpoint.

@@ -40,6 +40,7 @@ import { alertsRouter } from "./alerts";
 import { enterpriseExtensionsRouter } from "./enterpriseExtensions";
 import { integrationsRouter } from "./integrations";
 import { iamRouter } from "./iam";
+import { security43Router } from "./security43";
 import { mobileRouter } from "./mobile";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
@@ -82,6 +83,7 @@ export const appRouter = router({
   enterpriseExtensions: enterpriseExtensionsRouter,
   integrations: integrationsRouter,
   iam: iamRouter,
+  security43: security43Router,
   mobile: mobileRouter,
   system: systemRouter,
   auth: router({
