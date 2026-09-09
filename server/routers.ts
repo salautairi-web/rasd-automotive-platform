@@ -39,6 +39,7 @@ import { automationRouter } from "./automation";
 import { alertsRouter } from "./alerts";
 import { enterpriseExtensionsRouter } from "./enterpriseExtensions";
 import { integrationsRouter } from "./integrations";
+import { integration44Router } from "./integration44";
 import { iamRouter } from "./iam";
 import { security43Router } from "./security43";
 import { mobileRouter } from "./mobile";
@@ -82,6 +83,7 @@ export const appRouter = router({
   alerts: alertsRouter,
   enterpriseExtensions: enterpriseExtensionsRouter,
   integrations: integrationsRouter,
+  integration44: integration44Router,
   iam: iamRouter,
   security43: security43Router,
   mobile: mobileRouter,

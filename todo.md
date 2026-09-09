@@ -1649,3 +1649,22 @@
 - [x] Add tests for default deny, RBAC/ABAC decisions, entity isolation, step-up freshness, device trust, conditional access, privilege expiry, revocation, and incident response.
 - [x] Document deferred IdP/SCIM/SAML/OIDC provider adapters, EDR/MDM integrations, SIEM/SOAR connectors, biometric/WebAuthn delivery, and distributed policy workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 43 checkpoint.
+
+## Step 44 — Integration Hub, API Gateway, Event Bus & Enterprise Integration 2.0
+
+- [x] Document integration source-of-truth boundaries, domain-service ownership, immutable entity context, and no direct database bypass.
+- [x] Add integration systems, APIs, versioned contracts, clients, owners, purposes, dependencies, SLA, lifecycle, and entity scope.
+- [x] Add API Gateway policies for authentication, authorization, rate limits, quotas, validation, versioning, correlation IDs, pagination, idempotency, concurrency, and redacted audit.
+- [x] Add event schemas and lifecycle with producer, consumer, version compatibility, ordering, retention, replay, subscriptions, and entity context.
+- [x] Add queues, messages, delivery attempts, retry/backoff, poison-message handling, dead letters, lag, and delivery status.
+- [x] Add webhook endpoints with signature secrets, timestamp/replay protection, enable/disable state, event filters, retries, and delivery logs.
+- [x] Add connector and adapter catalog with provider configuration, credential references, version, health, failover, and provider-specific mappings.
+- [x] Add transformation and schema mapping metadata for validation, normalization, enrichment, unit/currency conversion, errors, and lineage.
+- [x] Add saga/process-manager state with steps, timeouts, compensation, retry, manual intervention, and inter-entity approval/settlement metadata.
+- [x] Add integration idempotency, request fingerprints, optimistic concurrency, conflict detection, and stored outcome metadata.
+- [x] Add integration health and observability metrics for latency, throughput, errors, retries, dead letters, queue depth, lag, availability, and provider status.
+- [x] Add protected Integration Hub procedures with entity authorization, webhook verification, sensitive payload redaction, audit, and no source-system mutation bypass.
+- [x] Add Arabic RTL Integration Hub dashboard for API health, event bus, queues, DLQ, webhooks, connectors, mappings, sagas, and entity health.
+- [x] Add tests for API auth, entity scope, duplicate requests/events, retry/DLQ, webhook signatures, provider outage, schema compatibility, saga compensation, inter-entity approval, redaction, and reporting immutability.
+- [x] Document deferred provider-specific adapters, external credentials, distributed workers, full tracing backend, and production queue infrastructure.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 44 checkpoint.
