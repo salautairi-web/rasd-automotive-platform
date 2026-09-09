@@ -43,3 +43,10 @@ export async function assertEntityMembership(userId: number, _userRole: string, 
   if (rows[0]) return true;
   throw new TRPCError({ code: "FORBIDDEN", message: "الحساب غير مرتبط بالكيان المحدد" });
 }
+
+export function assertSameEntity(leftEntityId: number | null | undefined, rightEntityId: number | null | undefined) {
+  if (leftEntityId == null || rightEntityId == null || leftEntityId !== rightEntityId) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "السجلات المرتبطة يجب أن تنتمي إلى نفس الكيان" });
+  }
+  return true;
+}
