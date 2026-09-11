@@ -1837,3 +1837,18 @@
 - [x] Add Vitest tests for transition validity, version isolation, entity scope, maker-checker, quorum, SoD, idempotency, retries, escalation, and immutable execution history.
 - [x] Document deferred BPMN designer, external workflow engine, messaging connectors, calendar providers, RPA workers, and distributed execution.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 52 checkpoint.
+
+## Workflow 52 — BPMN Designer, SLA Integrations & Simulation
+
+- [x] Add visual BPMN canvas with palette for start/end/task/approval/condition/parallel/timer/event/integration/human-review nodes.
+- [x] Add node linking, selection, editing, deletion, validation, zoom, pan, readable Arabic labels, and save-as-version without JSON authoring.
+- [x] Add workflow notifications with in-app and email channels, templates, language, priority, consent/policy state, and delivery status.
+- [x] Add entity and branch business calendars with working days, holidays, timezone, pause rules, and SLA due-time calculation.
+- [x] Add SLA views for warning, breach, escalation, reminders, and performance by entity and branch.
+- [x] Add Dry Run simulation with test context, rule evaluation, approval path preview, expected outcome, validation errors, and no side effects.
+- [x] Add process analytics for cycle time, bottlenecks, approval time, rework, exception rate, throughput, SLA breaches, and automation rate.
+- [x] Add protected procedures for designer versioning, simulation isolation, notification consent, calendar scope, and analytics entity isolation.
+- [x] Add Arabic RTL BPMN designer, SLA/integration status, simulation results, and bottleneck analytics dashboard.
+- [x] Add Vitest tests for node validation, edge integrity, version save, business-day SLA, branch calendar, notification policy, dry-run no-side-effects, bottleneck metrics, and entity isolation.
+- [x] Document deferred BPMN import/export, external email/calendar providers, real-time delivery workers, and distributed analytics pipelines.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the enhancement checkpoint.
