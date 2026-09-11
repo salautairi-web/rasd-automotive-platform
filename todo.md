@@ -1764,3 +1764,21 @@
 - [x] Add Vitest tests for scoring determinism, appetite breach, control evidence, entity isolation, approval separation, RTO/RPO validation, exercise lifecycle, and audit immutability.
 - [x] Document deferred GRC integrations, SIEM/SOC connectors, external notification channels, cloud failover orchestration, backup verification, and live DR automation.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 49 checkpoint.
+
+## Step 50 — Audit, Internal Audit, Financial Controls & Continuous Assurance
+
+- [x] Document audit independence, three-lines roles, scope boundaries, evidence custody, reviewer separation, and source-of-truth responsibilities.
+- [x] Add entity-scoped audit universe, annual and rolling audit plans, risk-based prioritization, plan approval, and change history.
+- [x] Add audit engagements, objectives, scope, criteria, assigned team, milestones, status, fieldwork, review, and closure lifecycle.
+- [x] Add audit procedures, tests, samples, workpapers, evidence references, reviewer sign-off, and immutable audit trail.
+- [x] Add observations, findings, severity, root cause, management response, corrective action, due date, validation, and escalation.
+- [x] Add financial control catalog for journal, period close, payments, treasury, procurement, revenue, payroll, inventory, assets, and segregation of duties.
+- [x] Add control attestations, control tests, exceptions, remediation, retest, and residual assurance rating.
+- [x] Add continuous assurance rules with data source, query definition, frequency, threshold, sampling, alert state, and lineage.
+- [x] Add anomaly and duplicate detection for financial transactions without replacing local accounting or creating duplicate postings.
+- [x] Add issue and recommendation tracking across risk, compliance, security, treasury, projects, and internal audit with ownership and aging.
+- [x] Add protected procedures for audit scope isolation, reviewer independence, approval separation, evidence masking, sign-off, and closure.
+- [x] Add Arabic RTL dashboard for audit plan, engagements, open findings, control health, continuous assurance alerts, aging, and executive reporting.
+- [x] Add Vitest tests for entity isolation, independence, score determinism, evidence lineage, finding lifecycle, control failure escalation, duplicate detection, and immutable sign-off.
+- [x] Document deferred external audit suites, SIEM/data connectors, bank and ERP continuous feeds, notification channels, and AI-assisted analytics boundaries.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 50 checkpoint.

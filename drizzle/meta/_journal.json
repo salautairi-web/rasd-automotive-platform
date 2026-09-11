@@ -393,6 +393,13 @@
       "when": 1789101915482,
       "tag": "0055_tough_morlun",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "5",
+      "when": 1789102290902,
+      "tag": "0056_goofy_overlord",
+      "breakpoints": true
     }
   ]
 }
