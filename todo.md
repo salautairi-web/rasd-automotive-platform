@@ -1730,3 +1730,20 @@
 - [x] Add tests for invoice/payment scope, gateway replay, amount integrity, refund limits, settlement matching, entity isolation, masked data, and audit.
 - [x] Document deferred provider-specific gateway adapters, PCI scope, token vault, bank settlement connectors, fraud providers, and distributed webhook workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 47 checkpoint.
+
+## Step 48 — Treasury, Cash, Banks & Liquidity 2.0
+
+- [x] Document treasury source-of-truth boundaries between cash, banks, payments, accounting, budgets, and external bank feeds.
+- [x] Add entity-scoped bank accounts, cash accounts, signatories, mandates, limits, currencies, branches, owners, and lifecycle controls.
+- [x] Add cash receipts, disbursements, transfers, deposits, withdrawals, payment batches, approvals, and execution status.
+- [x] Add bank transaction imports, statement lines, value dates, references, counterparty metadata, and duplicate detection.
+- [x] Add bank and cash reconciliation with matching rules, manual matches, exceptions, approvals, evidence, and immutable history.
+- [x] Add liquidity forecasts with horizons, scenarios, inflows, outflows, commitments, debt, minimum cash, assumptions, versions, and review status.
+- [x] Add cash positioning, available balance, restricted cash, expected settlements, aging, concentration, and entity rollups without bypassing local ledgers.
+- [x] Add treasury risks for liquidity, concentration, currency, counterparty, fraud, payment failure, and limit breach with escalation metadata.
+- [x] Add maker-checker, dual authorization, step-up/MFA, segregation of duties, limits, approval matrices, and idempotent treasury actions.
+- [x] Add protected treasury procedures with entity isolation, financial masking, audit, reconciliation lineage, and no duplicate accounting posting.
+- [x] Add Arabic RTL treasury and liquidity dashboard for cash position, banks, forecasts, reconciliations, risks, transfers, and exceptions.
+- [x] Add tests for account scope, balance conservation, transfer lifecycle, reconciliation matching, duplicate imports, forecast determinism, limits, approval separation, and entity isolation.
+- [x] Document deferred bank-feed adapters, open-banking connectors, payment rails, cash-management providers, FX/risk engines, and distributed reconciliation workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 48 checkpoint.

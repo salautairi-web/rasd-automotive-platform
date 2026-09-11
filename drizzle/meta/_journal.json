@@ -372,6 +372,13 @@
       "when": 1789099907833,
       "tag": "0052_wet_tyrannus",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "5",
+      "when": 1789100777281,
+      "tag": "0053_giant_richard_fisk",
+      "breakpoints": true
     }
   ]
 }
