@@ -1688,3 +1688,14 @@
 - [x] Add tests for entity isolation, reconciliation, drill-down authorization, KPI versioning, explicit inter-entity elimination, source immutability, refresh failure, quality exceptions, scenarios, and AI traceability.
 - [x] Document deferred warehouse-scale infrastructure, external BI exporters, advanced forecasting models, AI provider connectors, and distributed ingestion workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 45 checkpoint.
+
+## BI Domain Analytics Dashboards Extension
+
+- [x] Define governed domain dashboard contracts for finance, rental/fleet, workshop, auto sales, parts/inventory, procurement, projects, HR, assets, compliance, and customer experience.
+- [x] Add domain KPI API contracts with entity scope, date range, source metric, freshness, lineage, and authorized drill-down metadata.
+- [x] Build Arabic RTL domain analytics workspace with domain navigation, entity/date filters, KPI cards, trend/segmentation views, and empty/loading/error states.
+- [x] Add finance, fleet/rental, workshop, sales, parts/inventory, procurement, projects, HR, assets, compliance, and CRM analytics panels without fabricated values.
+- [x] Add protected drill-down and export audit behavior with no cross-entity leakage or operational mutation.
+- [x] Add tests for domain scope, KPI source traceability, filter determinism, drill-down authorization, missing-data states, and dashboard routing.
+- [x] Document domain dashboard contracts and deferred warehouse-scale visualizations or provider-specific analytics.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the extension checkpoint.

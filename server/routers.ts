@@ -22,6 +22,7 @@ import { centralOperationsRouter } from "./centralOperations";
 import { biRouter } from "./bi";
 import { biWarehouseRouter } from "./biWarehouse";
 import { bi45Router } from "./bi45";
+import { biDomainsRouter } from "./biDomains";
 import { centralFinanceRouter } from "./centralFinance";
 import { treasuryRouter } from "./treasury";
 import { planningRouter } from "./planning";
@@ -67,6 +68,7 @@ export const appRouter = router({
   bi: biRouter,
   biWarehouse: biWarehouseRouter,
   bi45: bi45Router,
+  biDomains: biDomainsRouter,
   centralFinance: centralFinanceRouter,
   treasury: treasuryRouter,
   planning: planningRouter,

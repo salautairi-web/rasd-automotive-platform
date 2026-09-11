@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target, AlertTriangle, Gavel, BellRing, LockKeyhole } from "lucide-react";
+import { Activity, BarChart3, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelLeft, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, Target, AlertTriangle, Gavel, BellRing, LockKeyhole } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -48,6 +48,7 @@ const menuItems = [
   { icon: ShieldCheck, label: "الهوية والأمن", path: "/security" },
   { icon: Smartphone, label: "تجربة الجوال", path: "/mobile-experience" },
   { icon: ChartNoAxesCombined, label: "الذكاء التحليلي", path: "/bi" },
+  { icon: BarChart3, label: "لوحات المجالات", path: "/bi/domains" },
   { icon: Landmark, label: "المالية والخزينة", path: "/finance" },
   { icon: WalletCards, label: "الخزينة والمدفوعات", path: "/treasury" },
   { icon: Target, label: "التخطيط والميزانيات", path: "/planning" },
