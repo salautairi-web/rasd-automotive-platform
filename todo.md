@@ -1793,3 +1793,15 @@
 - [x] Add tests for read-only enforcement, entity isolation, engagement scoping, workspace expiry, evidence request lifecycle, export approval separation, and immutable audit records.
 - [x] Document deferred secure data-room providers, external identity federation, watermarking, DLP scanning, and outbound notification connectors.
 - [x] Run TypeScript, full Vitest suite, production build, visual QA, review todo.md, and save the external auditor workspace checkpoint.
+
+## External Auditor Workspace — Watermark, Tracking & Comments
+
+- [x] Add automatic watermark policy and rendered watermark metadata for every exportable evidence/document.
+- [x] Block export approval until watermark processing is completed and integrity metadata is recorded.
+- [x] Add visible auditor request-tracking view with lifecycle stages, progress, aging, due dates, priority, and rejection feedback.
+- [x] Add evidence comments with author type, thread/reply linkage, mentions, visibility, resolution state, and immutable audit events.
+- [x] Add protected procedures for watermark processing, comment creation, comment resolution, and evidence/workspace scope isolation.
+- [x] Add Arabic RTL auditor dashboard interactions for requests, evidence comments, watermark state, and export readiness.
+- [x] Add tests for watermark-required approval, integrity metadata, progress derivation, comment visibility, entity isolation, read-only boundaries, and audit immutability.
+- [x] Document deferred PDF/Office rendering workers, external notifications, real-time transport, and DLP integration.
+- [x] Run TypeScript, full Vitest suite, production build, visual QA, review todo.md, and save the enhancement checkpoint.
