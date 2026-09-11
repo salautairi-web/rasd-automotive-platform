@@ -1699,3 +1699,18 @@
 - [x] Add tests for domain scope, KPI source traceability, filter determinism, drill-down authorization, missing-data states, and dashboard routing.
 - [x] Document domain dashboard contracts and deferred warehouse-scale visualizations or provider-specific analytics.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the extension checkpoint.
+
+## Step 46 — Mobile Workforce, Field Operations & Offline Execution 2.0
+
+- [x] Document mobile source-of-truth boundaries, device security, entity scope, offline limitations, and server authority.
+- [x] Add mobile roles, profiles, device registrations, app versions, capabilities, assignments, and field workforce availability.
+- [x] Add field work orders, routes, visits, checklists, forms, inspections, signatures, evidence, location metadata, and status transitions.
+- [x] Add offline cache metadata, sync cursors, operation queue, payload fingerprints, retry state, conflict records, and resolution decisions.
+- [x] Add low-connectivity behavior with local validation, idempotent replay, resumable uploads, attachment metadata, and safe failure states.
+- [x] Add GPS/location consent, accuracy, timestamp, geofence metadata, route events, and privacy controls without continuous tracking by default.
+- [x] Add push/in-app task notifications, assignment changes, escalations, and acknowledgement metadata.
+- [x] Add protected mobile and field procedures with MFA/device trust, entity isolation, resource authorization, audit, and replay protection.
+- [x] Add Arabic RTL mobile-first workspace for assigned work, offline status, sync queue, conflicts, evidence, route, and completion.
+- [x] Add tests for offline replay, sync cursors, conflict resolution, entity isolation, device authorization, location consent, attachment integrity, and field lifecycle.
+- [x] Document deferred native mobile packaging, background location, MDM/biometric adapters, map providers, distributed sync workers, and push delivery providers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 46 checkpoint.
