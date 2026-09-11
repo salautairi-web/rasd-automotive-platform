@@ -1747,3 +1747,20 @@
 - [x] Add tests for account scope, balance conservation, transfer lifecycle, reconciliation matching, duplicate imports, forecast determinism, limits, approval separation, and entity isolation.
 - [x] Document deferred bank-feed adapters, open-banking connectors, payment rails, cash-management providers, FX/risk engines, and distributed reconciliation workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 48 checkpoint.
+
+## Step 49 — Risk Management, Internal Controls, BCP & DR
+
+- [x] Document the three-lines governance model, risk appetite, control ownership, evidence boundaries, and source-of-truth responsibilities.
+- [x] Add entity-scoped risk register with categories, inherent/residual scoring, likelihood, impact, velocity, appetite, owners, status, and escalation.
+- [x] Add control library with preventive/detective/corrective controls, frequency, owners, evidence requirements, design/effectiveness status, and testing history.
+- [x] Add risk assessments, treatment plans, issues, actions, due dates, residual-risk acceptance, and exception approvals with maker-checker.
+- [x] Add key risk and control indicators with thresholds, trend, data lineage, alert severity, and review status.
+- [x] Add business impact analysis with critical processes, dependencies, RTO, RPO, maximum tolerable downtime, recovery tiers, and entity scope.
+- [x] Add BCP plans, DR runbooks, recovery strategies, roles, communication trees, alternate sites, and dependency inventories.
+- [x] Add continuity and disaster-recovery exercises with scenario, schedule, participants, evidence, observations, corrective actions, and approval.
+- [x] Add incident/crisis records with activation state, decisions, timeline, communications, post-incident review, and immutable audit trail.
+- [x] Add protected procedures for entity isolation, risk scoring, control testing, action closure, plan approval, exercise recording, and incident activation.
+- [x] Add Arabic RTL dashboard for risk heatmap, open issues, control health, KRI alerts, BIA priorities, BCP/DR readiness, and overdue actions.
+- [x] Add Vitest tests for scoring determinism, appetite breach, control evidence, entity isolation, approval separation, RTO/RPO validation, exercise lifecycle, and audit immutability.
+- [x] Document deferred GRC integrations, SIEM/SOC connectors, external notification channels, cloud failover orchestration, backup verification, and live DR automation.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 49 checkpoint.

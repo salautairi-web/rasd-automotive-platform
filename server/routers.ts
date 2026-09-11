@@ -26,6 +26,7 @@ import { biDomainsRouter } from "./biDomains";
 import { centralFinanceRouter } from "./centralFinance";
 import { treasuryRouter } from "./treasury";
 import { treasury48Router } from "./treasury48";
+import { risk49Router } from "./risk49";
 import { planningRouter } from "./planning";
 import { costAccountingRouter } from "./costAccounting";
 import { governanceRouter } from "./governance";
@@ -74,6 +75,7 @@ export const appRouter = router({
   centralFinance: centralFinanceRouter,
   treasury: treasuryRouter,
   treasury48: treasury48Router,
+  risk49: risk49Router,
   planning: planningRouter,
   costAccounting: costAccountingRouter,
   governance: governanceRouter,
