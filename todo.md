@@ -1805,3 +1805,19 @@
 - [x] Add tests for watermark-required approval, integrity metadata, progress derivation, comment visibility, entity isolation, read-only boundaries, and audit immutability.
 - [x] Document deferred PDF/Office rendering workers, external notifications, real-time transport, and DLP integration.
 - [x] Run TypeScript, full Vitest suite, production build, visual QA, review todo.md, and save the enhancement checkpoint.
+
+## Step 51 — Customer Experience, Omnichannel CRM & Customer 360
+
+- [x] Document customer identity source of truth, entity ownership, consent boundaries, retention, and channel responsibilities.
+- [x] Add entity-scoped customer 360 profile with individual/business identity, contacts, vehicles, contracts, invoices, payments, service history, cases, interactions, preferences, and consent status.
+- [x] Add identity resolution and duplicate prevention with confidence, merge proposal, approval, survivorship, and immutable history.
+- [x] Add omnichannel interaction timeline for portal, phone, email, WhatsApp/SMS, social, branch, sales, rental, workshop, and service channels.
+- [x] Add customer journeys, segments, lifecycle stages, tasks, campaigns, service-level targets, and next-best-action suggestions with human approval.
+- [x] Add case and complaint management with priority, SLA, assignment, escalation, status, resolution, root cause, and satisfaction follow-up.
+- [x] Add customer consent, communication preferences, opt-out, privacy requests, data access/export, and deletion/retention controls.
+- [x] Add customer feedback and experience metrics without fabricating reviews, ratings, or testimonials.
+- [x] Add protected procedures for entity isolation, consent enforcement, PII masking, identity merge approval, case access, and audit logging.
+- [x] Add Arabic RTL dashboard for Customer 360, omnichannel timeline, open cases, SLA aging, journey progress, consent, and experience signals.
+- [x] Add Vitest tests for identity isolation, duplicate prevention, consent enforcement, PII masking, case lifecycle, SLA escalation, channel deduplication, and merge approvals.
+- [x] Document deferred telephony/WhatsApp/social connectors, external CDP, messaging providers, sentiment models, and real-time event workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 51 checkpoint.
