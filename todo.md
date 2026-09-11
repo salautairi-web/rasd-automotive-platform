@@ -1714,3 +1714,19 @@
 - [x] Add tests for offline replay, sync cursors, conflict resolution, entity isolation, device authorization, location consent, attachment integrity, and field lifecycle.
 - [x] Document deferred native mobile packaging, background location, MDM/biometric adapters, map providers, distributed sync workers, and push delivery providers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 46 checkpoint.
+
+## Step 47 — Payments, Billing, Collections & Digital Gateway 2.0
+
+- [x] Document payment source-of-truth boundaries between invoices, Treasury, accounting, portals, and external gateways.
+- [x] Add payment requests, invoice schedules, installments, due dates, collection stages, dunning, promises to pay, and entity scope.
+- [x] Add payment methods, token references, gateways, merchant accounts, fees, currencies, settlement accounts, and provider configuration metadata without storing card data.
+- [x] Add payment intents, authorization, capture, failure, cancellation, expiry, refund, partial refund, chargeback, and dispute lifecycle.
+- [x] Add gateway webhooks with signature verification, replay protection, idempotency, event correlation, and raw payload redaction.
+- [x] Add reconciliation between gateway settlements, Treasury transactions, invoices, refunds, fees, and accounting handoff.
+- [x] Add collection activities, reminders, communication handoff, aging, promises, escalation, and restricted customer/financial views.
+- [x] Add fraud and risk metadata for velocity, mismatch, anomaly, manual review, step-up, and decision evidence without automatic irreversible decisions.
+- [x] Add protected payment procedures with entity isolation, amount/currency validation, maker-checker, MFA/step-up, idempotency, audit, and no duplicate accounting posting.
+- [x] Add Arabic RTL payment and collections dashboard for invoices, pending intents, success/failure, settlements, refunds, disputes, aging, and exceptions.
+- [x] Add tests for invoice/payment scope, gateway replay, amount integrity, refund limits, settlement matching, entity isolation, masked data, and audit.
+- [x] Document deferred provider-specific gateway adapters, PCI scope, token vault, bank settlement connectors, fraud providers, and distributed webhook workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 47 checkpoint.
