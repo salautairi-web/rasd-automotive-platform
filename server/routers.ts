@@ -31,6 +31,7 @@ import { audit50Router } from "./audit50";
 import { externalAuditor50Router } from "./externalAuditor50";
 import { externalAuditorCollab50Router } from "./externalAuditorCollab50";
 import { crm51Router } from "./crm51";
+import { workflow52Router } from "./workflow52";
 import { planningRouter } from "./planning";
 import { costAccountingRouter } from "./costAccounting";
 import { governanceRouter } from "./governance";
@@ -84,6 +85,7 @@ export const appRouter = router({
   externalAuditor50: externalAuditor50Router,
   externalAuditorCollab50: externalAuditorCollab50Router,
   crm51: crm51Router,
+  workflow52: workflow52Router,
   planning: planningRouter,
   costAccounting: costAccountingRouter,
   governance: governanceRouter,

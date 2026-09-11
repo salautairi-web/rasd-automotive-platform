@@ -421,6 +421,13 @@
       "when": 1789104116498,
       "tag": "0059_exotic_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "5",
+      "when": 1789105509883,
+      "tag": "0060_rainy_cannonball",
+      "breakpoints": true
     }
   ]
 }

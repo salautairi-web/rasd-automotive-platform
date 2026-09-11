@@ -1821,3 +1821,19 @@
 - [x] Add Vitest tests for identity isolation, duplicate prevention, consent enforcement, PII masking, case lifecycle, SLA escalation, channel deduplication, and merge approvals.
 - [x] Document deferred telephony/WhatsApp/social connectors, external CDP, messaging providers, sentiment models, and real-time event workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 51 checkpoint.
+
+## Step 52 — Workflow, BPM, Approvals & Process Automation
+
+- [x] Document workflow source of truth, entity ownership, versioning, execution boundaries, and audit responsibilities.
+- [x] Add entity-scoped workflow definitions with version, lifecycle, trigger, conditions, stages, transitions, SLA, and effective dates.
+- [x] Add workflow nodes for approval, task, notification, integration, timer, condition, parallel, and human review with configuration validation.
+- [x] Add workflow instances with correlation, entity context, business record, state, current node, idempotency, retry, and execution history.
+- [x] Add approval policies with maker-checker, delegation, quorum, threshold, step-up MFA, segregation of duties, and rejection reasons.
+- [x] Add task inbox with assignment, claiming, due dates, escalation, reassignment, comments, evidence, and completion outcomes.
+- [x] Add secure process automation with allowlisted actions, idempotent execution, retry/backoff, compensation, dead-letter state, and operator review.
+- [x] Add SLA timers, escalation rules, reminders, overdue monitoring, and business-calendar awareness.
+- [x] Add protected procedures for entity isolation, version activation, task ownership, approval separation, MFA step-up, and audit logging.
+- [x] Add Arabic RTL BPM dashboard for active workflows, pending approvals, task inbox, SLA risk, escalations, automation health, and execution history.
+- [x] Add Vitest tests for transition validity, version isolation, entity scope, maker-checker, quorum, SoD, idempotency, retries, escalation, and immutable execution history.
+- [x] Document deferred BPMN designer, external workflow engine, messaging connectors, calendar providers, RPA workers, and distributed execution.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 52 checkpoint.
