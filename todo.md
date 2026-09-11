@@ -1852,3 +1852,20 @@
 - [x] Add Vitest tests for node validation, edge integrity, version save, business-day SLA, branch calendar, notification policy, dry-run no-side-effects, bottleneck metrics, and entity isolation.
 - [x] Document deferred BPMN import/export, external email/calendar providers, real-time delivery workers, and distributed analytics pipelines.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the enhancement checkpoint.
+
+## Step 53 — Documents, ECM, Records, E-Signature & Lifecycle
+
+- [x] Document document-management source of truth, storage boundaries, metadata ownership, entity scope, retention, and audit responsibilities.
+- [x] Add entity-scoped document library with folders, document types, metadata, classification, tags, sensitivity, owner, business links, and access policy.
+- [x] Add immutable document versions with checksum, size, MIME type, author, change reason, preview state, and version comparison.
+- [x] Add full-text/search metadata, saved searches, filters, related-record links, and controlled sharing without bypassing authorization.
+- [x] Add records-management features with record declaration, retention schedule, legal hold, disposition review, destruction approval, and certificate history.
+- [x] Add document lifecycle states including draft, review, approved, effective, superseded, archived, held, and disposed.
+- [x] Add electronic-signature envelopes with signers, order, authentication mode, consent, timestamps, signature events, evidence, expiry, decline, and completion.
+- [x] Add signature and approval workflows with maker-checker, role/entity scope, delegation, reminder, expiry, and immutable audit trail.
+- [x] Add document evidence requests and external-auditor sharing integration with watermark/export controls and read-only boundaries.
+- [x] Add protected procedures for upload metadata, versioning, access masking, retention holds, disposition, signature decisions, and export approvals.
+- [x] Add Arabic RTL dashboard for document portfolio, pending reviews, signatures, retention risks, legal holds, expiring records, and audit evidence.
+- [x] Add Vitest tests for entity isolation, version immutability, checksum integrity, retention/hold precedence, disposition approval, signer separation, signature expiry, and export controls.
+- [x] Document deferred OCR/full-text workers, external storage providers, e-signature providers, DLP/classification, and legal jurisdiction adapters.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 53 checkpoint.
