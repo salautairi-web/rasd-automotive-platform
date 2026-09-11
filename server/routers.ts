@@ -28,6 +28,7 @@ import { treasuryRouter } from "./treasury";
 import { treasury48Router } from "./treasury48";
 import { risk49Router } from "./risk49";
 import { audit50Router } from "./audit50";
+import { externalAuditor50Router } from "./externalAuditor50";
 import { planningRouter } from "./planning";
 import { costAccountingRouter } from "./costAccounting";
 import { governanceRouter } from "./governance";
@@ -78,6 +79,7 @@ export const appRouter = router({
   treasury48: treasury48Router,
   risk49: risk49Router,
   audit50: audit50Router,
+  externalAuditor50: externalAuditor50Router,
   planning: planningRouter,
   costAccounting: costAccountingRouter,
   governance: governanceRouter,

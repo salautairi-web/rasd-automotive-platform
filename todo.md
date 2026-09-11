@@ -1782,3 +1782,14 @@
 - [x] Add Vitest tests for entity isolation, independence, score determinism, evidence lineage, finding lifecycle, control failure escalation, duplicate detection, and immutable sign-off.
 - [x] Document deferred external audit suites, SIEM/data connectors, bank and ERP continuous feeds, notification channels, and AI-assisted analytics boundaries.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 50 checkpoint.
+
+## External Auditor Workspace Extension
+
+- [x] Add scoped external auditor workspaces with read-only role, entity scope, engagement scope, expiry, revocation, and export policy.
+- [x] Add evidence request lifecycle with request details, priority, due date, requester, owner, response evidence, review, approval, rejection, and immutable history.
+- [x] Add export approval workflow requiring scope validation, reviewer separation, expiry, reason, redaction state, download count, and audit trail.
+- [x] Add protected procedures that prevent external auditors from mutating operational, audit, evidence, or financial records.
+- [x] Add Arabic RTL external auditor workspace dashboard for active workspaces, evidence requests, pending approvals, approved exports, and access events.
+- [x] Add tests for read-only enforcement, entity isolation, engagement scoping, workspace expiry, evidence request lifecycle, export approval separation, and immutable audit records.
+- [x] Document deferred secure data-room providers, external identity federation, watermarking, DLP scanning, and outbound notification connectors.
+- [x] Run TypeScript, full Vitest suite, production build, visual QA, review todo.md, and save the external auditor workspace checkpoint.
