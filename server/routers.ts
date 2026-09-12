@@ -44,6 +44,7 @@ import { hrRouter } from "./hr";
 import { hr41Router } from "./hr41";
 import { assetsRouter } from "./assets";
 import { inventoryRouter } from "./inventory";
+import { inventory56Router } from "./inventory56";
 import { crmRouter } from "./crm";
 import { documentManagementRouter } from "./documents";
 import { documents53Router } from "./documents53";
@@ -101,6 +102,7 @@ export const appRouter = router({
   hr41: hr41Router,
   assets: assetsRouter,
   inventory: inventoryRouter,
+  inventory56: inventory56Router,
   crm: crmRouter,
   documentManagement: documentManagementRouter,
   documents53: documents53Router,

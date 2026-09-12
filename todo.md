@@ -1904,3 +1904,21 @@
 - [x] Add Vitest tests for supplier isolation, duplicate prevention, qualification expiry, budget checks, bid confidentiality, SoD, PO versioning, partial receipt, three-way matching, tolerances, and no duplicate posting.
 - [x] Document deferred supplier portals, e-procurement networks, tax/e-invoice connectors, bank verification, sanctions providers, OCR, and distributed matching workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 55 checkpoint.
+
+## Step 56 — Inventory, Warehousing & Multi-Warehouse Stock Control
+
+- [x] Document inventory source of truth, item ownership, warehouse/entity scope, costing responsibility, and accounting posting boundaries.
+- [x] Add entity-scoped item master with SKU, units of measure, categories, variants, barcodes, dimensions, reorder rules, serial/lot policy, and status.
+- [x] Add multi-warehouse and bin/location structure with branches, zones, putaway rules, picking rules, quarantine, and restricted locations.
+- [x] Add stock balances by entity, warehouse, location, item, lot, serial, status, ownership, available, reserved, damaged, and in-transit quantities.
+- [x] Add inbound receiving, inspection, putaway, outbound picking, packing, dispatch, returns, quarantine, and evidence lifecycle.
+- [x] Add transfers between warehouses and entities with requests, approvals, shipping, receipt, variance, and idempotency controls.
+- [x] Add reservations, allocations, safety stock, reorder points, replenishment suggestions, backorders, and commitments.
+- [x] Add cycle counts and physical inventory with blind counts, variance approval, recounts, adjustment evidence, and audit history.
+- [x] Add serial and lot traceability with expiry, warranty, recalls, genealogy, and movement history.
+- [x] Add inventory costing and valuation views without duplicating local accounting postings, including landed-cost allocation boundaries.
+- [x] Add protected procedures for entity isolation, negative-stock prevention, SoD, warehouse authorization, movement idempotency, and audit logging.
+- [x] Add Arabic RTL dashboard for stock position, low stock, aging, expiry, reservations, transfers, counts, valuation, and warehouse performance.
+- [x] Add Vitest tests for balance conservation, entity isolation, location scope, serial/lot traceability, negative-stock prevention, transfer lifecycle, count variance, reservation release, and no duplicate posting.
+- [x] Document deferred barcode/RFID hardware, WMS/3PL connectors, EDI, carrier integrations, advanced optimization, and distributed inventory workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 56 checkpoint.

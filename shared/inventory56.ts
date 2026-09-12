@@ -1,0 +1,9 @@
+export const availableQuantity=(onHand:number,reserved:number,quarantine:number)=>onHand-reserved-quarantine;
+export const canReserveInventory=(onHand:number,reserved:number,quarantine:number,requested:number)=>requested>0&&availableQuantity(onHand,reserved,quarantine)>=requested;
+export const canIssueInventory=(onHand:number,reserved:number,quarantine:number,requested:number)=>requested>0&&onHand-reserved-quarantine>=requested;
+export const balanceConservation=(opening:number,receipts:number,returnsQty:number,issues:number,transfersOut:number,transfersIn:number,adjustments:number)=>opening+receipts+returnsQty-issues-transfersOut+transfersIn+adjustments;
+export const interEntityRequired=(sourceEntityId:number,targetEntityId:number)=>sourceEntityId!==targetEntityId;
+export const landedCostTotal=(freight:number,insurance:number,duties:number,handling:number)=>freight+insurance+duties+handling;
+export const replenishmentSuggestion=(available:number,reorderPoint:number,maximum:number,safetyStock:number)=>Math.max(0,Math.max(maximum,reorderPoint+safetyStock)-available);
+export const agingRisk=(ageDays:number,expiryDays:number|undefined)=>expiryDays!==undefined&&expiryDays<=30?"expiry_risk":ageDays>=180?"dead_stock":ageDays>=90?"slow_moving":"normal";
+export const transferStatusFor=(sourceEntityId:number,targetEntityId:number)=>sourceEntityId===targetEntityId?"internal":"inter_entity";
