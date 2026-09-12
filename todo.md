@@ -1869,3 +1869,20 @@
 - [x] Add Vitest tests for entity isolation, version immutability, checksum integrity, retention/hold precedence, disposition approval, signer separation, signature expiry, and export controls.
 - [x] Document deferred OCR/full-text workers, external storage providers, e-signature providers, DLP/classification, and legal jurisdiction adapters.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 53 checkpoint.
+
+## Step 54 — Notifications, Communications, Messaging & Engagement Hub
+
+- [x] Document communication source of truth, channel ownership, consent boundaries, entity scope, retention, and audit responsibilities.
+- [x] Add entity-scoped notification templates with Arabic/English content, variables, versions, approval, classification, priority, and fallback policy.
+- [x] Add customer and employee subscriptions, opt-in/opt-out, quiet hours, channel preferences, consent evidence, and regulatory restrictions.
+- [x] Add omnichannel message requests for in-app, email, SMS, WhatsApp, push, webhook, portal, and internal task channels.
+- [x] Add routing rules by event, entity, branch, audience, channel, priority, language, and escalation policy.
+- [x] Add durable queues with idempotency, deduplication, provider adapter, delivery attempts, backoff, dead-letter state, and replay controls.
+- [x] Add delivery lifecycle with queued, sent, delivered, viewed, clicked, failed, bounced, rejected, unsubscribed, and expired states.
+- [x] Add inbound conversations, threading, correlation to customer/case/workflow/document, assignment, SLA, and internal notes.
+- [x] Add campaign and journey messaging with audience policy, frequency caps, approval, scheduling, suppression, and performance metrics.
+- [x] Add protected procedures for PII masking, consent enforcement, template approval, provider secret boundaries, entity isolation, and audit logging.
+- [x] Add Arabic RTL engagement hub dashboard for queue health, delivery funnel, failures, subscriptions, conversations, SLA, and channel performance.
+- [x] Add Vitest tests for consent, entity isolation, template versioning, idempotency, deduplication, retry/backoff, dead-letter replay, opt-out, provider webhook replay, and PII masking.
+- [x] Document deferred email/SMS/WhatsApp/push providers, telephony, social connectors, real-time workers, analytics pipelines, and regulatory adapters.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 54 checkpoint.

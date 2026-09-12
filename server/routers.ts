@@ -14,6 +14,7 @@ import { importExportRouter } from "./importExport";
 import { portalRouter } from "./portal";
 import { portalV2Router } from "./portalV2";
 import { communicationRouter } from "./communication";
+import { communication54Router } from "./communication54";
 import { procurementNetworkRouter } from "./procurementNetwork";
 import { fleetRouter } from "./fleet";
 import { complianceRouter } from "./compliance";
@@ -69,6 +70,7 @@ export const appRouter = router({
   portal: portalRouter,
   portalV2: portalV2Router,
   communication: communicationRouter,
+  communication54: communication54Router,
   procurementNetwork: procurementNetworkRouter,
   fleet: fleetRouter,
   compliance: complianceRouter,
