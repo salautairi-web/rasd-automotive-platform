@@ -1886,3 +1886,21 @@
 - [x] Add Vitest tests for consent, entity isolation, template versioning, idempotency, deduplication, retry/backoff, dead-letter replay, opt-out, provider webhook replay, and PII masking.
 - [x] Document deferred email/SMS/WhatsApp/push providers, telephony, social connectors, real-time workers, analytics pipelines, and regulatory adapters.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 54 checkpoint.
+
+## Step 55 — Procurement, Supplier Sourcing & Procure-to-Pay
+
+- [x] Document procurement source of truth, entity ownership, approval boundaries, budget linkage, and accounting posting responsibilities.
+- [x] Add entity-scoped supplier master, contacts, categories, tax and bank metadata, risk classification, sanctions status, and duplicate prevention.
+- [x] Add supplier onboarding, qualification questionnaires, documents, approvals, expiry alerts, performance history, and suspension/reinstatement.
+- [x] Add purchase requisitions with requester, department, cost center, project, budget check, urgency, justification, attachments, and approval route.
+- [x] Add sourcing events, RFQs, supplier invitations, bids, evaluation criteria, scoring, negotiation rounds, award rationale, and conflict declarations.
+- [x] Add purchase orders with versioning, lines, taxes, currency, delivery terms, commitments, change orders, approvals, and supplier acknowledgment.
+- [x] Add goods/service receipts with partial receipt, inspection, quality rejection, warehouse/project allocation, and evidence.
+- [x] Add invoice intake and three-way matching between purchase order, receipt, and invoice with tolerance and exception workflow.
+- [x] Add payment readiness and handoff to AP/treasury without duplicating accounting postings or bypassing payment approvals.
+- [x] Add supplier contracts, SLAs, milestones, penalties, renewals, and procurement performance metrics.
+- [x] Add protected procedures for entity isolation, SoD, budget enforcement, supplier bank masking, bid confidentiality, approval separation, and audit logging.
+- [x] Add Arabic RTL procurement dashboard for requisitions, sourcing, orders, receipts, matching exceptions, supplier risk, commitments, and cycle time.
+- [x] Add Vitest tests for supplier isolation, duplicate prevention, qualification expiry, budget checks, bid confidentiality, SoD, PO versioning, partial receipt, three-way matching, tolerances, and no duplicate posting.
+- [x] Document deferred supplier portals, e-procurement networks, tax/e-invoice connectors, bank verification, sanctions providers, OCR, and distributed matching workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 55 checkpoint.

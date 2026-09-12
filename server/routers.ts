@@ -39,6 +39,7 @@ import { governanceRouter } from "./governance";
 import { projectsRouter } from "./projects";
 import { mdmRouter } from "./mdm";
 import { procurementRouter } from "./procurement";
+import { procurement55Router } from "./procurement55";
 import { hrRouter } from "./hr";
 import { hr41Router } from "./hr41";
 import { assetsRouter } from "./assets";
@@ -95,6 +96,7 @@ export const appRouter = router({
   projects: projectsRouter,
   mdm: mdmRouter,
   procurement: procurementRouter,
+  procurement55: procurement55Router,
   hr: hrRouter,
   hr41: hr41Router,
   assets: assetsRouter,

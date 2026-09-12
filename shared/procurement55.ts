@@ -1,0 +1,5 @@
+export const supplierCanTransact=(status:string,qualification:string,compliance:string)=>status==="active"&&qualification==="qualified"&&compliance==="compliant";
+export const isMaverickSpend=(hasPurchaseOrder:boolean,approvedSupplier:boolean,contractPrice:boolean)=>!hasPurchaseOrder||!approvedSupplier||!contractPrice;
+export const budgetDecision=(availableMinor:number,committedMinor:number,requestedMinor:number)=>{const remaining=availableMinor-committedMinor;return{remainingMinor:remaining,withinBudget:requestedMinor<=remaining,varianceMinor:Math.max(0,requestedMinor-remaining)};};
+export const threeWayStatus=(poMinor:number,receiptMinor:number|undefined,invoiceMinor:number,toleranceMinor:number)=>{if(receiptMinor===undefined)return{status:"missing_receipt" as const,varianceMinor:0};const variance=Math.abs(poMinor-invoiceMinor)+Math.abs(poMinor-receiptMinor);return{status:variance<=toleranceMinor?"matched" as const:"variance" as const,varianceMinor:variance};};
+export const weightedSupplierScore=(priceBps:number,deliveryBps:number,qualityBps:number,riskBps:number)=>Math.round((priceBps*35+deliveryBps*25+qualityBps*30+riskBps*10)/100);
