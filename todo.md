@@ -1922,3 +1922,12 @@
 - [x] Add Vitest tests for balance conservation, entity isolation, location scope, serial/lot traceability, negative-stock prevention, transfer lifecycle, count variance, reservation release, and no duplicate posting.
 - [x] Document deferred barcode/RFID hardware, WMS/3PL connectors, EDI, carrier integrations, advanced optimization, and distributed inventory workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the Step 56 checkpoint.
+
+## Inventory Operations UI Extension — Barcode/QR
+
+- [x] Add Arabic RTL operational forms for receiving, issuing, warehouse transfer, and cycle counting.
+- [x] Add barcode and QR input/scanning flow with manual fallback, camera permission state, duplicate-scan prevention, and entity-safe resolution.
+- [x] Connect forms to protected inventory56 procedures with idempotency keys, quantity validation, negative-stock prevention, and explicit inter-entity handling.
+- [x] Add user feedback for scan success, unknown code, wrong entity, duplicate scan, insufficient stock, and completed submission.
+- [x] Add Vitest coverage for scan normalization, duplicate prevention, entity mismatch, form validation, and movement idempotency.
+- [x] Add Arabic documentation and desktop/mobile visual QA, review todo.md, and save the UI extension checkpoint.
