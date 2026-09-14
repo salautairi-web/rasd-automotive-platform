@@ -2027,3 +2027,15 @@
 - [x] Add Vitest tests for check-in, inspection, diagnosis, estimate versions, approval, job-card assignment, parts reservation/issue, labor, subcontract, QC rework, road-test authorization, delivery blocking, warranty comeback, finance update, and isolation.
 - [x] Document deferred workshop-provider, diagnostic/OEM, telematics, payment, external vendor, OCR, and distributed worker integrations.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, write Step 59 documentation, review todo.md, and save the checkpoint.
+
+## Workshop 59 — Inspection, DTC, Parts, Approval, Road Test & Warranty
+
+- [x] Add comprehensive vehicle inspection templates with checklist findings, severity, measurements, evidence photos, inspector, timestamps, and customer-visible summary.
+- [x] Add diagnostic trouble code records with code, system, description, severity, cause, recommendation, evidence, status, and direct job-card linkage.
+- [x] Add evidence metadata and secure media references without storing binary payloads in the database; enforce entity and job-card scope.
+- [x] Add workshop parts requests linked to job cards with reserve, issue, substitute, return, and cancel lifecycle.
+- [x] Connect parts requests to inventory56 quantities with idempotency, serial/lot validation, negative-stock prevention, and real-time balance refresh.
+- [x] Add digital estimate consent with customer decision, version/checksum, approver identity, timestamp, decline/change reason, and audit trail.
+- [x] Add road-test authorization, driver, start/end mileage, route/evidence, findings, incidents, and customer-visible report.
+- [x] Add warranty tracking with coverage, claim, comeback linkage, root cause, responsibility, corrective action, and service-history integration.
+- [x] Add protected procedures, Arabic RTL UI, tests, documentation, TypeScript/build validation, desktop/mobile QA, and checkpoint.
