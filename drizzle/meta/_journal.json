@@ -505,6 +505,13 @@
       "when": 1789417936701,
       "tag": "0071_rare_wasp",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "5",
+      "when": 1789419044176,
+      "tag": "0072_shocking_xorn",
+      "breakpoints": true
     }
   ]
 }

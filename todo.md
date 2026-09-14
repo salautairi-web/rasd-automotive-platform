@@ -2054,3 +2054,18 @@
 - [x] Add Arabic RTL Trading cockpit with stock, ready-for-sale, aging, pipeline, reservations, deposits, sales, margin, and vehicle P&L indicators.
 - [x] Add Step 60 domain tests for entity isolation, cost basis, stock transitions, price approval, reservation locking, deposit allocation, delivery blocking, and profitability reconciliation.
 - [x] Document Step 60 boundaries, APIs, events, deferred integrations, and acceptance evidence.
+
+## Continuation — Platform Build Program
+
+- [ ] Review the attached package, current roadmap, checkpoint, and repository state before each new implementation stage.
+- [x] Close Step 60 trading gaps for contracts, payments, delivery controls, ownership/registration, returns, warranty, and profitability reporting.
+- [x] Re-run schema, router, UI, test, documentation, and entity-isolation validation after Step 60 hardening.
+- [ ] Select and implement the next executable package step after Step 60 without duplicating existing domains or financial records.
+- [x] Maintain responsive Arabic RTL workspaces, domain tests, production builds, visual QA, and checkpoint reports for each stage.
+
+## Step 60 Hardening — Commercial Closeout
+
+- [x] Add trading contracts, payment allocations, ownership/registration records, returns, and warranty claim records with entity scope.
+- [x] Add protected quote approval, deposit allocation, payment settlement, delivery blocking, return, and ownership-transfer procedures.
+- [x] Extend the Trading 60 RTL cockpit with commercial closeout actions and status visibility.
+- [x] Add hardening tests for payment balance, approval gates, delivery blocking, return state, and cross-entity isolation.
