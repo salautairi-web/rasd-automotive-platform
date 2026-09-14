@@ -533,6 +533,13 @@
       "when": 1789420797711,
       "tag": "0075_acoustic_kabuki",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "5",
+      "when": 1789421248250,
+      "tag": "0076_silky_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }

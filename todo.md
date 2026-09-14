@@ -2092,4 +2092,11 @@
 - [x] Add project resources, baseline schedule, critical-path/dependency analytics, and source-linked commitment reconciliation.
 - [x] Add shipment ETA/delay and missing-document alerts with entity and shipment scope.
 - [x] Extend Arabic RTL PMO and trade dashboards with the new operational indicators and actions.
-- [ ] Select the next package step after Step 62, implement its vertical slice, and complete tests, documentation, build, QA, and checkpoint.
+- [x] Select the next package step after Step 62, implement its vertical slice, and complete tests, documentation, build, QA, and checkpoint.
+
+## Step 63 — HR/HCM Payroll Vertical Slice
+
+- [x] Add entity-scoped employee employment contexts, contracts, compensation versions, payroll periods, payroll lines, and payroll control states without exposing sensitive records cross-entity.
+- [x] Add protected HR procedures for employee onboarding, contract approval, compensation versioning, payroll draft/calculation/lock/approval, and finance-posting handoff without duplicating finance entries.
+- [x] Add an Arabic RTL HR/payroll workspace with entity filters, headcount, payroll period controls, variance checks, and approval gates.
+- [x] Add Step 63 domain tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
