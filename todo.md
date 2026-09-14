@@ -2057,10 +2057,10 @@
 
 ## Continuation — Platform Build Program
 
-- [ ] Review the attached package, current roadmap, checkpoint, and repository state before each new implementation stage.
+- [x] Review the attached package, current roadmap, checkpoint, and repository state before each new implementation stage.
 - [x] Close Step 60 trading gaps for contracts, payments, delivery controls, ownership/registration, returns, warranty, and profitability reporting.
 - [x] Re-run schema, router, UI, test, documentation, and entity-isolation validation after Step 60 hardening.
-- [ ] Select and implement the next executable package step after Step 60 without duplicating existing domains or financial records.
+- [x] Select and implement the next executable package step after Step 60 without duplicating existing domains or financial records.
 - [x] Maintain responsive Arabic RTL workspaces, domain tests, production builds, visual QA, and checkpoint reports for each stage.
 
 ## Step 60 Hardening — Commercial Closeout
@@ -2069,3 +2069,10 @@
 - [x] Add protected quote approval, deposit allocation, payment settlement, delivery blocking, return, and ownership-transfer procedures.
 - [x] Extend the Trading 60 RTL cockpit with commercial closeout actions and status visibility.
 - [x] Add hardening tests for payment balance, approval gates, delivery blocking, return state, and cross-entity isolation.
+
+## Step 61 — Import & Export Vehicle Trade
+
+- [x] Add entity-scoped international trade orders, proforma invoices, shipments, vehicle mappings, containers, customs declarations, documents, landed-cost components, and trade inventory handoff without duplicating Vehicle Master or Finance/Treasury.
+- [x] Add protected procedures for import/export lifecycle, document readiness, customs release, landed-cost allocation, and handoff to Trading 60 inventory.
+- [x] Add Arabic RTL Step 61 workspace with shipment milestones, customs blockers, landed cost, and vehicle trade status.
+- [x] Add Step 61 domain tests, documentation, TypeScript/build validation, full tests, and desktop/mobile QA.
