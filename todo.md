@@ -1980,11 +1980,11 @@
 
 ## RASD Master Package Continuation After Step 57
 
-- [ ] Re-read the extracted master package sections for Steps 58–82 and capture their detailed scopes, dependencies, and acceptance criteria.
-- [ ] Update PACKAGE_INDEX_FINDINGS.md and RASD_STEPS_57_82_ROADMAP.md with the post-Step-57 reading results.
-- [ ] Identify Step 58 as the next executable scope and map its gaps to existing RASD modules and source-of-truth boundaries.
-- [ ] Add the approved Step 58 implementation checklist before coding.
-- [ ] Continue implementation, tests, documentation, visual QA, and checkpointing for the next step.
+- [x] Re-read the extracted master package sections for Steps 58–82 and capture their detailed scopes, dependencies, and acceptance criteria.
+- [x] Update PACKAGE_INDEX_FINDINGS.md and RASD_STEPS_57_82_ROADMAP.md with the post-Step-57 reading results.
+- [x] Identify Step 58 as the next executable scope and map its gaps to existing RASD modules and source-of-truth boundaries.
+- [x] Add the approved Step 58 implementation checklist before coding.
+- [x] Continue implementation, tests, documentation, visual QA, and checkpointing for the next step.
 
 ## Step 58 — Fleet Management, Vehicle Lifecycle, Telematics, Fuel & Drivers
 
