@@ -1931,3 +1931,15 @@
 - [x] Add user feedback for scan success, unknown code, wrong entity, duplicate scan, insufficient stock, and completed submission.
 - [x] Add Vitest coverage for scan normalization, duplicate prevention, entity mismatch, form validation, and movement idempotency.
 - [x] Add Arabic documentation and desktop/mobile visual QA, review todo.md, and save the UI extension checkpoint.
+
+## Inventory Offline, Catalog & Count Extension
+
+- [x] Add offline-first operation state with local durable movement queue, connectivity indicator, pending count, retry state, and conflict visibility.
+- [x] Add automatic synchronization when connectivity returns with idempotent replay, ordered batches, backoff, and permanent-failure review.
+- [x] Resolve scanned barcode/QR values against the real product catalog with entity scope, SKU, product name, unit, lot, serial, expiry, and warranty metadata.
+- [x] Add batch and serial capture and validation for receiving, issuing, transfer, and count operations.
+- [x] Add printable barcode and QR label generation with product, lot, serial, entity, and warehouse metadata.
+- [x] Add detailed cycle-count variance reports with filters, evidence, approval state, and segregation of duties for adjustments.
+- [x] Add protected procedures, tests, Arabic documentation, desktop/mobile visual QA, and save the extension checkpoint.
+
+- [x] Fix JSX closing-tag error in InventoryOperations56.tsx and rerun final verification.
