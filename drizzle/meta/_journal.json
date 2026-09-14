@@ -526,6 +526,13 @@
       "when": 1789420079516,
       "tag": "0074_overconfident_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "5",
+      "when": 1789420797711,
+      "tag": "0075_acoustic_kabuki",
+      "breakpoints": true
     }
   ]
 }

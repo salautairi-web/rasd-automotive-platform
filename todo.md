@@ -2085,3 +2085,11 @@
 - [x] Add secure shipping document upload using S3 storage references, SHA-256 checksums, metadata, verification status, and entity/shipment scope.
 - [x] Add advanced trade dashboard filters and shipment event/status tracking with customs, document, ETA, and landed-cost indicators.
 - [x] Add domain tests, documentation, TypeScript, full Vitest, production build, desktop/mobile QA, and checkpoint for the combined stage.
+
+## Continuation — Step 62 Operational Controls
+
+- [x] Re-read the latest checkpoint and roadmap, then identify the next Step 62 operational gap without duplicating existing project sources.
+- [x] Add project resources, baseline schedule, critical-path/dependency analytics, and source-linked commitment reconciliation.
+- [x] Add shipment ETA/delay and missing-document alerts with entity and shipment scope.
+- [x] Extend Arabic RTL PMO and trade dashboards with the new operational indicators and actions.
+- [ ] Select the next package step after Step 62, implement its vertical slice, and complete tests, documentation, build, QA, and checkpoint.
