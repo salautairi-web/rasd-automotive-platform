@@ -1977,3 +1977,26 @@
 - [x] Add asset physical verification with barcode/QR, serial/VIN, condition, location, custodian, missing asset, and variance outcomes.
 - [x] Add asset TCO and lifecycle dashboard with Arabic RTL entity-scoped metrics and alerts.
 - [x] Add protected procedures, tests, documentation, TypeScript/build validation, and desktop/mobile visual QA for Step 57.
+
+## RASD Master Package Continuation After Step 57
+
+- [ ] Re-read the extracted master package sections for Steps 58–82 and capture their detailed scopes, dependencies, and acceptance criteria.
+- [ ] Update PACKAGE_INDEX_FINDINGS.md and RASD_STEPS_57_82_ROADMAP.md with the post-Step-57 reading results.
+- [ ] Identify Step 58 as the next executable scope and map its gaps to existing RASD modules and source-of-truth boundaries.
+- [ ] Add the approved Step 58 implementation checklist before coding.
+- [ ] Continue implementation, tests, documentation, visual QA, and checkpointing for the next step.
+
+## Step 58 — Fleet Management, Vehicle Lifecycle, Telematics, Fuel & Drivers
+
+- [x] Extend fleet lifecycle transitions and assignment history without duplicating the central vehicle/VIN master.
+- [x] Add entity-scoped driver profiles, license classes, expiry, training, compliance, assignment, acknowledgement, and audit history.
+- [x] Add utilization metrics for available, rented, maintenance, accident, idle, downtime, and availability days.
+- [x] Add deterministic fuel anomaly and efficiency analytics by vehicle, entity, period, odometer, quantity, price, and station.
+- [x] Add maintenance trigger rules by date, mileage, or first due with grace period, critical overdue, task, and escalation.
+- [x] Add Telematics purpose policy, freshness, access scope, coordinate masking, device status, and event lineage without default continuous tracking.
+- [x] Add vehicle financial profile and profitability metrics linking rental revenue, maintenance, parts, labor, fuel, insurance, fines, accidents, depreciation, TCO, and contribution.
+- [x] Add protected fleet procedures, entity isolation, idempotency, odometer monotonicity, rental linkage, and finance-event boundaries.
+- [x] Add Arabic RTL fleet dashboard for utilization, cost per vehicle, fuel anomalies, maintenance risk, driver compliance, and telematics health.
+- [x] Add Vitest tests for lifecycle transitions, driver scope, license expiry, utilization determinism, fuel anomalies, maintenance triggers, telematics policy, masking, profitability, and entity isolation.
+- [x] Document deferred Telematics/GPS providers, fuel-card connectors, driver-license verification, route optimization, and distributed alert workers.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, update Step 58 documentation, review todo.md, and save the checkpoint.

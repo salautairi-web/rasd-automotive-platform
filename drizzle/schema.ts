@@ -1243,3 +1243,90 @@ export const assetWarranties57 = mysqlTable("asset_warranties_57", { id:int("id"
 export const assetMeters57 = mysqlTable("asset_meters_57", { id:int("id").autoincrement().primaryKey(), businessEntityId:int("businessEntityId").notNull(), assetId:int("assetId").notNull(), metricType:mysqlEnum("metricType",["mileage","hours","cycles","other"]).notNull(), valueDecimal:decimal("valueDecimal",{precision:18,scale:3}).notNull(), source:varchar("source",{length:100}).notNull(), observedAt:timestamp("observedAt").notNull(), maintenanceTrigger:varchar("maintenanceTrigger",{length:180}), correlationId:varchar("correlationId",{length:80}).notNull() });
 export const assetVerifications57 = mysqlTable("asset_verifications_57", { id:int("id").autoincrement().primaryKey(), businessEntityId:int("businessEntityId").notNull(), assetId:int("assetId").notNull(), verificationMethod:mysqlEnum("verificationMethod",["physical","barcode","qr","serial","vin"]).notNull(), observedLocation:varchar("observedLocation",{length:180}), observedCustodianId:int("observedCustodianId"), conditionCode:varchar("conditionCode",{length:60}), outcome:mysqlEnum("outcome",["verified","missing","mismatch","damaged","pending_review"]).default("pending_review").notNull(), evidenceKey:varchar("evidenceKey",{length:300}), verifiedBy:int("verifiedBy").notNull(), verifiedAt:timestamp("verifiedAt").defaultNow().notNull(), correlationId:varchar("correlationId",{length:80}).notNull() });
 export const assetRevaluations57 = mysqlTable("asset_revaluations_57", { id:int("id").autoincrement().primaryKey(), businessEntityId:int("businessEntityId").notNull(), assetId:int("assetId").notNull(), valuationDate:timestamp("valuationDate").notNull(), valuer:varchar("valuer",{length:180}).notNull(), newValueMinor:int("newValueMinor").notNull(), impactMinor:int("impactMinor").notNull(), status:mysqlEnum("status",["pending","approved","posted","rejected"]).default("pending").notNull(), evidenceKey:varchar("evidenceKey",{length:300}), approvedBy:int("approvedBy"), correlationId:varchar("correlationId",{length:80}).notNull() });
+
+
+// Step 58 — Fleet operations extensions; vehicle identity remains rentalVehicles/VIN source of truth.
+export const fleetDriverProfiles58 = mysqlTable("fleet_driver_profiles_58", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId").notNull(),
+  driverId: int("driverId").notNull(),
+  licenseClass: varchar("licenseClass", { length: 40 }).notNull(),
+  licenseReference: varchar("licenseReference", { length: 120 }).notNull(),
+  licenseExpiresAt: timestamp("licenseExpiresAt"),
+  trainingStatus: mysqlEnum("trainingStatus", ["valid", "expiring", "expired", "not_started"]).default("not_started").notNull(),
+  status: mysqlEnum("status", ["active", "suspended", "expired"]).default("active").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({ entityDriver: uniqueIndex("fleet_driver_entity_driver_58").on(table.businessEntityId, table.driverId) }));
+
+export const fleetDriverAssignments58 = mysqlTable("fleet_driver_assignments_58", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId").notNull(),
+  vehicleId: int("vehicleId").notNull(),
+  driverId: int("driverId").notNull(),
+  branchId: int("branchId"),
+  purpose: varchar("purpose", { length: 180 }).notNull(),
+  startAt: timestamp("startAt").notNull(),
+  endAt: timestamp("endAt"),
+  odometerAtStart: int("odometerAtStart").notNull(),
+  odometerAtEnd: int("odometerAtEnd"),
+  acknowledgement: boolean("acknowledgement").default(false).notNull(),
+  idempotencyKey: varchar("idempotencyKey", { length: 160 }).notNull(),
+  createdByUserId: int("createdByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({ idem: uniqueIndex("fleet_driver_assignment_idem_58").on(table.businessEntityId, table.idempotencyKey) }));
+
+export const fleetFuelAnomalies58 = mysqlTable("fleet_fuel_anomalies_58", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId").notNull(),
+  vehicleId: int("vehicleId").notNull(),
+  fuelEntryId: int("fuelEntryId").notNull(),
+  anomalyType: varchar("anomalyType", { length: 60 }).notNull(),
+  severity: mysqlEnum("severity", ["low", "medium", "high", "critical"]).default("medium").notNull(),
+  expectedPer100Km: decimal("expectedPer100Km", { precision: 12, scale: 3 }).notNull(),
+  actualPer100Km: decimal("actualPer100Km", { precision: 12, scale: 3 }).notNull(),
+  status: mysqlEnum("status", ["open", "acknowledged", "resolved"]).default("open").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fleetTelemetryPolicies58 = mysqlTable("fleet_telemetry_policies_58", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId").notNull(),
+  purpose: mysqlEnum("purpose", ["maintenance", "safety", "utilization", "incident", "rental"]).notNull(),
+  retentionDays: int("retentionDays").default(90).notNull(),
+  allowLiveTracking: boolean("allowLiveTracking").default(false).notNull(),
+  maskCoordinates: boolean("maskCoordinates").default(true).notNull(),
+  allowedRoles: text("allowedRoles").notNull(),
+  status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({ entityPurpose: uniqueIndex("fleet_telemetry_policy_entity_purpose_58").on(table.businessEntityId, table.purpose) }));
+
+export const fleetUtilizationSnapshots58 = mysqlTable("fleet_utilization_snapshots_58", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId").notNull(),
+  vehicleId: int("vehicleId").notNull(),
+  periodStart: timestamp("periodStart").notNull(),
+  periodEnd: timestamp("periodEnd").notNull(),
+  availableDays: decimal("availableDays", { precision: 10, scale: 2 }).default("0").notNull(),
+  rentedDays: decimal("rentedDays", { precision: 10, scale: 2 }).default("0").notNull(),
+  maintenanceDays: decimal("maintenanceDays", { precision: 10, scale: 2 }).default("0").notNull(),
+  accidentDays: decimal("accidentDays", { precision: 10, scale: 2 }).default("0").notNull(),
+  idleDays: decimal("idleDays", { precision: 10, scale: 2 }).default("0").notNull(),
+  utilizationPercent: decimal("utilizationPercent", { precision: 8, scale: 3 }).default("0").notNull(),
+  availabilityPercent: decimal("availabilityPercent", { precision: 8, scale: 3 }).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fleetLifecycleEvents58 = mysqlTable("fleet_lifecycle_events_58", {
+  id: int("id").autoincrement().primaryKey(),
+  businessEntityId: int("businessEntityId").notNull(),
+  vehicleId: int("vehicleId").notNull(),
+  fromStatus: varchar("fromStatus", { length: 40 }).notNull(),
+  toStatus: varchar("toStatus", { length: 40 }).notNull(),
+  reason: varchar("reason", { length: 240 }).notNull(),
+  source: varchar("source", { length: 80 }).notNull(),
+  idempotencyKey: varchar("idempotencyKey", { length: 160 }).notNull(),
+  actorUserId: int("actorUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({ idem: uniqueIndex("fleet_lifecycle_event_idem_58").on(table.businessEntityId, table.idempotencyKey) }));
