@@ -1943,3 +1943,15 @@
 - [x] Add protected procedures, tests, Arabic documentation, desktop/mobile visual QA, and save the extension checkpoint.
 
 - [x] Fix JSX closing-tag error in InventoryOperations56.tsx and rerun final verification.
+
+## Inventory Reporting, Continuous Scan & Reorder Dashboard
+
+- [x] Add export of cycle-count variance reports to PDF and Excel with entity filters, report timestamp, approval status, and audit metadata.
+- [x] Add continuous Barcode/QR scan mode with start/stop state, duplicate suppression, scan counter, cooldown, and manual fallback.
+- [x] Add audio and visual scan feedback for success, unknown code, duplicate, wrong entity, camera failure, and validation errors with reduced-motion/accessibility support.
+- [x] Add interactive real-time inventory dashboard with available, reserved, in-transit, damaged, aging, and low-stock indicators.
+- [x] Add near-out-of-stock alerts with reorder point, safety stock, lead time, severity, entity/warehouse scope, acknowledgment, and drill-down.
+- [x] Add protected procedures for export scope, PII/entity masking, dashboard isolation, alert acknowledgment, and no duplicate accounting postings.
+- [x] Add Vitest tests for export determinism, entity filtering, scan cooldown/deduplication, feedback states, alert thresholds, acknowledgment, and isolation.
+- [x] Document deferred scheduled refresh workers, direct printer integrations, spreadsheet/PDF archival storage, and real-time transport limits.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the extension checkpoint.

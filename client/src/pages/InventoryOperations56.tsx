@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import JsBarcode from "jsbarcode";
 import QRCode from "qrcode";
-import { Camera, CheckCircle2, ClipboardCheck, Cloud, CloudOff, PackageCheck, Printer, RefreshCw, ScanLine, Send, Truck, XCircle } from "lucide-react";
+import { Camera, CheckCircle2, ClipboardCheck, Cloud, CloudOff, PackageCheck, Printer, RefreshCw, ScanLine, Send, Truck, XCircle, Download, Activity, AlertTriangle, Volume2 } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Mode = "receive" | "issue" | "transfer" | "count";
@@ -48,6 +49,9 @@ export default function InventoryOperations56() {
   const [serialNo, setSerialNo] = useState("");
   const [tracking, setTracking] = useState<Tracking>("none");
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [continuousScan, setContinuousScan] = useState(false);
+  const [scanCount, setScanCount] = useState(0);
+  const lastScanRef = useRef({ value: "", at: 0 });
   const [pending, setPending] = useState<PendingOperation[]>([]);
   const [status, setStatus] = useState<{ tone: ScanTone; text: string }>({ tone: "idle", text: "جاهز للمسح أو الإدخال اليدوي." });
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -58,6 +62,8 @@ export default function InventoryOperations56() {
     { enabled: Boolean(scanValue) },
   );
   const variances = trpc.inventory56.varianceReport.useQuery({ businessEntityId: entity });
+  const inventoryDashboard = trpc.inventory56.dashboard.useQuery({ businessEntityId: entity }, { refetchInterval: 30000 });
+  const stockAlerts = trpc.inventory56.stockAlerts.useQuery({ businessEntityId: entity }, { refetchInterval: 30000 });
   const receive = trpc.inventory56.receive.useMutation();
   const issue = trpc.inventory56.issue.useMutation();
   const transfer = trpc.inventory56.createTransfer.useMutation();
@@ -104,9 +110,23 @@ export default function InventoryOperations56() {
   };
   useEffect(() => () => releaseCamera(), []);
 
+  const feedback = (success: boolean) => {
+    setStatus({ tone: success ? "success" : "error", text: success ? "تم التعرف على الرمز بنجاح." : "تعذر التعرف على الرمز أو أنه مكرر." });
+    try {
+      const context = new AudioContext();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = success ? 880 : 220;
+      gain.gain.value = 0.035;
+      oscillator.connect(gain); gain.connect(context.destination); oscillator.start(); oscillator.stop(context.currentTime + (success ? 0.09 : 0.16));
+    } catch { /* الصوت اختياري ولا يمنع المسح */ }
+  };
   const applyCatalog = (raw: string) => {
     const code = raw.trim().toUpperCase();
     if (!code) return;
+    if (continuousScan && code === lastScanRef.current.value && Date.now() - lastScanRef.current.at < 1200) { feedback(false); return; }
+    lastScanRef.current = { value: code, at: Date.now() };
+    setScanCount((count) => count + 1);
     setScanValue(code);
     setStatus({ tone: "idle", text: online ? "جارٍ البحث في كتالوج الكيان..." : "حُفظ الرمز للتحقق عند عودة الاتصال." });
   };
@@ -131,9 +151,10 @@ export default function InventoryOperations56() {
         try {
           const codes = await detector.detect(videoRef.current);
           if (codes[0]?.rawValue) {
-            applyCatalog(codes[0].rawValue);
-            releaseCamera();
-            return;
+            const code = codes[0].rawValue;
+            const duplicate = code.trim().toUpperCase() === lastScanRef.current.value && Date.now() - lastScanRef.current.at < 1200;
+            if (duplicate) feedback(false); else { applyCatalog(code); feedback(true); }
+            if (!continuousScan) { releaseCamera(); return; }
           }
         } catch {
           // A frame can be unavailable briefly while autofocus is settling.
@@ -220,6 +241,20 @@ export default function InventoryOperations56() {
     }
   };
 
+  const exportExcel = () => {
+    const rows = (variances.data || []).map((item) => `<tr><td>${item.id}</td><td>${item.productId}</td><td>${item.varianceQty}</td><td>${item.varianceValueMinor}</td><td>${item.status}</td></tr>`).join("");
+    const html = `<html dir="rtl"><meta charset="utf-8"><table><thead><tr><th>المعرف</th><th>الصنف</th><th>فرق الكمية</th><th>قيمة الفرق</th><th>الحالة</th></tr></thead><tbody>${rows}</tbody></table></html>`;
+    const blob = new Blob(["\\ufeff", html], { type: "application/vnd.ms-excel;charset=utf-8" });
+    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `inventory-variances-entity-${entity}.xls`; anchor.click(); URL.revokeObjectURL(url);
+  };
+  const exportPdf = () => {
+    const pdf = new jsPDF({ orientation: "landscape" });
+    pdf.setFontSize(16); pdf.text(`RASD Inventory Variances — Entity ${entity}`, 14, 18);
+    pdf.setFontSize(10); pdf.text(`Generated: ${new Date().toLocaleString()}`, 14, 26);
+    let y = 38; pdf.text("ID | Product | Qty variance | Value | Status", 14, y); y += 8;
+    (variances.data || []).forEach((item) => { pdf.text(`${item.id} | ${item.productId} | ${item.varianceQty} | ${item.varianceValueMinor} | ${item.status}`, 14, y); y += 7; if (y > 190) { pdf.addPage(); y = 18; } });
+    pdf.save(`inventory-variances-entity-${entity}.pdf`);
+  };
   const printLabel = async (type: "barcode" | "qr") => {
     if (!productId) {
       setStatus({ tone: "error", text: "أدخل أو امسح صنفاً قبل طباعة الملصق." });
@@ -273,10 +308,11 @@ export default function InventoryOperations56() {
                 <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div><p className="font-semibold">كتالوج Barcode وQR</p><p className="mt-1 text-xs text-slate-500">المسح يبحث داخل كتالوج الكيان ويجلب سياسة الدفعة والرقم التسلسلي.</p></div>
-                    <Button variant="outline" onClick={cameraOpen ? releaseCamera : startCamera}><Camera className="ml-2" size={16} />{cameraOpen ? "إيقاف الكاميرا" : "فتح الكاميرا"}</Button>
+                    <Button variant={continuousScan ? "default" : "outline"} onClick={() => setContinuousScan((value) => !value)}><Activity className="ml-2" size={16} />{continuousScan ? "المسح المستمر: مفعّل" : "المسح المستمر"}</Button><Button variant="outline" onClick={cameraOpen ? releaseCamera : startCamera}><Camera className="ml-2" size={16} />{cameraOpen ? "إيقاف الكاميرا" : "فتح الكاميرا"}</Button>
                   </div>
                   <div className="mt-3 flex gap-2"><Input value={scanValue} onChange={(event) => setScanValue(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") applyCatalog(scanValue); }} placeholder="امسح أو اكتب SKU / Barcode / QR ثم Enter" /><Button variant="secondary" onClick={() => applyCatalog(scanValue)}><ScanLine className="ml-2" size={16} />بحث</Button></div>
                   {cameraOpen && <video ref={videoRef} className="mt-3 h-44 w-full rounded-xl bg-slate-900 object-cover" muted playsInline />}
+                  {continuousScan && <p className="mt-2 flex items-center gap-2 text-xs text-blue-700"><Volume2 size={14} /> تمت قراءة {scanCount} رمزاً · يوقف التكرار تلقائياً خلال 1.2 ثانية.</p>}
                   {catalog.data?.product && <p className="mt-3 rounded-lg bg-white p-3 text-sm text-slate-700">{catalog.data.product.nameAr} · {catalog.data.product.sku} · تتبع {tracking === "serial" ? "تسلسلي" : tracking === "batch" ? "دفعات" : "غير مطلوب"}</p>}
                 </div>
                 <div className="grid gap-4 sm:grid-cols-3"><Field label="الدفعة" value={batchNo} text onChange={(value) => setBatchNo(String(value))} /><Field label="الرقم التسلسلي" value={serialNo} text onChange={(value) => setSerialNo(String(value))} /><SelectField label="سياسة التتبع" value={tracking} onChange={(value) => setTracking(value as Tracking)} options={[{ value: "none", label: "بدون" }, { value: "batch", label: "دفعة" }, { value: "serial", label: "تسلسلي" }]} /></div>
@@ -288,8 +324,8 @@ export default function InventoryOperations56() {
             </Card>
             <div className="space-y-4">
               <Card className="border-0"><CardHeader><CardTitle>حالة التحقق والمزامنة</CardTitle></CardHeader><CardContent><div className={`rounded-xl p-4 text-sm ${statusClass}`}>{status.tone === "success" ? <CheckCircle2 className="mb-2" size={20} /> : status.tone === "error" ? <XCircle className="mb-2" size={20} /> : <ScanLine className="mb-2" size={20} />}<p>{status.text}</p></div></CardContent></Card>
-              <Card className="border-0"><CardHeader><CardTitle>فروقات الجرد</CardTitle></CardHeader><CardContent className="space-y-3">{(variances.data || []).length === 0 ? <p className="text-sm text-slate-500">لا توجد فروقات ضمن الكيان الحالي.</p> : (variances.data || []).map((variance) => <div key={variance.id} className="rounded-xl border p-3 text-sm"><div className="flex items-center justify-between"><b>صنف #{variance.productId}</b><Badge variant="outline">{variance.status}</Badge></div><p className="mt-2 text-slate-500">فرق الكمية: {variance.varianceQty} · القيمة: {variance.varianceValueMinor} هللة</p>{variance.status === "open" && <div className="mt-3 flex gap-2"><Button size="sm" onClick={() => approveVariance.mutate({ businessEntityId: entity, varianceId: variance.id, decision: "approved" }, { onSuccess: () => void variances.refetch() })}>اعتماد</Button><Button size="sm" variant="outline" onClick={() => approveVariance.mutate({ businessEntityId: entity, varianceId: variance.id, decision: "rejected" }, { onSuccess: () => void variances.refetch() })}>رفض</Button></div>}</div>)}</CardContent></Card>
-              <Card className="border-0"><CardContent className="p-5"><div className="flex items-center gap-3"><PackageCheck className="text-emerald-600" /><div><p className="font-semibold">ضوابط التشغيل</p><p className="mt-1 text-xs leading-5 text-slate-500">عزل كيان · Idempotency · تتبع دفعة/Serial · مراجعة فروقات الجرد</p></div></div><div className="mt-4 flex items-center gap-3"><Truck className="text-blue-600" /><div><p className="font-semibold">التزامن</p><p className="mt-1 text-xs leading-5 text-slate-500">الحركات المحلية لا تضيع عند انقطاع الشبكة وتُعاد بترتيب آمن.</p></div></div><div className="mt-4 flex items-center gap-3"><ClipboardCheck className="text-amber-600" /><div><p className="font-semibold">الاعتماد</p><p className="mt-1 text-xs leading-5 text-slate-500">لا يتحول فرق الجرد إلى تسوية قبل اعتماد مستخدم منفصل.</p></div></div></CardContent></Card>
+              <Card className="border-0"><CardHeader><CardTitle className="flex items-center justify-between gap-2"><span>فروقات الجرد</span><span className="flex gap-2"><Button size="sm" variant="outline" onClick={exportExcel}><Download size={14} className="ml-1" />Excel</Button><Button size="sm" variant="outline" onClick={exportPdf}><Download size={14} className="ml-1" />PDF</Button></span></CardTitle></CardHeader><CardContent className="space-y-3">{(variances.data || []).length === 0 ? <p className="text-sm text-slate-500">لا توجد فروقات ضمن الكيان الحالي.</p> : (variances.data || []).map((variance) => <div key={variance.id} className="rounded-xl border p-3 text-sm"><div className="flex items-center justify-between"><b>صنف #{variance.productId}</b><Badge variant="outline">{variance.status}</Badge></div><p className="mt-2 text-slate-500">فرق الكمية: {variance.varianceQty} · القيمة: {variance.varianceValueMinor} هللة</p>{variance.status === "open" && <div className="mt-3 flex gap-2"><Button size="sm" onClick={() => approveVariance.mutate({ businessEntityId: entity, varianceId: variance.id, decision: "approved" }, { onSuccess: () => void variances.refetch() })}>اعتماد</Button><Button size="sm" variant="outline" onClick={() => approveVariance.mutate({ businessEntityId: entity, varianceId: variance.id, decision: "rejected" }, { onSuccess: () => void variances.refetch() })}>رفض</Button></div>}</div>)}</CardContent></Card>
+              <Card className="border-0"><CardHeader><CardTitle className="flex items-center gap-2"><Activity className="text-blue-600" size={18} />حالة المخزون الآن</CardTitle></CardHeader><CardContent className="p-5"><div className="grid grid-cols-2 gap-2 text-center text-sm"><Metric label="متاح" value={inventoryDashboard.data?.available ?? 0} /><Metric label="محجوز" value={inventoryDashboard.data?.reserved ?? 0} /><Metric label="قيد النقل" value={inventoryDashboard.data?.activeTransfers ?? 0} /><Metric label="قيمة المخزون" value={`${inventoryDashboard.data?.valueMinor ?? 0} هللة`} /></div><div className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900"><div className="flex items-center gap-2 font-semibold"><AlertTriangle size={16} />تنبيهات قرب النفاد</div>{(stockAlerts.data || []).length === 0 ? <p className="mt-2 text-xs">لا توجد أصناف تحت نقطة إعادة الطلب.</p> : <div className="mt-2 space-y-2">{(stockAlerts.data || []).slice(0, 5).map((alert) => <div key={`${alert.productId}-${alert.warehouseId}`} className="flex items-center justify-between rounded-lg bg-white/70 p-2 text-xs"><span>صنف #{alert.productId} · مستودع #{alert.warehouseId}</span><Badge variant="outline">{alert.severity === "critical" ? "حرج" : "تحذير"} · {alert.availableQty}</Badge></div>)}</div>}</div><div className="mt-5 flex items-center gap-3"><PackageCheck className="text-emerald-600" /><div><p className="font-semibold">ضوابط التشغيل</p><p className="mt-1 text-xs leading-5 text-slate-500">عزل كيان · Idempotency · تتبع دفعة/Serial · مراجعة فروقات الجرد</p></div></div><div className="mt-4 flex items-center gap-3"><Truck className="text-blue-600" /><div><p className="font-semibold">التزامن</p><p className="mt-1 text-xs leading-5 text-slate-500">الحركات المحلية لا تضيع عند انقطاع الشبكة وتُعاد بترتيب آمن.</p></div></div><div className="mt-4 flex items-center gap-3"><ClipboardCheck className="text-amber-600" /><div><p className="font-semibold">الاعتماد</p><p className="mt-1 text-xs leading-5 text-slate-500">لا يتحول فرق الجرد إلى تسوية قبل اعتماد مستخدم منفصل.</p></div></div></CardContent></Card>
             </div>
           </div>
         </div>
@@ -303,4 +339,8 @@ function Field({ label, value, onChange, text = false }: { label: string; value:
 }
 function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }> }) {
   return <div><label className="text-sm font-medium">{label}</label><select className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div>;
+}
+
+function Metric({ label, value }: { label: string; value: string | number }) {
+  return <div className="rounded-lg bg-slate-50 p-2"><p className="text-[11px] text-slate-500">{label}</p><p className="mt-1 font-semibold text-slate-900">{value}</p></div>;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countVariance, isTraceComplete, labelPayload, nextOfflineState, normalizeScan, retryDelayMs } from "../shared/inventoryOffline56";
+import { countVariance, inventoryAlertSeverity, isTraceComplete, labelPayload, nextOfflineState, normalizeScan, retryDelayMs, scanShouldAccept, varianceExportRows } from "../shared/inventoryOffline56";
 
 describe("inventory offline and trace controls", () => {
   it("normalizes scan values for stable catalog lookup", () => {
@@ -27,5 +27,22 @@ describe("inventory offline and trace controls", () => {
 
   it("creates an entity-bound label payload without losing trace identifiers", () => {
     expect(JSON.parse(labelPayload(4, 21, "QR-21", "B-9", "S-2"))).toEqual({ entityId: 4, productId: 21, encodedValue: "QR-21", batchNo: "B-9", serialNo: "S-2" });
+  });
+});
+
+
+describe("inventory reporting and continuous scan", () => {
+  it("suppresses duplicate continuous scans within the cooldown window", () => {
+    expect(scanShouldAccept(" abc-1 ", "ABC-1", 1000, 1500, true)).toBe(false);
+    expect(scanShouldAccept(" abc-1 ", "ABC-1", 1000, 2200, true)).toBe(true);
+    expect(scanShouldAccept(" xyz-2 ", "ABC-1", 1000, 1100, true)).toBe(true);
+  });
+  it("classifies low-stock alerts deterministically", () => {
+    expect(inventoryAlertSeverity(0, 5, 1)).toBe("critical");
+    expect(inventoryAlertSeverity(4, 5, 1)).toBe("warning");
+    expect(inventoryAlertSeverity(8, 5, 1)).toBe("normal");
+  });
+  it("normalizes variance rows for deterministic exports", () => {
+    expect(varianceExportRows([{ id: 3, productId: 9, varianceQty: "-2.5", varianceValueMinor: 1250, status: "open" }])).toEqual([{ id: 3, productId: 9, varianceQty: -2.5, varianceValueMinor: 1250, status: "open" }]);
   });
 });
