@@ -2076,3 +2076,12 @@
 - [x] Add protected procedures for import/export lifecycle, document readiness, customs release, landed-cost allocation, and handoff to Trading 60 inventory.
 - [x] Add Arabic RTL Step 61 workspace with shipment milestones, customs blockers, landed cost, and vehicle trade status.
 - [x] Add Step 61 domain tests, documentation, TypeScript/build validation, full tests, and desktop/mobile QA.
+
+## Step 62 + Shipping Reliability Extension
+
+- [x] Re-read Step 62 package scope and inspect existing projects, budgets, PMO, WBS, storage, and trade61 contracts before implementation.
+- [x] Add entity-scoped PMO projects, WBS hierarchy, milestones, budgets, commitments, actuals, change controls, and variance calculations without duplicating finance records.
+- [x] Add protected PMO procedures and an Arabic RTL project/portfolio workspace with WBS and budget controls.
+- [x] Add secure shipping document upload using S3 storage references, SHA-256 checksums, metadata, verification status, and entity/shipment scope.
+- [x] Add advanced trade dashboard filters and shipment event/status tracking with customs, document, ETA, and landed-cost indicators.
+- [x] Add domain tests, documentation, TypeScript, full Vitest, production build, desktop/mobile QA, and checkpoint for the combined stage.

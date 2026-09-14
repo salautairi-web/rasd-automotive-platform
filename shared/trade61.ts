@@ -1,2 +1,5 @@
+import { createHash } from "node:crypto";
+
+export function shippingDocumentChecksum(data: Uint8Array) { return createHash("sha256").update(data).digest("hex"); }
 export function customsReadiness(requiredDocumentsJson: string, missingDocumentsJson?: string) { let required: string[] = []; let missing: string[] = []; try { const parsed = JSON.parse(requiredDocumentsJson || "[]"); required = Array.isArray(parsed) ? parsed.map(String) : []; } catch { required = []; } try { const parsed = JSON.parse(missingDocumentsJson || "[]"); missing = Array.isArray(parsed) ? parsed.map(String) : []; } catch { missing = []; } return { required, missing, ready: missing.length === 0, missingJson: JSON.stringify(missing) }; }
 export function landedCostAllocation(amountMinor: number, basis: "per_vehicle" | "value" | "weight" | "equal") { if (!Number.isFinite(amountMinor) || amountMinor < 0) throw new Error("Invalid landed cost"); return { totalMinor: Math.round(amountMinor), basis }; }

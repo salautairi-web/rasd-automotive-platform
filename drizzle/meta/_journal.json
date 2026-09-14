@@ -519,6 +519,13 @@
       "when": 1789419622367,
       "tag": "0073_oval_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "5",
+      "when": 1789420079516,
+      "tag": "0074_overconfident_hulk",
+      "breakpoints": true
     }
   ]
 }

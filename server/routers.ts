@@ -21,6 +21,7 @@ import { fleet58Router } from "./fleet58";
 import { workshop59Router } from "./workshop59";
 import { trading60Router } from "./trading60";
 import { trade61Router } from "./trade61";
+import { projects62Router } from "./projects62";
 import { complianceRouter } from "./compliance";
 import { compliance42Router } from "./compliance42";
 import { centralOperationsRouter } from "./centralOperations";
@@ -84,6 +85,7 @@ export const appRouter = router({
   workshop59: workshop59Router,
   trading60: trading60Router,
   trade61: trade61Router,
+  projects62: projects62Router,
   compliance: complianceRouter,
   compliance42: compliance42Router,
   centralOperations: centralOperationsRouter,
