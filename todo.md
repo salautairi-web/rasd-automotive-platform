@@ -2100,3 +2100,11 @@
 - [x] Add protected HR procedures for employee onboarding, contract approval, compensation versioning, payroll draft/calculation/lock/approval, and finance-posting handoff without duplicating finance entries.
 - [x] Add an Arabic RTL HR/payroll workspace with entity filters, headcount, payroll period controls, variance checks, and approval gates.
 - [x] Add Step 63 domain tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Step 63 — Workforce Operations Extension
+
+- [x] Re-read the latest Step 63 checkpoint and package requirements for attendance, leave, overtime, payroll approvals, and project/work-order cost allocation.
+- [x] Add entity-scoped attendance logs, leave requests/balances, overtime approvals, and payroll cost allocations without duplicating Finance, PMO, or Workshop costs.
+- [x] Add protected procedures for attendance, leave, overtime, payroll approval, cost allocation, and reconciliation.
+- [x] Extend the Arabic RTL HR/payroll workspace with workforce operations and payroll control indicators.
+- [x] Add domain tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.

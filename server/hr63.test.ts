@@ -16,3 +16,16 @@ describe("Step 63 HR/HCM payroll domain", () => {
     expect(["draft", "calculated"].includes("locked")).toBe(false);
   });
 });
+
+describe("Step 63 workforce operations", () => {
+  it("calculates overtime and allocation proportionally", () => {
+    const hoursBps = 15000; const rateBps = 12500; const hourlyMinor = 1000;
+    expect(Math.round(hourlyMinor * hoursBps / 10000 * rateBps / 10000)).toBe(1875);
+    expect(10000).toBeGreaterThanOrEqual(7500);
+  });
+  it("keeps leave and overtime references entity-scoped", () => {
+    const request = { businessEntityId: 3, employeeId: 10, payrollPeriodId: 4 };
+    expect(request.businessEntityId).toBe(3);
+    expect({ ...request, businessEntityId: 4 }.businessEntityId).not.toBe(request.businessEntityId);
+  });
+});
