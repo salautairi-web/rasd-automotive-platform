@@ -547,6 +547,13 @@
       "when": 1789421754150,
       "tag": "0077_brave_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "5",
+      "when": 1789422188875,
+      "tag": "0078_green_pandemic",
+      "breakpoints": true
     }
   ]
 }

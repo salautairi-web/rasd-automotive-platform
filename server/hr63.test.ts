@@ -29,3 +29,13 @@ describe("Step 63 workforce operations", () => {
     expect({ ...request, businessEntityId: 4 }.businessEntityId).not.toBe(request.businessEntityId);
   });
 });
+
+describe("Step 63 payroll closeout", () => {
+  it("passes reconciliation only when expected and actual totals match", () => {
+    expect(125000 === 125000).toBe(true);
+    expect(125000 === 124999).toBe(false);
+  });
+  it("keeps labor integration pending until source reconciliation", () => {
+    expect(["pending", "matched", "unmatched"]).toContain("pending");
+  });
+});

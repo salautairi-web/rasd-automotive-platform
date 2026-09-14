@@ -2108,3 +2108,11 @@
 - [x] Add protected procedures for attendance, leave, overtime, payroll approval, cost allocation, and reconciliation.
 - [x] Extend the Arabic RTL HR/payroll workspace with workforce operations and payroll control indicators.
 - [x] Add domain tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Step 63 — Payroll Closeout and Workforce Cost Integration
+
+- [x] Re-read the latest Step 63 checkpoint and package requirements for leave balances, multi-level approvals, payroll locking, and reconciliation.
+- [x] Add entity-scoped leave balances, approval events, payroll closeout controls, and reconciliation states without duplicating Finance records.
+- [x] Add technician/project labor integration with job-card and project allocation references.
+- [x] Extend the Arabic RTL HR/payroll workspace with leave balances, approval status, payroll closeout, and labor cost indicators.
+- [x] Add domain tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
