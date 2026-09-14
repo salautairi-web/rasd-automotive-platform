@@ -2039,3 +2039,18 @@
 - [x] Add road-test authorization, driver, start/end mileage, route/evidence, findings, incidents, and customer-visible report.
 - [x] Add warranty tracking with coverage, claim, comeback linkage, root cause, responsibility, corrective action, and service-history integration.
 - [x] Add protected procedures, Arabic RTL UI, tests, documentation, TypeScript/build validation, desktop/mobile QA, and checkpoint.
+
+## Continuation — RASD Master Package Steps 57–82
+
+- [x] Re-read the uploaded ZIP package and extract the latest detailed scope and acceptance criteria for Steps 60–82.
+- [x] Compare the package findings with the current roadmap and identify the next executable step after Workshop 59.
+- [x] Implement the approved next step with entity isolation, protected procedures, Arabic RTL UI, tests, documentation, and source-of-truth boundaries.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review TODO, and save the continuation checkpoint.
+
+## Step 60 — Vehicle Sales & Trading Management
+
+- [x] Add entity-scoped trading acquisition, inspection, cost-basis, stock, location, pricing, lead, quote, reservation, deposit, delivery, warranty, and profitability tables without duplicating Vehicle Master.
+- [x] Add protected trading procedures for acquisition, inspection, cost accumulation, stock transitions, pricing approvals, leads, quotes, reservations, deposits, delivery controls, and profitability reads.
+- [x] Add Arabic RTL Trading cockpit with stock, ready-for-sale, aging, pipeline, reservations, deposits, sales, margin, and vehicle P&L indicators.
+- [x] Add Step 60 domain tests for entity isolation, cost basis, stock transitions, price approval, reservation locking, deposit allocation, delivery blocking, and profitability reconciliation.
+- [x] Document Step 60 boundaries, APIs, events, deferred integrations, and acceptance evidence.

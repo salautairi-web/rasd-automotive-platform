@@ -498,6 +498,13 @@
       "when": 1789417127080,
       "tag": "0070_milky_sunset_bain",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "5",
+      "when": 1789417936701,
+      "tag": "0071_rare_wasp",
+      "breakpoints": true
     }
   ]
 }
