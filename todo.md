@@ -1955,3 +1955,25 @@
 - [x] Add Vitest tests for export determinism, entity filtering, scan cooldown/deduplication, feedback states, alert thresholds, acknowledgment, and isolation.
 - [x] Document deferred scheduled refresh workers, direct printer integrations, spreadsheet/PDF archival storage, and real-time transport limits.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, review todo.md, and save the extension checkpoint.
+
+## RASD Master Package — Steps 57–82
+
+- [x] Inspect the uploaded master ZIP and extract its Markdown/package index.
+- [x] Build a step-by-step inventory of Steps 57–82 with domains, dependencies, scope, and expected deliverables.
+- [x] Map each future step to existing RASD modules, schemas, routers, dashboards, controls, and deferred integrations.
+- [x] Identify the first executable priority step and its prerequisites without implementing an unapproved scope.
+- [x] Write the consolidated execution roadmap and update the project documentation.
+- [x] Confirm the next step scope before beginning its implementation.
+
+## Step 57 — Asset Management, Fixed Assets, Depreciation & Lifecycle
+
+- [x] Extend asset master with classification, component hierarchy, serial/VIN reference, acquisition/capitalization dates, useful life, residual value, location, custodian, and policy status without duplicating vehicle VIN.
+- [x] Add asset locations, custody assignments, acceptance/return, condition, verification, and transfer history within an entity.
+- [x] Add explicit inter-entity asset transfers with valuation, approvals, settlement metadata, accounting-event boundary, and audit trail.
+- [x] Add asset components, replacements, warranties, insurance policies, claims, expiries, and maintenance/usage links.
+- [x] Add impairment and revaluation records with evidence, approvals, policy controls, and finance-event boundaries.
+- [x] Add periodic depreciation run controls, period status, exception/reconciliation metadata, recalculation approval, and idempotency.
+- [x] Add asset disposal/sale workflow with valuation, proceeds, gain/loss, ownership transfer, and approval segregation.
+- [x] Add asset physical verification with barcode/QR, serial/VIN, condition, location, custodian, missing asset, and variance outcomes.
+- [x] Add asset TCO and lifecycle dashboard with Arabic RTL entity-scoped metrics and alerts.
+- [x] Add protected procedures, tests, documentation, TypeScript/build validation, and desktop/mobile visual QA for Step 57.
