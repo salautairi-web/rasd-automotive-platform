@@ -18,6 +18,7 @@ import { communication54Router } from "./communication54";
 import { procurementNetworkRouter } from "./procurementNetwork";
 import { fleetRouter } from "./fleet";
 import { fleet58Router } from "./fleet58";
+import { workshop59Router } from "./workshop59";
 import { complianceRouter } from "./compliance";
 import { compliance42Router } from "./compliance42";
 import { centralOperationsRouter } from "./centralOperations";
@@ -78,6 +79,7 @@ export const appRouter = router({
   procurementNetwork: procurementNetworkRouter,
   fleet: fleetRouter,
   fleet58: fleet58Router,
+  workshop59: workshop59Router,
   compliance: complianceRouter,
   compliance42: compliance42Router,
   centralOperations: centralOperationsRouter,

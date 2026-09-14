@@ -2000,3 +2000,30 @@
 - [x] Add Vitest tests for lifecycle transitions, driver scope, license expiry, utilization determinism, fuel anomalies, maintenance triggers, telematics policy, masking, profitability, and entity isolation.
 - [x] Document deferred Telematics/GPS providers, fuel-card connectors, driver-license verification, route optimization, and distributed alert workers.
 - [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, update Step 58 documentation, review todo.md, and save the checkpoint.
+
+## RASD Master Package Continuation After Step 58
+
+- [x] Re-read the extracted master package sections for Steps 59–82 and capture detailed scopes, dependencies, and acceptance criteria.
+- [x] Update PACKAGE_INDEX_FINDINGS.md and RASD_STEPS_57_82_ROADMAP.md with post-Step-58 reading results.
+- [x] Identify Step 59 as the next executable scope and map its gaps to existing RASD modules and source-of-truth boundaries.
+- [x] Add the Step 59 implementation checklist before coding.
+- [x] Continue implementation, tests, documentation, visual QA, and checkpointing for Step 59.
+
+## Step 59 — Workshop Management, Service Center & Job Cards
+
+- [x] Extend workshop entities, branches, service centers, bays, advisors, technicians, specialties, shifts, and capacity controls.
+- [x] Add appointments, walk-in check-in, customer consent, vehicle mileage/fuel/damage/photos, complaint, and intake evidence.
+- [x] Add inspection templates, findings, diagnostics, DTC/root cause, recommendations, technician evidence, and customer-visible summaries.
+- [x] Add estimate versions with labor, parts, subcontracting, consumables, tax, discounts, validity, and customer approval/rejection/change-request audit.
+- [x] Add job cards with lifecycle states, priority, promised date, advisor, bay, technicians, operations, pause/resume/end, actual/standard hours, and progress.
+- [x] Add technician profiles, specialties, certifications, skill matrix, shifts, availability, productivity, quality, and training within privacy scope.
+- [x] Add workshop parts requests, reservations, issue/return/substitution, serial/batch, cost, warranty, and warehouse/entity safeguards.
+- [x] Add subcontract work with vendor approval, service order/PO boundary, receipt, cost, warranty, and invoice linkage.
+- [x] Add QC, rework on failure, road-test authorization and mileage, final inspection, delivery blocking, acknowledgement, and evidence.
+- [x] Add warranty claims, comeback/repeat repair linkage, root cause, responsibility, corrective action, and service history by entity.
+- [x] Add workshop pricing, capacity, appointments, WIP, finance profile, gross margin, cycle time, first-time-fix, comeback, parts fill, and satisfaction metrics.
+- [x] Add protected workshop procedures for entity isolation, PII masking, customer approval integrity, part/finance boundaries, delivery controls, and audit logging.
+- [x] Add Arabic RTL workshop cockpit for appointments, open job cards, bays, workload, parts, WIP, margin, QC, comebacks, and vehicle history.
+- [x] Add Vitest tests for check-in, inspection, diagnosis, estimate versions, approval, job-card assignment, parts reservation/issue, labor, subcontract, QC rework, road-test authorization, delivery blocking, warranty comeback, finance update, and isolation.
+- [x] Document deferred workshop-provider, diagnostic/OEM, telematics, payment, external vendor, OCR, and distributed worker integrations.
+- [x] Run TypeScript, full Vitest suite, production build, desktop/mobile visual QA, write Step 59 documentation, review todo.md, and save the checkpoint.
