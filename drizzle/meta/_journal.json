@@ -568,6 +568,13 @@
       "when": 1789490175034,
       "tag": "0080_special_maelstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "5",
+      "when": 1789507241241,
+      "tag": "0081_wise_sprite",
+      "breakpoints": true
     }
   ]
 }

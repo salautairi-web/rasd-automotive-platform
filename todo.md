@@ -2145,3 +2145,10 @@
 - [x] Add the next entity-scoped schema and protected procedures without duplicating existing operational or financial records.
 - [x] Build its Arabic RTL vertical slice and integrate it with current modules.
 - [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Step 67 — Next RASD Package Stage
+
+- [x] Read Step 67 scope and inspect existing domains and integrations before implementation.
+- [x] Add Step 67 entity-scoped schema and protected procedures without duplicating source records.
+- [x] Build the Arabic RTL vertical slice and integrate it with the current platform.
+- [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
