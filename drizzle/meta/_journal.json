@@ -561,6 +561,13 @@
       "when": 1789442463151,
       "tag": "0079_clumsy_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "5",
+      "when": 1789490175034,
+      "tag": "0080_special_maelstrom",
+      "breakpoints": true
     }
   ]
 }

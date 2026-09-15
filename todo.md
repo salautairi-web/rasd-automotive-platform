@@ -2138,3 +2138,10 @@
 - [x] Add the next step entity-scoped schema and protected procedures without duplicating existing operational or financial records.
 - [x] Build its Arabic RTL vertical slice and integrate it with the relevant current modules.
 - [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Next Package Step After Step 65
+
+- [x] Read the next package step scope and inspect existing domains before implementation.
+- [x] Add the next entity-scoped schema and protected procedures without duplicating existing operational or financial records.
+- [x] Build its Arabic RTL vertical slice and integrate it with current modules.
+- [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
