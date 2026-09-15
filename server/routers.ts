@@ -36,6 +36,7 @@ import { treasury48Router } from "./treasury48";
 import { ar65Router } from "./ar65";
 import { consolidation66Router } from "./consolidation66";
 import { fpna67Router } from "./fpna67";
+import { crm68Router } from "./crm68";
 import { risk49Router } from "./risk49";
 import { audit50Router } from "./audit50";
 import { externalAuditor50Router } from "./externalAuditor50";
@@ -104,6 +105,7 @@ export const appRouter = router({
   ar65: ar65Router,
   consolidation66: consolidation66Router,
   fpna67: fpna67Router,
+  crm68: crm68Router,
   risk49: risk49Router,
   audit50: audit50Router,
   externalAuditor50: externalAuditor50Router,
