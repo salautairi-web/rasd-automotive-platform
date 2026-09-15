@@ -554,6 +554,13 @@
       "when": 1789422188875,
       "tag": "0078_green_pandemic",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "5",
+      "when": 1789442463151,
+      "tag": "0079_clumsy_tempest",
+      "breakpoints": true
     }
   ]
 }
