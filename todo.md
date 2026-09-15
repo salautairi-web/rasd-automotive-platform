@@ -2116,3 +2116,18 @@
 - [x] Add technician/project labor integration with job-card and project allocation references.
 - [x] Extend the Arabic RTL HR/payroll workspace with leave balances, approval status, payroll closeout, and labor cost indicators.
 - [x] Add domain tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Next Package Step After Step 63
+
+- [x] Read the next package step scope and inspect existing domains before implementation.
+- [x] Add its entity-scoped schema, protected procedures, and source-of-truth boundaries without duplicating existing financial or operational records.
+- [x] Build the Arabic RTL vertical slice and integrate it with the relevant existing modules.
+- [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Step 64 — Treasury, Banking & Liquidity Vertical Slice
+
+- [x] Add entity-scoped Step 64 treasury cockpit over existing treasury48 sources without duplicating cash ownership or Finance postings.
+- [x] Add bank/cash positioning, receipt/payment queue, transfer approval, liquidity scenario, reconciliation, and inter-entity guard indicators.
+- [x] Add protected Step 64 procedures for consolidated visibility, cash controls, approvals, and source-linked posting handoff.
+- [x] Add Arabic RTL treasury workspace with entity scope, cash position, pending approvals, liquidity risk, and transfer controls.
+- [x] Add Step 64 tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
