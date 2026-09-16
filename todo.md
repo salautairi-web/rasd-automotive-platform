@@ -2188,3 +2188,10 @@
 - [x] Add protected procedures for rule drafting, validation, version approval, activation, simulation, and workflow instance evaluation.
 - [x] Build an Arabic RTL responsive rule designer with matrix preview and validation feedback.
 - [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Step 73 — Approval Extension Without Duplication
+
+- [x] Read Step 73 scope and compare it with the implemented Step 72 approval designer.
+- [x] Identify and implement only missing sequential/parallel matrix capabilities, preserving Step 72 as the source of truth.
+- [x] Extend the Arabic RTL responsive approval workspace only where the Step 73 scope requires it.
+- [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
