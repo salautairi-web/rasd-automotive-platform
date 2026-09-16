@@ -2180,3 +2180,11 @@
 - [x] Add Step 71 entity-scoped schema and protected procedures without duplicating source records.
 - [x] Build the Arabic RTL responsive vertical slice and integrate it with the current platform.
 - [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Step 72 — Configurable Approval Rule Designer
+
+- [x] Read Step 72 scope and inspect Workflow 71 definitions, nodes, edges, and approval resources before implementation.
+- [x] Add entity-scoped configurable approval rules, sequential/parallel approval matrices, quorum, conditions, versions, and activation states.
+- [x] Add protected procedures for rule drafting, validation, version approval, activation, simulation, and workflow instance evaluation.
+- [x] Build an Arabic RTL responsive rule designer with matrix preview and validation feedback.
+- [x] Add tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
