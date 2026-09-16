@@ -42,6 +42,7 @@ import { dms70Router } from "./dms70";
 import { workflow71Router } from "./workflow71";
 import { approval72Router } from "./approval72";
 import { bi73Router } from "./bi73";
+import { mdm74Router } from "./mdm74";
 import { risk49Router } from "./risk49";
 import { audit50Router } from "./audit50";
 import { externalAuditor50Router } from "./externalAuditor50";
@@ -116,6 +117,7 @@ export const appRouter = router({
   workflow71: workflow71Router,
   approval72: approval72Router,
   bi73: bi73Router,
+  mdm74: mdm74Router,
   risk49: risk49Router,
   audit50: audit50Router,
   externalAuditor50: externalAuditor50Router,
