@@ -74,6 +74,7 @@ import { iamRouter } from "./iam";
 import { security43Router } from "./security43";
 import { mobileRouter } from "./mobile";
 import { payments47Router } from "./payments47";
+import { adminControlRouter } from "./adminControl";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
 import { and, eq, sql } from "drizzle-orm";
@@ -149,6 +150,7 @@ export const appRouter = router({
   security43: security43Router,
   mobile: mobileRouter,
   payments47: payments47Router,
+  adminControl: adminControlRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

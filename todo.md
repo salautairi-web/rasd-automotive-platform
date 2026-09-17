@@ -2209,3 +2209,10 @@
 - [x] Add protected procedures for standards approval, steward assignment, quality assessment, duplicate review, lifecycle transition, and governance reporting.
 - [x] Build an Arabic RTL MDM governance workspace with golden records, quality dimensions, duplicates, ownership, and pending changes.
 - [x] Add Step 74 tests, documentation, TypeScript/build validation, full tests, desktop/mobile QA, and checkpoint.
+
+## Attached File Requirements Extraction
+
+- [ ] Identify the attached file and read its full contents, including relevant appendices and diagrams.
+- [ ] Extract requirements for entities, projects, dashboards, customers, users, roles, permissions, approvals, and auditability.
+- [ ] Map extracted requirements to existing RASD modules and distinguish implemented, partial, and missing capabilities.
+- [ ] Produce an Arabic executive extraction document with prioritized implementation recommendations and traceability.

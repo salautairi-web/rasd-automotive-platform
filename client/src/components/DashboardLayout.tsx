@@ -29,6 +29,7 @@ import { Button } from "./ui/button";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "نظرة عامة", path: "/" },
+  { icon: ShieldCheck, label: "مركز التحكم المؤسسي", path: "/admin/control-center" },
   { icon: Building2, label: "الهيكل المؤسسي", path: "/organization" },
   { icon: Landmark, label: "سجل كيانات الأعمال", path: "/erp/entities" },
   { icon: BriefcaseBusiness, label: "دفاتر المحاسبة", path: "/erp/accounting" },
