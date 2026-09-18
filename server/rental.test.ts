@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateDepositSettlement, canCheckinContract, canCheckoutContract, hasReservationConflict, maintenanceState, validateOdometer, vehicleProfitability } from "../shared/rental";
+import { calculateDepositSettlement, calculateRentalCharges, canCheckinContract, canCheckoutContract, hasReservationConflict, maintenanceState, validateDepositSettlementApproval, validateOdometer, vehicleProfitability } from "../shared/rental";
 
 describe("Rental lifecycle invariants", () => {
   it("detects overlapping reservations", () => {
@@ -26,5 +26,13 @@ describe("Rental lifecycle invariants", () => {
   });
   it("calculates per-vehicle net contribution and margin", () => {
     expect(vehicleProfitability(200000, 50000)).toEqual({ netContributionMinor: 150000, marginBps: 7500 });
+  });
+  it("calculates fuel, mileage, lateness, and additional driver charges", () => {
+    expect(calculateRentalCharges({ mileage: 1400, allowedMileage: 1000, fuelLevel: 75, fuelRateMinor: 1500, extraMileageRateMinor: 250, lateDays: 2, lateDayRateMinor: 10000, additionalDrivers: 1, additionalDriverRateMinor: 5000 })).toMatchObject({ fuelGap: 25, extraKm: 400, fuelMinor: 37500, extraMileageMinor: 100000, lateReturnMinor: 20000, additionalDriverMinor: 5000, totalMinor: 162500 });
+  });
+  it("requires an accountant role and pending status for deposit approval", () => {
+    expect(validateDepositSettlementApproval("pending_accountant", "accountant")).toBe(true);
+    expect(() => validateDepositSettlementApproval("pending_accountant", "sales_agent")).toThrow("Accountant approval is required");
+    expect(() => validateDepositSettlementApproval("applied", "accountant")).toThrow("Settlement is not awaiting approval");
   });
 });
