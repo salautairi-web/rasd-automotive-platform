@@ -631,6 +631,13 @@
       "when": 1789765160995,
       "tag": "0089_wooden_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "5",
+      "when": 1790175800900,
+      "tag": "0090_nostalgic_quentin_quire",
+      "breakpoints": true
     }
   ]
 }

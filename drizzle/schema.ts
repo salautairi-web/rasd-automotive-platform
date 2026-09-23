@@ -1503,3 +1503,50 @@ export const mdmDataStandards74 = mysqlTable("mdm_data_standards_74", { id: int(
 export const mdmQualityRules74 = mysqlTable("mdm_quality_rules_74", { id: int("id").autoincrement().primaryKey(), businessEntityId: int("businessEntityId"), domainType: varchar("domainType", { length: 80 }).notNull(), ruleKey: varchar("ruleKey", { length: 120 }).notNull(), dimension: mysqlEnum("dimension", ["completeness", "accuracy", "validity", "consistency", "uniqueness", "timeliness", "integrity", "conformity"]).notNull(), expression: text("expression").notNull(), thresholdBps: int("thresholdBps").default(10000).notNull(), severity: mysqlEnum("severity", ["low", "medium", "high", "critical"]).default("medium").notNull(), status: mysqlEnum("status", ["draft", "active", "retired"]).default("draft").notNull(), createdBy: int("createdBy").notNull(), approvedBy: int("approvedBy"), approvedAt: timestamp("approvedAt"), createdAt: timestamp("createdAt").defaultNow().notNull() }, t => ({ ruleUnique: uniqueIndex("mdm_quality_rule_74_unique").on(t.businessEntityId, t.domainType, t.ruleKey) }));
 export const mdmQualityAssessments74 = mysqlTable("mdm_quality_assessments_74", { id: int("id").autoincrement().primaryKey(), businessEntityId: int("businessEntityId"), domainType: varchar("domainType", { length: 80 }).notNull(), recordId: int("recordId").notNull(), ruleId: int("ruleId").notNull(), observedValue: decimal("observedValue", { precision: 8, scale: 4 }).notNull(), status: mysqlEnum("status", ["passed", "warning", "failed", "waived"]).default("passed").notNull(), evidenceJson: text("evidenceJson").notNull(), evaluatedBy: int("evaluatedBy").notNull(), evaluatedAt: timestamp("evaluatedAt").defaultNow().notNull() });
 export const mdmLifecycleActions74 = mysqlTable("mdm_lifecycle_actions_74", { id: int("id").autoincrement().primaryKey(), businessEntityId: int("businessEntityId"), domainType: varchar("domainType", { length: 80 }).notNull(), recordId: int("recordId").notNull(), fromStatus: varchar("fromStatus", { length: 40 }).notNull(), toStatus: varchar("toStatus", { length: 40 }).notNull(), reason: text("reason").notNull(), requestedBy: int("requestedBy").notNull(), approvedBy: int("approvedBy"), status: mysqlEnum("status", ["submitted", "approved", "rejected", "applied"]).default("submitted").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull(), appliedAt: timestamp("appliedAt") });
+
+
+// Centralized role-aware UI layout preferences, templates, and administrative policies.
+export const uiLayoutTemplates = mysqlTable("ui_layout_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  templateKey: varchar("templateKey", { length: 120 }).notNull().unique(),
+  roleKey: varchar("roleKey", { length: 100 }).notNull(),
+  mode: mysqlEnum("mode", ["customer", "user"]).default("user").notNull(),
+  nameAr: varchar("nameAr", { length: 180 }).notNull(),
+  configJson: text("configJson").notNull(),
+  isSystem: boolean("isSystem").default(false).notNull(),
+  status: mysqlEnum("status", ["active", "disabled"]).default("active").notNull(),
+  updatedBy: int("updatedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const uiLayoutPreferences = mysqlTable("ui_layout_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  scopeKey: varchar("scopeKey", { length: 220 }).notNull().unique(),
+  userId: int("userId").notNull(),
+  roleKey: varchar("roleKey", { length: 100 }).notNull(),
+  mode: mysqlEnum("mode", ["customer", "user"]).default("user").notNull(),
+  businessEntityId: int("businessEntityId"),
+  branchId: int("branchId"),
+  configJson: text("configJson").notNull(),
+  source: mysqlEnum("source", ["personal", "template", "forced"]).default("personal").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({ scope: uniqueIndex("ui_layout_preference_scope_unique").on(t.userId, t.scopeKey) }));
+
+export const uiLayoutPolicies = mysqlTable("ui_layout_policies", {
+  id: int("id").autoincrement().primaryKey(),
+  policyKey: varchar("policyKey", { length: 220 }).notNull().unique(),
+  roleKey: varchar("roleKey", { length: 100 }).notNull(),
+  mode: mysqlEnum("mode", ["customer", "user"]).default("user").notNull(),
+  businessEntityId: int("businessEntityId"),
+  branchId: int("branchId"),
+  templateId: int("templateId"),
+  configJson: text("configJson").notNull(),
+  enforced: boolean("enforced").default(true).notNull(),
+  status: mysqlEnum("status", ["active", "disabled"]).default("active").notNull(),
+  createdBy: int("createdBy").notNull(),
+  updatedBy: int("updatedBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({ target: uniqueIndex("ui_layout_policy_target_unique").on(t.roleKey, t.mode, t.businessEntityId, t.branchId) }));

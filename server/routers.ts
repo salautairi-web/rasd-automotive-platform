@@ -81,6 +81,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { validateBalancedJournal } from "../shared/erp";
 import { canReserveVehicle, canDeliverVehicle, quotationStatus } from "../shared/auto-sales";
+import { layoutRouter } from "./layout";
 
 const correlationSchema = z.string().trim().min(8).max(80).optional();
 
@@ -151,6 +152,7 @@ export const appRouter = router({
   mobile: mobileRouter,
   payments47: payments47Router,
   adminControl: adminControlRouter,
+  layout: layoutRouter,
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
