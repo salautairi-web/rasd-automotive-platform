@@ -13,6 +13,14 @@ export function calculateWorkshopEstimate(input: { laborMinor: number; partsMino
   return Math.max(0, subtotal + input.taxMinor - input.discountMinor);
 }
 
+export function estimateStatusAfterDecision(decision: "approved" | "rejected" | "change_requested") {
+  return decision === "approved" ? "approved" : decision === "rejected" ? "rejected" : "partially_approved";
+}
+
+export function isValidWorkshopMileage(startMileage: number, endMileage: number) {
+  return Number.isInteger(startMileage) && Number.isInteger(endMileage) && startMileage >= 0 && endMileage >= startMileage;
+}
+
 export function canDeliverWorkshopJob(input: { status: WorkshopJobStatus; invoiceStatus: "pending" | "issued" | "paid"; paymentStatus: "pending" | "partial" | "paid" | "waived"; customerAcknowledgement: boolean; requiredDocumentsPresent: boolean; qcPassed: boolean }) {
   return input.status === "ready" && input.qcPassed && input.requiredDocumentsPresent && input.customerAcknowledgement && (input.paymentStatus === "paid" || input.paymentStatus === "waived") && input.invoiceStatus !== "pending";
 }

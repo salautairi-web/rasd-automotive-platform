@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateWorkshopEstimate, calculateWorkshopKpis, canDeliverWorkshopJob, canTransitionWorkshopJob, maskWorkshopCustomer } from "../shared/workshop59";
+import { calculateWorkshopEstimate, calculateWorkshopKpis, canDeliverWorkshopJob, canTransitionWorkshopJob, estimateStatusAfterDecision, isValidWorkshopMileage, maskWorkshopCustomer } from "../shared/workshop59";
 
 describe("workshop59", () => {
   it("allows only valid job-card transitions", () => {
@@ -17,5 +17,15 @@ describe("workshop59", () => {
   it("calculates workshop KPI rates and masks customer data", () => {
     expect(calculateWorkshopKpis([{ revenueMinor: 1000, costMinor: 600, cycleHours: 4, comeback: false, firstTimeFix: true }, { revenueMinor: 2000, costMinor: 1000, cycleHours: 8, comeback: true, firstTimeFix: false }])).toEqual({ revenueMinor: 3000, grossMarginMinor: 1400, averageRepairOrderMinor: 1500, averageCycleHours: 6, comebackRateBps: 5000, firstTimeFixRateBps: 5000 });
     expect(maskWorkshopCustomer("Customer-1234", false)).toBe("Cu••••34");
+  });
+  it("maps customer estimate decisions to safe estimate states", () => {
+    expect(estimateStatusAfterDecision("approved")).toBe("approved");
+    expect(estimateStatusAfterDecision("rejected")).toBe("rejected");
+    expect(estimateStatusAfterDecision("change_requested")).toBe("partially_approved");
+  });
+  it("rejects road-test odometer rollback", () => {
+    expect(isValidWorkshopMileage(12000, 12037)).toBe(true);
+    expect(isValidWorkshopMileage(12037, 12000)).toBe(false);
+    expect(isValidWorkshopMileage(-1, 20)).toBe(false);
   });
 });
