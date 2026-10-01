@@ -1550,3 +1550,20 @@ export const uiLayoutPolicies = mysqlTable("ui_layout_policies", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (t) => ({ target: uniqueIndex("ui_layout_policy_target_unique").on(t.roleKey, t.mode, t.businessEntityId, t.branchId) }));
+
+
+// Immutable version history for role-aware UI layout templates.
+export const uiLayoutTemplateVersions = mysqlTable("ui_layout_template_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  templateKey: varchar("templateKey", { length: 120 }).notNull(),
+  roleKey: varchar("roleKey", { length: 100 }).notNull(),
+  mode: mysqlEnum("mode", ["customer", "user"]).default("user").notNull(),
+  versionNo: int("versionNo").notNull(),
+  nameAr: varchar("nameAr", { length: 180 }).notNull(),
+  configJson: text("configJson").notNull(),
+  status: mysqlEnum("status", ["published", "archived"]).default("published").notNull(),
+  changeNote: varchar("changeNote", { length: 500 }),
+  createdBy: int("createdBy").notNull(),
+  restoredFromVersionId: int("restoredFromVersionId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (t) => ({ versionUnique: uniqueIndex("ui_layout_template_version_unique").on(t.templateKey, t.versionNo) }));
