@@ -21,6 +21,15 @@ export function isValidWorkshopMileage(startMileage: number, endMileage: number)
   return Number.isInteger(startMileage) && Number.isInteger(endMileage) && startMileage >= 0 && endMileage >= startMileage;
 }
 
+export function isValidWorkshopScheduleWindow(startsAt: Date, endsAt: Date) {
+  return startsAt instanceof Date && endsAt instanceof Date && !Number.isNaN(startsAt.getTime()) && !Number.isNaN(endsAt.getTime()) && endsAt.getTime() > startsAt.getTime();
+}
+
+export function workshopScheduleOverlaps(input: { startsAt: Date; endsAt: Date; existing: Array<{ startsAt: Date; endsAt: Date; status: string }> }) {
+  if (!isValidWorkshopScheduleWindow(input.startsAt, input.endsAt)) return true;
+  return input.existing.some(item => item.status !== "cancelled" && item.startsAt.getTime() < input.endsAt.getTime() && item.endsAt.getTime() > input.startsAt.getTime());
+}
+
 export function canDeliverWorkshopJob(input: { status: WorkshopJobStatus; invoiceStatus: "pending" | "issued" | "paid"; paymentStatus: "pending" | "partial" | "paid" | "waived"; customerAcknowledgement: boolean; requiredDocumentsPresent: boolean; qcPassed: boolean }) {
   return input.status === "ready" && input.qcPassed && input.requiredDocumentsPresent && input.customerAcknowledgement && (input.paymentStatus === "paid" || input.paymentStatus === "waived") && input.invoiceStatus !== "pending";
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateWorkshopEstimate, calculateWorkshopKpis, canDeliverWorkshopJob, canTransitionWorkshopJob, estimateStatusAfterDecision, isValidWorkshopMileage, maskWorkshopCustomer } from "../shared/workshop59";
+import { calculateWorkshopEstimate, calculateWorkshopKpis, canDeliverWorkshopJob, canTransitionWorkshopJob, estimateStatusAfterDecision, isValidWorkshopMileage, isValidWorkshopScheduleWindow, maskWorkshopCustomer, workshopScheduleOverlaps } from "../shared/workshop59";
 
 describe("workshop59", () => {
   it("allows only valid job-card transitions", () => {
@@ -27,5 +27,13 @@ describe("workshop59", () => {
     expect(isValidWorkshopMileage(12000, 12037)).toBe(true);
     expect(isValidWorkshopMileage(12037, 12000)).toBe(false);
     expect(isValidWorkshopMileage(-1, 20)).toBe(false);
+  });
+  it("validates appointment windows and prevents active bay overlaps", () => {
+    const start = new Date("2026-10-03T08:00:00Z");
+    const end = new Date("2026-10-03T09:00:00Z");
+    expect(isValidWorkshopScheduleWindow(start, end)).toBe(true);
+    expect(isValidWorkshopScheduleWindow(end, start)).toBe(false);
+    expect(workshopScheduleOverlaps({ startsAt: start, endsAt: end, existing: [{ startsAt: new Date("2026-10-03T08:30:00Z"), endsAt: new Date("2026-10-03T09:30:00Z"), status: "confirmed" }] })).toBe(true);
+    expect(workshopScheduleOverlaps({ startsAt: start, endsAt: end, existing: [{ startsAt: new Date("2026-10-03T08:30:00Z"), endsAt: new Date("2026-10-03T09:30:00Z"), status: "cancelled" }] })).toBe(false);
   });
 });

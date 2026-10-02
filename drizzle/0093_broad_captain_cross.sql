@@ -1,0 +1,1 @@
+ALTER TABLE `workshop_schedules_59` ADD `technicianId` int;

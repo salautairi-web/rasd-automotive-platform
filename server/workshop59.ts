@@ -4,13 +4,78 @@ import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { storagePut } from "./storage";
-import { workshopCheckins59, workshopEstimates59, workshopJobCards59, workshopOperations59, workshopQuality59, workshopDeliveries59, workshopInspections59, workshopDtc59, workshopPartRequests59, workshopEstimateConsents59, workshopRoadTests59, workshopWarranties59, partsInventory, partsInventoryMovements } from "../drizzle/schema";
+import { workshopCheckins59, workshopEstimates59, workshopJobCards59, workshopOperations59, workshopQuality59, workshopDeliveries59, workshopInspections59, workshopDtc59, workshopPartRequests59, workshopEstimateConsents59, workshopRoadTests59, workshopWarranties59, partsInventory, partsInventoryMovements, customers, vehicles, workshopAppointments, workshopBays59, workshopSchedules59, workshopTechnicians } from "../drizzle/schema";
 import { calculateWorkshopEstimate, canDeliverWorkshopJob, canTransitionWorkshopJob, estimateStatusAfterDecision, isValidWorkshopMileage } from "../shared/workshop59";
 
 const scope = z.object({ businessEntityId: z.number().int().positive() });
 const idempotencyKey = z.string().trim().min(8).max(160);
 
 export const workshop59Router = router({
+  referenceData: protectedProcedure.input(scope).query(async ({ input }) => {
+    const db = await getDb(); if (!db) return { customers: [], vehicles: [], bays: [], technicians: [] };
+    const [customerRows, vehicleRows, bays, technicians] = await Promise.all([
+      db.select({ id: customers.id, customerNo: customers.customerNo, nameAr: customers.nameAr, phone: customers.phone }).from(customers).where(and(eq(customers.businessEntityId, input.businessEntityId), eq(customers.status, "active"))).orderBy(desc(customers.createdAt)).limit(200),
+      db.select({ id: vehicles.id, vehicleNo: vehicles.vehicleNo, vin: vehicles.vin, make: vehicles.make, model: vehicles.model, modelYear: vehicles.modelYear, lifecycleStatus: vehicles.lifecycleStatus }).from(vehicles).where(eq(vehicles.businessEntityId, input.businessEntityId)).orderBy(desc(vehicles.createdAt)).limit(200),
+      db.select().from(workshopBays59).where(and(eq(workshopBays59.businessEntityId, input.businessEntityId), eq(workshopBays59.status, "active"))).orderBy(workshopBays59.bayCode),
+      db.select().from(workshopTechnicians).where(and(eq(workshopTechnicians.businessEntityId, input.businessEntityId), eq(workshopTechnicians.available, 1))).orderBy(workshopTechnicians.nameAr),
+    ]);
+    return { customers: customerRows, vehicles: vehicleRows, bays, technicians };
+  }),
+  appointmentsBoard: protectedProcedure.input(scope.extend({ from: z.coerce.date(), to: z.coerce.date() })).query(async ({ input }) => {
+    const db = await getDb(); if (!db) return { appointments: [], schedules: [], bays: [], technicians: [] };
+    const [appointments, schedules, bays, technicians] = await Promise.all([
+      db.select().from(workshopAppointments).where(and(eq(workshopAppointments.businessEntityId, input.businessEntityId), sql`${workshopAppointments.scheduledAt} >= ${input.from}`, sql`${workshopAppointments.scheduledAt} < ${input.to}`)).orderBy(workshopAppointments.scheduledAt),
+      db.select().from(workshopSchedules59).where(and(eq(workshopSchedules59.businessEntityId, input.businessEntityId), sql`${workshopSchedules59.startsAt} < ${input.to}`, sql`${workshopSchedules59.endsAt} > ${input.from}`)).orderBy(workshopSchedules59.startsAt),
+      db.select().from(workshopBays59).where(eq(workshopBays59.businessEntityId, input.businessEntityId)).orderBy(workshopBays59.bayCode),
+      db.select().from(workshopTechnicians).where(eq(workshopTechnicians.businessEntityId, input.businessEntityId)).orderBy(workshopTechnicians.nameAr),
+    ]);
+    return { appointments, schedules, bays, technicians };
+  }),
+  scheduleAppointment: protectedProcedure.input(scope.extend({ customerId: z.number().int().positive(), vehicleId: z.number().int().positive(), serviceType: z.string().trim().min(2).max(120), startsAt: z.coerce.date(), endsAt: z.coerce.date(), bayId: z.number().int().positive(), technicianId: z.number().int().positive().optional(), technicianUserId: z.number().int().positive().optional(), jobCardId: z.number().int().positive().optional(), notes: z.string().max(2000).optional(), idempotencyKey })).mutation(async ({ input, ctx }) => {
+    if (input.endsAt <= input.startsAt) throw new TRPCError({ code: "BAD_REQUEST", message: "وقت نهاية الموعد يجب أن يكون بعد بدايته" });
+    const db = await getDb(); if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    const replay = await db.select().from(workshopSchedules59).where(and(eq(workshopSchedules59.businessEntityId, input.businessEntityId), eq(workshopSchedules59.idempotencyKey, input.idempotencyKey))).limit(1);
+    if (replay[0]) return replay[0];
+    const [customer, vehicle, bay] = await Promise.all([
+      db.select({ id: customers.id }).from(customers).where(and(eq(customers.id, input.customerId), eq(customers.businessEntityId, input.businessEntityId), eq(customers.status, "active"))).limit(1),
+      db.select({ id: vehicles.id }).from(vehicles).where(and(eq(vehicles.id, input.vehicleId), eq(vehicles.businessEntityId, input.businessEntityId))).limit(1),
+      db.select().from(workshopBays59).where(and(eq(workshopBays59.id, input.bayId), eq(workshopBays59.businessEntityId, input.businessEntityId), eq(workshopBays59.status, "active"))).limit(1),
+    ]);
+    if (!customer[0] || !vehicle[0] || !bay[0]) throw new TRPCError({ code: "FORBIDDEN", message: "العميل أو المركبة أو الباي خارج نطاق الكيان أو غير نشط" });
+    if (input.technicianId) {
+      const technician = await db.select({ id: workshopTechnicians.id }).from(workshopTechnicians).where(and(eq(workshopTechnicians.id, input.technicianId), eq(workshopTechnicians.businessEntityId, input.businessEntityId), eq(workshopTechnicians.available, 1))).limit(1);
+      if (!technician[0]) throw new TRPCError({ code: "FORBIDDEN", message: "الفني غير متاح ضمن الكيان" });
+    }
+    const conflicts = await db.select({ id: workshopSchedules59.id }).from(workshopSchedules59).where(and(eq(workshopSchedules59.businessEntityId, input.businessEntityId), sql`${workshopSchedules59.status} <> 'cancelled'`, sql`${workshopSchedules59.startsAt} < ${input.endsAt}`, sql`${workshopSchedules59.endsAt} > ${input.startsAt}`, sql`(${workshopSchedules59.bayId} = ${input.bayId} OR (${input.technicianId ? sql`${workshopSchedules59.technicianId} = ${input.technicianId}` : sql`1 = 0`}))`)).limit(1);
+    if (conflicts[0]) throw new TRPCError({ code: "CONFLICT", message: "يوجد تعارض في الباي أو جدول الفني خلال هذه الفترة" });
+    const appointmentNo = `WS-APT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const appointmentResult = await db.insert(workshopAppointments).values({ businessEntityId: input.businessEntityId, appointmentNo, customerId: input.customerId, vehicleId: input.vehicleId, scheduledAt: input.startsAt, serviceType: input.serviceType, status: "scheduled" });
+    const appointmentId = Number(appointmentResult[0].insertId);
+    const [row] = await db.insert(workshopSchedules59).values({ businessEntityId: input.businessEntityId, appointmentId, jobCardId: input.jobCardId, bayId: input.bayId, technicianId: input.technicianId, technicianUserId: input.technicianUserId, startsAt: input.startsAt, endsAt: input.endsAt, notes: input.notes, idempotencyKey: input.idempotencyKey, createdBy: ctx.user.id }).$returningId();
+    return { ...row, appointmentId, appointmentNo };
+  }),
+  performanceReport: protectedProcedure.input(scope.extend({ from: z.coerce.date(), to: z.coerce.date() })).query(async ({ input }) => {
+    const db = await getDb(); if (!db) return { summary: { revenueMinor: 0, laborCostMinor: 0, partsCostMinor: 0, grossMarginMinor: 0, completedJobs: 0, openJobs: 0, averageCycleHours: 0, comebackRateBps: 0, firstTimeFixRateBps: 0 }, byStatus: [], technicianPerformance: [] };
+    const [jobs, estimates, operations, partRequests, inventory] = await Promise.all([
+      db.select().from(workshopJobCards59).where(and(eq(workshopJobCards59.businessEntityId, input.businessEntityId), sql`${workshopJobCards59.createdAt} >= ${input.from}`, sql`${workshopJobCards59.createdAt} < ${input.to}`)),
+      db.select().from(workshopEstimates59).where(and(eq(workshopEstimates59.businessEntityId, input.businessEntityId), sql`${workshopEstimates59.createdAt} >= ${input.from}`, sql`${workshopEstimates59.createdAt} < ${input.to}`)),
+      db.select().from(workshopOperations59).where(eq(workshopOperations59.businessEntityId, input.businessEntityId)),
+      db.select().from(workshopPartRequests59).where(and(eq(workshopPartRequests59.businessEntityId, input.businessEntityId), sql`${workshopPartRequests59.createdAt} >= ${input.from}`, sql`${workshopPartRequests59.createdAt} < ${input.to}`)),
+      db.select().from(partsInventory).where(eq(partsInventory.businessEntityId, input.businessEntityId)),
+    ]);
+    const revenueMinor = estimates.filter(e => ["issued", "approved", "partially_approved"].includes(e.status)).reduce((sum, e) => sum + e.totalMinor, 0);
+    const laborCostMinor = operations.filter(o => jobs.some(j => j.id === o.jobCardId)).reduce((sum, o) => sum + o.laborCostMinor, 0);
+    const inventoryCost = new Map(inventory.map(item => [`${item.warehouseId}:${item.productId}`, item.averageCostMinor]));
+    const partsCostMinor = partRequests.filter(r => r.status === "issued").reduce((sum, r) => sum + (inventoryCost.get(`${r.warehouseId}:${r.productId}`) ?? 0) * r.quantity, 0);
+    const completed = jobs.filter(j => ["delivered", "closed"].includes(j.status));
+    const comeback = jobs.filter(j => j.status === "warranty_repeat").length;
+    const firstTimeFix = completed.length - comeback;
+    const cycleHours = jobs.length ? Math.round(jobs.reduce((sum, j) => sum + ((j.updatedAt.getTime() - j.createdAt.getTime()) / 3600000), 0) / jobs.length) : 0;
+    const byStatus = Array.from(new Set(jobs.map(j => j.status))).map(status => ({ status, count: jobs.filter(j => j.status === status).length }));
+    const technicianIds = Array.from(new Set(operations.map(o => o.technicianUserId).filter((id): id is number => id !== null)));
+    const technicianPerformance = technicianIds.map(technicianId => { const rows = operations.filter(o => o.technicianUserId === technicianId); return { technicianId, operations: rows.length, completed: rows.filter(o => o.status === "completed").length, rework: rows.filter(o => o.status === "rework").length, actualHours: rows.reduce((sum, o) => sum + Number(o.actualHours ?? 0), 0), laborCostMinor: rows.reduce((sum, o) => sum + o.laborCostMinor, 0) }; });
+    return { summary: { revenueMinor, laborCostMinor, partsCostMinor, grossMarginMinor: revenueMinor - laborCostMinor - partsCostMinor, completedJobs: completed.length, openJobs: jobs.filter(j => !["closed", "delivered"].includes(j.status)).length, averageCycleHours: cycleHours, comebackRateBps: jobs.length ? Math.round(comeback / jobs.length * 10000) : 0, firstTimeFixRateBps: jobs.length ? Math.round(Math.max(0, firstTimeFix) / jobs.length * 10000) : 0 }, byStatus, technicianPerformance };
+  }),
   dashboard: protectedProcedure.input(scope).query(async ({ input }) => {
     const db = await getDb(); if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     const [jobs, checkins, operations, quality] = await Promise.all([
@@ -83,7 +148,7 @@ export const workshop59Router = router({
     await db.update(workshopJobCards59).set({ status: input.to }).where(and(eq(workshopJobCards59.id, input.jobCardId), eq(workshopJobCards59.businessEntityId, input.businessEntityId), eq(workshopJobCards59.status, input.from)));
     return { ok: true, from: input.from, status: input.to };
   }),
-  createOperation: protectedProcedure.input(scope.extend({ jobCardId: z.number().int().positive(), technicianUserId: z.number().int().positive().optional(), operation: z.string().trim().min(2).max(180), standardHours: z.string().max(20).default("0") })).mutation(async ({ input }) => { const db = await getDb(); if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" }); const [job] = await db.select({ id: workshopJobCards59.id }).from(workshopJobCards59).where(and(eq(workshopJobCards59.id, input.jobCardId), eq(workshopJobCards59.businessEntityId, input.businessEntityId))).limit(1); if (!job) throw new TRPCError({ code: "FORBIDDEN", message: "أمر العمل خارج نطاق الكيان" }); const [row] = await db.insert(workshopOperations59).values({ businessEntityId: input.businessEntityId, jobCardId: input.jobCardId, technicianUserId: input.technicianUserId, operation: input.operation, standardHours: input.standardHours }).$returningId(); return row; }),
+  createOperation: protectedProcedure.input(scope.extend({ jobCardId: z.number().int().positive(), technicianUserId: z.number().int().positive().optional(), operation: z.string().trim().min(2).max(180), standardHours: z.string().max(20).default("0"), laborCostMinor: z.number().int().nonnegative().default(0) })).mutation(async ({ input }) => { const db = await getDb(); if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" }); const [job] = await db.select({ id: workshopJobCards59.id }).from(workshopJobCards59).where(and(eq(workshopJobCards59.id, input.jobCardId), eq(workshopJobCards59.businessEntityId, input.businessEntityId))).limit(1); if (!job) throw new TRPCError({ code: "FORBIDDEN", message: "أمر العمل خارج نطاق الكيان" }); const [row] = await db.insert(workshopOperations59).values({ businessEntityId: input.businessEntityId, jobCardId: input.jobCardId, technicianUserId: input.technicianUserId, operation: input.operation, standardHours: input.standardHours, laborCostMinor: input.laborCostMinor }).$returningId(); return row; }),
   updateOperation: protectedProcedure.input(scope.extend({ operationId: z.number().int().positive(), status: z.enum(["planned", "in_progress", "paused", "completed", "rework"]), actualHours: z.string().max(20).optional() })).mutation(async ({ input }) => { const db = await getDb(); if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" }); const [operation] = await db.select().from(workshopOperations59).where(and(eq(workshopOperations59.id, input.operationId), eq(workshopOperations59.businessEntityId, input.businessEntityId))).limit(1); if (!operation) throw new TRPCError({ code: "NOT_FOUND", message: "عملية الورشة غير موجودة" }); await db.update(workshopOperations59).set({ status: input.status, actualHours: input.actualHours ?? operation.actualHours, startedAt: input.status === "in_progress" && !operation.startedAt ? new Date() : operation.startedAt, endedAt: input.status === "completed" || input.status === "rework" ? new Date() : operation.endedAt }).where(and(eq(workshopOperations59.id, input.operationId), eq(workshopOperations59.businessEntityId, input.businessEntityId))); return { ok: true, status: input.status }; }),
   recordQuality: protectedProcedure.input(scope.extend({ jobCardId: z.number().int().positive(), result: z.enum(["pending", "passed", "failed", "rework"]), checklistJson: z.string().min(2).max(20000), evidenceJson: z.string().max(12000).optional(), defect: z.string().max(2000).optional() })).mutation(async ({ input, ctx }) => {
     const db = await getDb(); if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
