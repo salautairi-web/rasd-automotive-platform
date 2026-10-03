@@ -16,6 +16,7 @@ describe("role-aware layout templates", () => {
       domainOrder: ["rental", "workshop", "sales", "parts", "finance"],
       visibleDomains: ["rental", "workshop", "sales", "parts", "finance"],
       serviceOrder: {},
+      systemOrder: ["central-erp", "master-data", "rental", "workshop", "sales", "parts", "projects", "finance", "procurement", "hr", "workflow", "audit"],
     });
   });
 
@@ -25,5 +26,12 @@ describe("role-aware layout templates", () => {
     const copy = cloneLayoutConfig(original);
     copy.serviceOrder.sales.push("quotes");
     expect(original.serviceOrder.sales).toEqual(["offers", "customers"]);
+  });
+
+  it("clones system order without sharing the array", () => {
+    const original = defaultLayoutForRole("branch_manager");
+    const copy = cloneLayoutConfig(original);
+    copy.systemOrder?.reverse();
+    expect(original.systemOrder?.[0]).toBe("central-erp");
   });
 });

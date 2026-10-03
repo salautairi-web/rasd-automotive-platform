@@ -13,6 +13,7 @@ const configSchema = z.object({
   domainOrder: z.array(z.string().min(1).max(40)).min(1).max(20),
   visibleDomains: z.array(z.string().min(1).max(40)).max(20),
   serviceOrder: z.record(z.string().max(40), z.array(z.string().max(180)).max(30)),
+  systemOrder: z.array(z.string().min(1).max(60)).max(40).optional(),
 });
 const requireAdmin = (role: string) => { if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "صلاحية إدارة تخطيط الواجهات مطلوبة" }); };
 

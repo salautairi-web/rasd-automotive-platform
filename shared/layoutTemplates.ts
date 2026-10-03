@@ -3,9 +3,11 @@ export type LayoutConfig = {
   domainOrder: string[];
   visibleDomains: string[];
   serviceOrder: Record<string, string[]>;
+  systemOrder?: string[];
 };
 
 const baseDomains = ["rental", "workshop", "sales", "parts", "finance"];
+const baseSystems = ["central-erp", "master-data", "rental", "workshop", "sales", "parts", "projects", "finance", "procurement", "hr", "workflow", "audit"];
 const roleFocus: Record<string, string> = {
   branch_manager: "rental",
   rental_manager: "rental",
@@ -29,10 +31,10 @@ export function defaultLayoutForRole(roleKey: string, mode: LayoutMode = "user")
   const focus = roleFocus[roleKey];
   const domainOrder = focus ? [focus, ...baseDomains.filter(domain => domain !== focus)] : [...baseDomains];
   const serviceOrder: Record<string, string[]> = {};
-  if (mode === "customer") return { domainOrder: [...baseDomains], visibleDomains: [...baseDomains], serviceOrder };
-  return { domainOrder, visibleDomains: [...baseDomains], serviceOrder };
+  if (mode === "customer") return { domainOrder: [...baseDomains], visibleDomains: [...baseDomains], serviceOrder, systemOrder: [...baseSystems] };
+  return { domainOrder, visibleDomains: [...baseDomains], serviceOrder, systemOrder: [...baseSystems] };
 }
 
 export function cloneLayoutConfig(config: LayoutConfig): LayoutConfig {
-  return { domainOrder: [...config.domainOrder], visibleDomains: [...config.visibleDomains], serviceOrder: Object.fromEntries(Object.entries(config.serviceOrder).map(([key, value]) => [key, [...value]])) };
+  return { domainOrder: [...config.domainOrder], visibleDomains: [...config.visibleDomains], serviceOrder: Object.fromEntries(Object.entries(config.serviceOrder).map(([key, value]) => [key, [...value]])), systemOrder: config.systemOrder ? [...config.systemOrder] : undefined };
 }
