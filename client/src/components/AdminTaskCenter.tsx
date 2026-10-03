@@ -1,0 +1,21 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc";
+import { ArrowLeft, ClipboardCheck, KeyRound, Layers3, ShieldAlert } from "lucide-react";
+import { useLocation } from "wouter";
+
+export default function AdminTaskCenter() {
+  const [, navigate] = useLocation();
+  const { data } = trpc.adminControl.dashboard.useQuery();
+  const { data: review } = trpc.adminControl.permissionReview.useQuery();
+  const pendingGates = (data?.projectGates ?? []).filter(gate => gate.status === "pending");
+  const reviewRoles = (review ?? []).filter(role => role.reviewStatus !== "active");
+  const tasks = [
+    ...pendingGates.slice(0, 8).map(gate => ({ key: `gate-${gate.id}`, title: `اعتماد بوابة ${gate.gateNo}: ${gate.gateNameAr}`, detail: `مشروع #${gate.projectId} · كيان ${gate.businessEntityId}`, tone: "amber", icon: ClipboardCheck, action: "فتح المشاريع", onClick: () => navigate("/projects/pmo") })),
+    ...reviewRoles.slice(0, 8).map(role => ({ key: `role-${role.id}`, title: `مراجعة دور: ${role.nameAr}`, detail: `${role.activeMemberships} عضوية · ${role.reviewStatus === "unused" ? "غير مستخدم" : "قديم"}`, tone: "rose", icon: KeyRound, action: "فتح الصلاحيات", onClick: () => navigate("/admin/control-center?tab=access") })),
+    ...(data?.projects ?? []).filter(project => ["planning", "execution", "monitoring"].includes(project.lifecycle)).slice(0, 6).map(project => ({ key: `project-${project.id}`, title: `متابعة مشروع ${project.nameAr}`, detail: `${project.projectCode} · الميزانية ${project.budgetMinor ?? 0}`, tone: "indigo", icon: Layers3, action: "فتح PMO", onClick: () => navigate("/projects/pmo") })),
+  ];
+  const counts = { urgent: reviewRoles.length, pending: pendingGates.length, active: (data?.projects ?? []).filter(project => ["planning", "execution", "monitoring"].includes(project.lifecycle)).length };
+  return <div className="space-y-6" dir="rtl"><Card className="border-0 bg-gradient-to-l from-slate-950 to-indigo-950 text-white"><CardContent className="p-6 sm:p-8"><div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><Badge className="mb-3 border-0 bg-white/10 text-indigo-100">ADMIN TASK CENTER · ROLE AWARE</Badge><h2 className="text-2xl font-semibold">مركز المهام الإدارية</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">قائمة موحدة للإجراءات التي تحتاج تدخلاً من مسؤول المنصة، مرتبة حسب الحساسية والأولوية.</p></div><div className="grid grid-cols-3 gap-2 text-center text-xs"><div className="rounded-xl bg-rose-400/15 p-3"><strong className="block text-xl">{counts.urgent}</strong><span className="text-slate-300">مراجعة عاجلة</span></div><div className="rounded-xl bg-amber-400/15 p-3"><strong className="block text-xl">{counts.pending}</strong><span className="text-slate-300">اعتمادات معلقة</span></div><div className="rounded-xl bg-indigo-400/15 p-3"><strong className="block text-xl">{counts.active}</strong><span className="text-slate-300">مشاريع نشطة</span></div></div></div></CardContent></Card><Card><CardHeader><CardTitle className="flex items-center gap-2"><ShieldAlert size={19} className="text-amber-600"/> قائمة الإجراءات</CardTitle></CardHeader><CardContent className="space-y-3">{tasks.map(task => { const Icon = task.icon; return <div key={task.key} className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center"><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${task.tone === "rose" ? "bg-rose-50 text-rose-600" : task.tone === "amber" ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"}`}><Icon size={19}/></div><div className="min-w-0 flex-1"><strong className="block text-sm">{task.title}</strong><p className="mt-1 truncate text-xs text-slate-500">{task.detail}</p></div><Button size="sm" variant="outline" onClick={task.onClick}>{task.action}<ArrowLeft size={14} className="mr-1"/></Button></div>; })}{!tasks.length && <div className="rounded-xl border border-dashed p-10 text-center text-sm text-emerald-700">لا توجد إجراءات إدارية معلقة حالياً.</div>}</CardContent></Card></div>;
+}

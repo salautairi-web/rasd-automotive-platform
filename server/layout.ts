@@ -1,9 +1,9 @@
-import { and, desc, eq, isNull, or } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "./_core/trpc";
 import { getDb, createAuditLog } from "./db";
-import { iamMemberships, iamRoles, uiLayoutPolicies, uiLayoutPreferences, uiLayoutTemplateVersions, uiLayoutTemplates } from "../drizzle/schema";
+import { auditLogs, iamMemberships, iamRoles, uiLayoutPolicies, uiLayoutPreferences, uiLayoutTemplateVersions, uiLayoutTemplates } from "../drizzle/schema";
 import { cloneLayoutConfig, defaultLayoutForRole, layoutRoleKeys, type LayoutConfig, type LayoutMode } from "../shared/layoutTemplates";
 import { diffLayoutConfigs, layoutVersionRestoreNote, nextLayoutVersion } from "../shared/layoutVersions";
 
@@ -69,6 +69,7 @@ export const layoutRouter = router({
     return { saved: true as const, source: input.source, roleKey: resolvedRoleKey };
   }),
   policies: protectedProcedure.query(async ({ ctx }) => { requireAdmin(ctx.user.role); const db = await getDb(); return db ? db.select().from(uiLayoutPolicies).orderBy(desc(uiLayoutPolicies.updatedAt)).limit(200) : []; }),
+  policyAudit: protectedProcedure.query(async ({ ctx }) => { requireAdmin(ctx.user.role); const db = await getDb(); if (!db) return []; return db.select().from(auditLogs).where(and(eq(auditLogs.systemKey, "layout"), inArray(auditLogs.entityType, ["ui_layout_policy", "ui_layout_template_version", "ui_layout_preference"]))).orderBy(desc(auditLogs.createdAt)).limit(300); }),
   upsertPolicy: protectedProcedure.input(z.object({ roleKey: z.string().min(1).max(100), mode, businessEntityId: id.optional(), branchId: id.optional(), config: configSchema, templateKey: z.string().max(120).optional(), enforced: z.boolean().default(true) })).mutation(async ({ ctx, input }) => {
     requireAdmin(ctx.user.role); const db = await getDb(); if (!db) throw new Error("database_unavailable"); const key = policyKey(input.roleKey, input); const configJson = JSON.stringify(cloneLayoutConfig(input.config));
     const [existing] = await db.select({ id: uiLayoutPolicies.id }).from(uiLayoutPolicies).where(eq(uiLayoutPolicies.policyKey, key)).limit(1); const values = { policyKey: key, roleKey: input.roleKey, mode: input.mode, businessEntityId: input.businessEntityId, branchId: input.branchId, configJson, enforced: input.enforced, status: "active" as const, updatedBy: ctx.user.id };
