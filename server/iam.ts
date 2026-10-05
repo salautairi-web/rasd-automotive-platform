@@ -2,7 +2,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { iamAccessReviews, iamMemberships, iamPermissions, iamPolicies, iamRolePermissions, iamRoles, iamSecurityEvents, iamMfaMethods, iamMfaChallenges, iamSessions, iamTrustedDevices, iamStepUpPolicies, iamStepUpVerifications, iamSessionAudit } from "../drizzle/schema";
+import { businessEntities, iamAccessReviews, iamMemberships, iamPermissions, iamPolicies, iamRolePermissions, iamRoles, iamSecurityEvents, iamMfaMethods, iamMfaChallenges, iamSessions, iamTrustedDevices, iamStepUpPolicies, iamStepUpVerifications, iamSessionAudit } from "../drizzle/schema";
 import { createMfaChallenge, hashMfaValue, isChallengeUsable, isStepUpFresh, sessionStatus, verifyMfaValue } from "../shared/mfa";
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
@@ -18,6 +18,11 @@ export async function hasEntityMembership(userId: number, businessEntityId: numb
 }
 
 export const iamRouter = router({
+  myAccess: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
+    return db.select({ membershipId: iamMemberships.id, businessEntityId: iamMemberships.businessEntityId, defaultEntity: iamMemberships.defaultEntity, scopeJson: iamMemberships.scopeJson, roleId: iamRoles.id, roleKey: iamRoles.roleKey, roleNameAr: iamRoles.nameAr, scopeType: iamRoles.scopeType, entityCode: businessEntities.code, entityNameAr: businessEntities.nameAr, entityCurrency: businessEntities.currency }).from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id)).innerJoin(businessEntities, eq(iamMemberships.businessEntityId, businessEntities.id)).where(and(eq(iamMemberships.userId, ctx.user.id), eq(iamMemberships.status, "active"), eq(iamRoles.status, "active"), eq(businessEntities.status, "active"))).orderBy(desc(iamMemberships.defaultEntity), businessEntities.nameAr).limit(100);
+  }),
   dashboard: protectedProcedure.query(async ({ ctx }) => {
     requireAdmin(ctx.user.role);
     const db = await getDb();

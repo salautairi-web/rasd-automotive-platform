@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateDepositSettlement, calculateRentalCharges, canCheckinContract, canCheckoutContract, hasReservationConflict, maintenanceState, validateDepositSettlementApproval, validateOdometer, vehicleProfitability } from "../shared/rental";
+import { canEnterRentalGateway } from "../shared/rentalAccess";
 
 describe("Rental lifecycle invariants", () => {
   it("detects overlapping reservations", () => {
@@ -34,5 +35,11 @@ describe("Rental lifecycle invariants", () => {
     expect(validateDepositSettlementApproval("pending_accountant", "accountant")).toBe(true);
     expect(() => validateDepositSettlementApproval("pending_accountant", "sales_agent")).toThrow("Accountant approval is required");
     expect(() => validateDepositSettlementApproval("applied", "accountant")).toThrow("Settlement is not awaiting approval");
+  });
+  it("allows only administrators or active IAM members into a valid rental entity", () => {
+    expect(canEnterRentalGateway({ isAdmin: true, hasActiveEntityMembership: false, businessEntityId: 999 })).toBe(true);
+    expect(canEnterRentalGateway({ isAdmin: false, hasActiveEntityMembership: true, businessEntityId: 7 })).toBe(true);
+    expect(canEnterRentalGateway({ isAdmin: false, hasActiveEntityMembership: false, businessEntityId: 7 })).toBe(false);
+    expect(canEnterRentalGateway({ isAdmin: false, hasActiveEntityMembership: true, businessEntityId: "7" })).toBe(false);
   });
 });
