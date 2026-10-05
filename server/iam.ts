@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -17,11 +17,30 @@ export async function hasEntityMembership(userId: number, businessEntityId: numb
   return Boolean(rows[0]);
 }
 
+export async function hasFinancialRentalRole(userId: number, businessEntityId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  const rows = await db.select({ id: iamMemberships.id }).from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id)).where(and(eq(iamMemberships.userId, userId), eq(iamMemberships.businessEntityId, businessEntityId), eq(iamMemberships.status, "active"), eq(iamRoles.status, "active"), or(like(iamRoles.roleKey, "%finance%"), eq(iamRoles.roleKey, "accountant"), eq(iamRoles.roleKey, "rental_manager")))).limit(1);
+  return Boolean(rows[0]);
+}
+
+export async function hasActiveMfa(userId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  const rows = await db.select({ id: iamMfaMethods.id }).from(iamMfaMethods).where(and(eq(iamMfaMethods.userId, userId), eq(iamMfaMethods.status, "active"))).limit(1);
+  return Boolean(rows[0]);
+}
+
 export const iamRouter = router({
   myAccess: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) return [];
     return db.select({ membershipId: iamMemberships.id, businessEntityId: iamMemberships.businessEntityId, defaultEntity: iamMemberships.defaultEntity, scopeJson: iamMemberships.scopeJson, roleId: iamRoles.id, roleKey: iamRoles.roleKey, roleNameAr: iamRoles.nameAr, scopeType: iamRoles.scopeType, entityCode: businessEntities.code, entityNameAr: businessEntities.nameAr, entityCurrency: businessEntities.currency }).from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id)).innerJoin(businessEntities, eq(iamMemberships.businessEntityId, businessEntities.id)).where(and(eq(iamMemberships.userId, ctx.user.id), eq(iamMemberships.status, "active"), eq(iamRoles.status, "active"), eq(businessEntities.status, "active"))).orderBy(desc(iamMemberships.defaultEntity), businessEntities.nameAr).limit(100);
+  }),
+  financialMfaStatus: protectedProcedure.input(entityInput).query(async ({ ctx, input }) => {
+    const required = ctx.user.role !== "admin" && await hasFinancialRentalRole(ctx.user.id, input.businessEntityId);
+    const enrolled = await hasActiveMfa(ctx.user.id);
+    return { required, enrolled, ready: !required || enrolled, message: required && !enrolled ? "تفعيل MFA مطلوب قبل العمليات المالية" : "جاهز للعمليات المالية" };
   }),
   dashboard: protectedProcedure.query(async ({ ctx }) => {
     requireAdmin(ctx.user.role);

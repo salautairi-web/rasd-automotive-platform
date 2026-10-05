@@ -75,7 +75,7 @@ import { security43Router } from "./security43";
 import { mobileRouter } from "./mobile";
 import { payments47Router } from "./payments47";
 import { adminControlRouter } from "./adminControl";
-import { hasEntityMembership } from "./iam";
+import { hasActiveMfa, hasEntityMembership, hasFinancialRentalRole } from "./iam";
 import { canEnterRentalGateway } from "../shared/rentalAccess";
 import { nextRasdNumber } from "./numbering";
 import { storageGetSignedUrl } from "./storage";
@@ -84,17 +84,22 @@ import { TRPCError } from "@trpc/server";
 import { validateBalancedJournal } from "../shared/erp";
 import { canReserveVehicle, canDeliverVehicle, quotationStatus } from "../shared/auto-sales";
 import { layoutRouter } from "./layout";
+import { rentalSecurityRouter } from "./rentalSecurity";
 
 const correlationSchema = z.string().trim().min(8).max(80).optional();
 
 const rentalScopedProcedure = protectedProcedure.use(async ({ ctx, input, next }) => {
   const businessEntityId = (input as { businessEntityId?: unknown })?.businessEntityId;
-  if (!canEnterRentalGateway({ isAdmin: ctx.user.role === "admin", hasActiveEntityMembership: typeof businessEntityId === "number" && await hasEntityMembership(ctx.user.id, businessEntityId), businessEntityId })) throw new TRPCError({ code: "FORBIDDEN", message: "عضوية IAM نشطة في كيان التأجير مطلوبة" });
+  const isAdmin = ctx.user.role === "admin";
+  const hasMembership = typeof businessEntityId === "number" && await hasEntityMembership(ctx.user.id, businessEntityId);
+  if (!canEnterRentalGateway({ isAdmin, hasActiveEntityMembership: hasMembership, businessEntityId })) throw new TRPCError({ code: "FORBIDDEN", message: "عضوية IAM نشطة في كيان التأجير مطلوبة" });
+  if (!isAdmin && typeof businessEntityId === "number" && await hasFinancialRentalRole(ctx.user.id, businessEntityId) && !(await hasActiveMfa(ctx.user.id))) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "يجب تفعيل المصادقة الثنائية قبل استخدام صلاحيات التأجير المالية" });
   return next();
 });
 
 export const appRouter = router({
   rentalAdvanced: rentalAdvancedRouter,
+  rentalSecurity: rentalSecurityRouter,
   importExport: importExportRouter,
   portal: portalRouter,
   portalV2: portalV2Router,

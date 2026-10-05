@@ -3,7 +3,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure, router } from "./_core/trpc";
-import { hasEntityMembership } from "./iam";
+import { hasActiveMfa, hasEntityMembership, hasFinancialRentalRole } from "./iam";
 import { canEnterRentalGateway } from "../shared/rentalAccess";
 import { getDb, enqueueEvent } from "./db";
 import { iamMemberships, iamRoles, workflowAudit52, workflowNotifications52, rentalCheckins, rentalCheckouts, rentalContractCharges, rentalContracts, rentalCustomers, rentalDepositSettlements, rentalDepositTransactions, rentalDeposits, rentalDrivers, rentalInsurancePolicies, rentalInvoices, rentalMaintenanceAlerts, rentalMaintenanceProfiles, rentalMaintenanceTasks, rentalOdometerReadings, rentalOilCatalog, rentalOilChanges, rentalPayments, rentalRatePlans, rentalReservations, rentalTrafficFines, rentalVehicleDamages, rentalVehicleExpenses, rentalVehicles } from "../drizzle/schema";
@@ -11,7 +11,10 @@ import { iamMemberships, iamRoles, workflowAudit52, workflowNotifications52, ren
 const scope = z.object({ businessEntityId: z.number().int().positive() });
 const rentalProcedure = protectedProcedure.use(async ({ ctx, input, next }) => {
   const businessEntityId = (input as { businessEntityId?: unknown })?.businessEntityId;
-  if (!canEnterRentalGateway({ isAdmin: ctx.user.role === "admin", hasActiveEntityMembership: typeof businessEntityId === "number" && await hasEntityMembership(ctx.user.id, businessEntityId), businessEntityId })) throw new TRPCError({ code: "FORBIDDEN", message: "عضوية IAM نشطة في كيان التأجير مطلوبة" });
+  const isAdmin = ctx.user.role === "admin";
+  const hasMembership = typeof businessEntityId === "number" && await hasEntityMembership(ctx.user.id, businessEntityId);
+  if (!canEnterRentalGateway({ isAdmin, hasActiveEntityMembership: hasMembership, businessEntityId })) throw new TRPCError({ code: "FORBIDDEN", message: "عضوية IAM نشطة في كيان التأجير مطلوبة" });
+  if (!isAdmin && typeof businessEntityId === "number" && await hasFinancialRentalRole(ctx.user.id, businessEntityId) && !(await hasActiveMfa(ctx.user.id))) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "يجب تفعيل المصادقة الثنائية قبل استخدام صلاحيات التأجير المالية" });
   return next();
 });
 async function requireVehicle(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, businessEntityId: number, vehicleId: number) {
