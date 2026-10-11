@@ -21,11 +21,14 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Activity, BarChart3, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelRight, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, CreditCard, Target, AlertTriangle, Gavel, BellRing, LockKeyhole } from "lucide-react";
+import { useSidebarFavorites } from "@/hooks/useSidebarFavorites";
+import { searchSidebarItems } from "../../../shared/sidebarNavigation";
+import { Activity, BarChart3, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelRight, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, CreditCard, Target, AlertTriangle, Gavel, BellRing, LockKeyhole, Search, Star, X } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "نظرة عامة", path: "/" },
@@ -90,13 +93,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
+    try {
+      const saved = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
+      return saved >= MIN_WIDTH && saved <= MAX_WIDTH ? saved : DEFAULT_WIDTH;
+    } catch { return DEFAULT_WIDTH; }
   });
   const { loading, user } = useAuth();
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
+    try { localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString()); } catch { /* Private browsing may disable persistence. */ }
   }, [sidebarWidth]);
 
   if (loading) {
@@ -136,7 +141,7 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DashboardLayoutContent key={user.id} setSidebarWidth={setSidebarWidth}>
         {children}
       </DashboardLayoutContent>
     </SidebarProvider>
@@ -154,12 +159,42 @@ function DashboardLayoutContent({
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
-  const { state, toggleSidebar, setOpenMobile } = useSidebar();
+  const { state, toggleSidebar, setOpen, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
+  const isCompact = isCollapsed && !isMobile;
+  const [menuSearch, setMenuSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const { favorites, toggleFavorite } = useSidebarFavorites(user?.id ?? 0, menuItems);
+  const visibleItems = searchSidebarItems(menuItems, menuSearch);
+  const favoriteItems = searchSidebarItems(favorites.map(path => menuItems.find(item => item.path === path)).filter((item): item is typeof menuItems[number] => Boolean(item)), menuSearch);
+
+  const navigate = (path: string) => { setLocation(path); setOpenMobile(false); };
+  const renderMenuItem = (item: typeof menuItems[number], section: "favorites" | "all") => {
+    const favorite = favorites.includes(item.path);
+    return <SidebarMenuItem key={`${section}:${item.path}`}>
+      <SidebarMenuButton
+        isActive={location === item.path}
+        aria-current={location === item.path ? "page" : undefined}
+        onClick={() => navigate(item.path)}
+        tooltip={{ children: item.label, side: "left" }}
+        className={`h-11 font-normal text-right ${isCompact ? "" : "pl-10"}`}
+      >
+        <item.icon className={`h-4 w-4 ${location === item.path ? "text-primary" : ""}`} />
+        <span>{item.label}</span>
+      </SidebarMenuButton>
+      {!isCompact && <button type="button"
+        aria-label={`${favorite ? "إزالة" : "إضافة"} ${item.label} ${favorite ? "من" : "إلى"} المفضلة`}
+        aria-pressed={favorite}
+        title={favorite ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+        onClick={() => toggleFavorite(item.path)}
+        className={`absolute left-0.5 top-1 grid size-9 place-items-center rounded-lg transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${favorite ? "text-amber-500" : "text-muted-foreground/60 hover:text-amber-500"}`}
+      ><Star className="size-4" fill={favorite ? "currentColor" : "none"} /></button>}
+    </SidebarMenuItem>;
+  };
 
   useEffect(() => {
     if (isCollapsed) {
@@ -215,7 +250,7 @@ function DashboardLayoutContent({
               >
                 <PanelRight className="h-4 w-4 text-muted-foreground" />
               </button>
-              {!isCollapsed ? (
+              {!isCompact ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="flex flex-col items-start truncate"><span className="text-lg font-semibold tracking-tight">RASD</span><span className="text-[10px] font-normal text-muted-foreground">لوحة الإدارة المؤسسية</span></div>
                 </div>
@@ -223,27 +258,35 @@ function DashboardLayoutContent({
             </div>
           </SidebarHeader>
 
+          <div className={isCompact ? "px-2 pb-2" : "px-3 pb-3"}>
+            {isCompact ? <button type="button" aria-label="فتح البحث داخل القائمة" title="البحث داخل القائمة"
+              className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => { setOpen(true); requestAnimationFrame(() => searchRef.current?.focus()); }}><Search size={16} /></button> : <>
+              <div className="relative">
+                <Search className="pointer-events-none absolute right-3 top-3 size-4 text-muted-foreground" />
+                <Input ref={searchRef} type="search" aria-label="البحث داخل القائمة" placeholder="ابحث عن خدمة…"
+                  value={menuSearch} onChange={event => setMenuSearch(event.target.value)}
+                  onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); setMenuSearch(""); } }}
+                  className="h-10 bg-background pl-9 pr-9 text-sm [&::-webkit-search-cancel-button]:appearance-none" />
+                {menuSearch && <button type="button" aria-label="مسح البحث في القائمة" onClick={() => { setMenuSearch(""); searchRef.current?.focus(); }}
+                  className="absolute left-1 top-1 grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-accent"><X size={14} /></button>}
+              </div>
+              {menuSearch.trim() && <p role="status" className="mt-2 text-xs text-muted-foreground">{visibleItems.length} خدمة مطابقة</p>}
+            </>}
+          </div>
+
           <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
-                const isActive = location === item.path;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => { setLocation(item.path); setOpenMobile(false); }}
-                      tooltip={{ children: item.label, side: "left" }}
-                      className="h-10 transition-all font-normal text-right"
-                    >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            <nav aria-label="الخدمات المفضلة" data-sidebar-section="favorites" className="px-2 pb-2">
+              {!isCompact && <div className="flex items-center justify-between gap-2 px-2 py-2 text-xs text-muted-foreground"><span className="flex items-center gap-1.5 font-medium"><Star size={13} className="text-amber-500" />الخدمات المفضلة</span><span>{favoriteItems.length}</span></div>}
+              <SidebarMenu>{favoriteItems.map(item => renderMenuItem(item, "favorites"))}</SidebarMenu>
+              {!isCompact && favoriteItems.length === 0 && <p className="px-2 pb-2 text-xs leading-6 text-muted-foreground">{menuSearch.trim() && favorites.length ? "لا توجد مفضلة مطابقة للبحث." : "اضغط النجمة بجوار أي خدمة لإضافتها هنا."}</p>}
+              {(favoriteItems.length > 0 || !isCompact) && <div className="mt-2 border-b border-border" />}
+            </nav>
+            <nav aria-label="جميع الخدمات" data-sidebar-section="all" className="px-2 py-1">
+              {!isCompact && <p className="px-2 pb-2 text-xs font-medium text-muted-foreground">جميع الخدمات</p>}
+              <SidebarMenu>{visibleItems.map(item => renderMenuItem(item, "all"))}</SidebarMenu>
+              {!isCompact && visibleItems.length === 0 && <p role="status" className="rounded-lg bg-muted/50 px-3 py-4 text-center text-xs leading-6 text-muted-foreground">لا توجد خدمة مطابقة. جرّب كلمة أخرى.</p>}
+            </nav>
           </SidebarContent>
 
           <SidebarFooter className="p-3">

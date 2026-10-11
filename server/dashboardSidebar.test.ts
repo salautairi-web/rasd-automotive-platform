@@ -37,4 +37,29 @@ describe("Arabic dashboard sidebar layout", () => {
     expect(html).toContain("md:block");
     expect(html).toContain("shrink-0");
   });
+  it("renders search, favorite and all-service sections with accessible star buttons", () => {
+    const html = renderToStaticMarkup(React.createElement(DashboardLayout, { children: "اختبار" }));
+    expect(html).toContain('aria-label="البحث داخل القائمة"');
+    expect(html).toContain('aria-label="الخدمات المفضلة"');
+    expect(html).toContain('aria-label="جميع الخدمات"');
+    expect(html).toContain('aria-label="إضافة تأجير السيارات إلى المفضلة"');
+    expect(html).toContain('aria-pressed="false"');
+    expect(html).toContain("اضغط النجمة بجوار أي خدمة لإضافتها هنا.");
+  });
+  it("restores only the current user's catalog favorites", () => {
+    vi.stubGlobal("localStorage", { getItem: (key: string) => key === "rasd:sidebar-favorites:v1:1" ? '["/rental","/unknown","/rental"]' : null, setItem: vi.fn() });
+    const html = renderToStaticMarkup(React.createElement(DashboardLayout, { children: "اختبار" }));
+    const favorites = html.match(/<nav[^>]*data-sidebar-section="favorites"[^>]*>[\s\S]*?<\/nav>/)?.[0];
+    expect(favorites).toContain("تأجير السيارات");
+    expect(favorites).not.toContain("/unknown");
+    expect(favorites).not.toContain("الورشة");
+    expect(html).toContain('aria-label="إزالة تأجير السيارات من المفضلة"');
+    expect(html).toContain('aria-pressed="true"');
+  });
+  it("keeps navigation usable when browser storage is unavailable", () => {
+    vi.stubGlobal("localStorage", { getItem: () => { throw new Error("Storage blocked"); }, setItem: vi.fn() });
+    const html = renderToStaticMarkup(React.createElement(DashboardLayout, { children: "اختبار" }));
+    expect(html).toContain('aria-label="البحث داخل القائمة"');
+    expect(html).toContain('data-side="right"');
+  });
 });
