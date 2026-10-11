@@ -1,10 +1,14 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { businessEntities, portalEntityRelationships, portalOrders, portalPayments, portalReservations, portalUsers, portalV2Messages, portalV2Notifications, portalV2Tickets, portalAudit } from "../drizzle/schema";
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
+import { canReplyToPortalTicket } from "../shared/customerPortal";
+
+const portalScopeInput = z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive() });
+const ticketScopeInput = portalScopeInput.extend({ ticketId: z.number().int().positive() });
 
 async function portalUser(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, userId: number) {
   const [existing] = await db.select().from(portalUsers).where(eq(portalUsers.userId, userId)).limit(1);
@@ -26,6 +30,32 @@ async function scopedRelationship(userId: number, businessEntityId: number, rela
 function auditValues(input: { portalUserId: number; businessEntityId: number; relationshipId: number; action: string; resourceType: string; resourceId?: string; outcome: "success" | "failure" | "denied" }) { return { ...input, correlationId: `portal-${nanoid(12)}` }; }
 
 export const portalV2Router = router({
+  ticketThread: protectedProcedure.input(ticketScopeInput).query(async ({ ctx, input }) => {
+    const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId);
+    const [ticket] = await db.select().from(portalV2Tickets).where(and(eq(portalV2Tickets.id, input.ticketId), eq(portalV2Tickets.portalUserId, pu.id), eq(portalV2Tickets.businessEntityId, input.businessEntityId), eq(portalV2Tickets.relationshipId, relationship.id))).limit(1);
+    if (!ticket) throw new TRPCError({ code: "NOT_FOUND", message: "التذكرة غير متاحة ضمن العلاقة الحالية" });
+    const messages = await db.select().from(portalV2Messages).where(and(eq(portalV2Messages.ticketId, ticket.id), eq(portalV2Messages.portalUserId, pu.id), eq(portalV2Messages.businessEntityId, input.businessEntityId), eq(portalV2Messages.relationshipId, relationship.id))).orderBy(asc(portalV2Messages.createdAt), asc(portalV2Messages.id)).limit(200);
+    return { ticket, messages };
+  }),
+  replyToTicket: protectedProcedure.input(ticketScopeInput.extend({ body: z.string().trim().min(2).max(5000) })).mutation(async ({ ctx, input }) => {
+    const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId);
+    await db.transaction(async tx => {
+      const [ticket] = await tx.select().from(portalV2Tickets).where(and(eq(portalV2Tickets.id, input.ticketId), eq(portalV2Tickets.portalUserId, pu.id), eq(portalV2Tickets.businessEntityId, input.businessEntityId), eq(portalV2Tickets.relationshipId, relationship.id))).limit(1).for("update");
+      if (!ticket) throw new TRPCError({ code: "NOT_FOUND", message: "التذكرة غير متاحة ضمن العلاقة الحالية" });
+      if (!canReplyToPortalTicket(ticket.status)) throw new TRPCError({ code: "CONFLICT", message: "التذكرة مغلقة أو محلولة؛ يرجى إنشاء طلب دعم جديد" });
+      await tx.insert(portalV2Messages).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, ticketId: ticket.id, senderType: "portal_user", body: input.body });
+      await tx.insert(portalAudit).values(auditValues({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, action: "ticket.reply", resourceType: "ticket", resourceId: ticket.ticketNo, outcome: "success" }));
+    });
+    return { sent: true as const };
+  }),
+  markNotificationRead: protectedProcedure.input(portalScopeInput.extend({ notificationId: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+    const { db, pu } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId);
+    const filters = and(eq(portalV2Notifications.id, input.notificationId), eq(portalV2Notifications.portalUserId, pu.id), eq(portalV2Notifications.businessEntityId, input.businessEntityId));
+    const [notification] = await db.select().from(portalV2Notifications).where(filters).limit(1);
+    if (!notification) throw new TRPCError({ code: "NOT_FOUND", message: "الإشعار غير متاح ضمن الكيان الحالي" });
+    if (!notification.readAt) await db.update(portalV2Notifications).set({ readAt: new Date() }).where(filters);
+    return { read: true as const };
+  }),
   account: protectedProcedure.query(async ({ ctx }) => { const db = await getDb(); if (!db) return { portalUser: null, relationships: [] }; const pu = await portalUser(db, ctx.user.id); const relationships = await db.select({ id: portalEntityRelationships.id, businessEntityId: portalEntityRelationships.businessEntityId, relationshipType: portalEntityRelationships.relationshipType, status: portalEntityRelationships.status, permissionsJson: portalEntityRelationships.permissionsJson, entityName: businessEntities.nameAr, entityType: businessEntities.entityType }).from(portalEntityRelationships).innerJoin(businessEntities, eq(businessEntities.id, portalEntityRelationships.businessEntityId)).where(and(eq(portalEntityRelationships.portalUserId, pu.id), eq(portalEntityRelationships.status, "active"))); return { portalUser: pu, relationships }; }),
   selectEntity: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive() })).mutation(async ({ ctx, input }) => { const scoped = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId); await scoped.db.insert(portalAudit).values(auditValues({ portalUserId: scoped.pu.id, businessEntityId: input.businessEntityId, relationshipId: input.relationshipId, action: "entity.select", resourceType: "relationship", resourceId: String(input.relationshipId), outcome: "success" })); return { selected: true as const, businessEntityId: input.businessEntityId, relationshipId: input.relationshipId, entityName: scoped.entityName }; }),
   dashboard: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive() })).query(async ({ ctx, input }) => {
@@ -40,5 +70,16 @@ export const portalV2Router = router({
   createOrder: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive(), orderType: z.string().min(2).max(80), summary: z.record(z.string(), z.unknown()), idempotencyKey: z.string().min(8).max(180) })).mutation(async ({ ctx, input }) => { const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId); const [replay] = await db.select({ id: portalOrders.id, status: portalOrders.status }).from(portalOrders).where(and(eq(portalOrders.businessEntityId, input.businessEntityId), eq(portalOrders.idempotencyKey, input.idempotencyKey))).limit(1); if (replay) return { orderId: replay.id, status: replay.status, replay: true as const }; const result = await db.insert(portalOrders).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, orderType: input.orderType, idempotencyKey: input.idempotencyKey, summaryJson: JSON.stringify(input.summary), status: "submitted" }); return { orderId: Number(result[0].insertId), status: "submitted" as const, replay: false as const }; }),
   createReservation: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive(), reservationType: z.string().min(2).max(80), details: z.record(z.string(), z.unknown()), idempotencyKey: z.string().min(8).max(180) })).mutation(async ({ ctx, input }) => { const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId); const [replay] = await db.select({ id: portalReservations.id, status: portalReservations.status }).from(portalReservations).where(and(eq(portalReservations.businessEntityId, input.businessEntityId), eq(portalReservations.idempotencyKey, input.idempotencyKey))).limit(1); if (replay) return { reservationId: replay.id, status: replay.status, replay: true as const }; const result = await db.insert(portalReservations).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, reservationType: input.reservationType, idempotencyKey: input.idempotencyKey, detailsJson: JSON.stringify(input.details), status: "requested" }); return { reservationId: Number(result[0].insertId), status: "requested" as const, replay: false as const }; }),
   createPayment: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive(), sourceInvoiceId: z.number().int().positive().optional(), amountMinor: z.number().int().positive(), currency: z.string().length(3), idempotencyKey: z.string().min(8).max(180) })).mutation(async ({ ctx, input }) => { const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId); const [replay] = await db.select({ id: portalPayments.id, status: portalPayments.status }).from(portalPayments).where(and(eq(portalPayments.businessEntityId, input.businessEntityId), eq(portalPayments.idempotencyKey, input.idempotencyKey))).limit(1); if (replay) return { paymentId: replay.id, status: replay.status, replay: true as const }; const result = await db.insert(portalPayments).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, sourceInvoiceId: input.sourceInvoiceId, amountMinor: input.amountMinor, currency: input.currency, idempotencyKey: input.idempotencyKey, status: "requested" }); return { paymentId: Number(result[0].insertId), status: "requested" as const, replay: false as const }; }),
-  createTicket: protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive(), relationshipId: z.number().int().positive(), category: z.string().min(2).max(80), subject: z.string().min(3).max(220), priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"), message: z.string().min(2).max(5000) })).mutation(async ({ ctx, input }) => { const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId); const ticketNo = `PTK-${nanoid(9).toUpperCase()}`; const result = await db.insert(portalV2Tickets).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, ticketNo, category: input.category, subject: input.subject, priority: input.priority, status: "open" }); const ticketId = Number(result[0].insertId); await db.insert(portalV2Messages).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, ticketId, body: input.message, senderType: "portal_user" }); await db.insert(portalAudit).values(auditValues({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, action: "ticket.create", resourceType: "ticket", resourceId: ticketNo, outcome: "success" })); return { ticketId, ticketNo }; }),
+  createTicket: protectedProcedure.input(portalScopeInput.extend({ category: z.string().trim().min(2).max(80), subject: z.string().trim().min(3).max(220), priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"), message: z.string().trim().min(2).max(5000) })).mutation(async ({ ctx, input }) => {
+    const { db, pu, relationship } = await scopedRelationship(ctx.user.id, input.businessEntityId, input.relationshipId);
+    const ticketNo = `PTK-${nanoid(9).toUpperCase()}`;
+    const ticketId = await db.transaction(async tx => {
+      const result = await tx.insert(portalV2Tickets).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, ticketNo, category: input.category, subject: input.subject, priority: input.priority, status: "open" });
+      const createdId = Number(result[0].insertId);
+      await tx.insert(portalV2Messages).values({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, ticketId: createdId, body: input.message, senderType: "portal_user" });
+      await tx.insert(portalAudit).values(auditValues({ portalUserId: pu.id, businessEntityId: input.businessEntityId, relationshipId: relationship.id, action: "ticket.create", resourceType: "ticket", resourceId: ticketNo, outcome: "success" }));
+      return createdId;
+    });
+    return { ticketId, ticketNo };
+  }),
 });
