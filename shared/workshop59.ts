@@ -5,7 +5,8 @@ const transitions: Record<WorkshopJobStatus, WorkshopJobStatus[]> = {
 };
 
 export function canTransitionWorkshopJob(from: WorkshopJobStatus, to: WorkshopJobStatus) {
-  return from === to || (transitions[from] ?? []).includes(to);
+  // Delivery is a guarded business operation, never a generic status transition.
+  return from === to || (to !== "delivered" && (transitions[from] ?? []).includes(to));
 }
 
 export function calculateWorkshopEstimate(input: { laborMinor: number; partsMinor: number; subcontractMinor: number; consumablesMinor: number; taxMinor: number; discountMinor: number }) {

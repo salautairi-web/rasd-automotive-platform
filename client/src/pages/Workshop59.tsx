@@ -1,104 +1,2708 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "wouter";
+import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import WorkshopSetupPanel from "@/components/WorkshopSetupPanel";
+import WorkshopReceiveDialog from "@/components/WorkshopReceiveDialog";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarDays, CheckCircle2, ClipboardCheck, FileText, Gauge, ImagePlus, PackageCheck, Play, RefreshCw, ShieldCheck, Wrench } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  CalendarDays,
+  ClipboardCheck,
+  FileText,
+  Gauge,
+  PackageCheck,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Wrench,
+  Search,
+  Settings2,
+  BookOpen,
+  CircleAlert,
+  LockKeyhole,
+  CheckCircle2,
+  ImagePlus,
+} from "lucide-react";
+import {
+  workshopNextStatuses,
+  workshopStatusLabels,
+  parseWorkshopMoney,
+  formatWorkshopMoney,
+  filterWorkshopJobs,
+  validWorkshopInteger,
+  workshopRequestKey,
+} from "../../../shared/workshopClient";
+import type { WorkshopJobStatus } from "../../../shared/workshop59";
 
-const statusLabel: Record<string, string> = { received: "مستلم", diagnosing: "تشخيص", awaiting_approval: "بانتظار اعتماد", awaiting_parts: "بانتظار قطع", in_progress: "قيد التنفيذ", qc: "فحص جودة", road_test: "اختبار طريق", ready: "جاهز للتسليم", delivered: "مسلم", closed: "مغلق", warranty_repeat: "إصلاح متكرر" };
-const statusTone: Record<string, string> = { received: "bg-slate-100 text-slate-700", diagnosing: "bg-violet-100 text-violet-700", awaiting_approval: "bg-amber-100 text-amber-700", awaiting_parts: "bg-orange-100 text-orange-700", in_progress: "bg-blue-100 text-blue-700", qc: "bg-cyan-100 text-cyan-700", road_test: "bg-indigo-100 text-indigo-700", ready: "bg-emerald-100 text-emerald-700", delivered: "bg-green-100 text-green-700", closed: "bg-slate-200 text-slate-700", warranty_repeat: "bg-rose-100 text-rose-700" };
-const nextStatuses: Record<string, string[]> = { received: ["diagnosing"], diagnosing: ["awaiting_approval", "awaiting_parts", "in_progress"], awaiting_approval: ["awaiting_parts", "in_progress", "received"], awaiting_parts: ["in_progress"], in_progress: ["qc", "awaiting_parts", "warranty_repeat"], qc: ["road_test", "ready", "in_progress"], road_test: ["ready", "in_progress"], ready: ["delivered"], delivered: ["closed", "warranty_repeat"], closed: ["warranty_repeat"], warranty_repeat: ["diagnosing", "in_progress"] };
-const money = (minor?: number | null) => `${((minor ?? 0) / 1000).toLocaleString("ar-OM", { maximumFractionDigits: 3 })} ر.ع`;
-
-type Panel = "overview" | "estimate" | "inspection" | "parts" | "quality" | "road" | "warranty";
+type WorkshopEntity = {
+  id: number;
+  nameAr: string;
+  currency: string;
+  roleNames: string[];
+  permissions: string[];
+};
+type View = "jobs" | "appointments" | "reports" | "setup";
+type Panel =
+  | "overview"
+  | "estimate"
+  | "inspection"
+  | "operations"
+  | "parts"
+  | "quality"
+  | "road"
+  | "delivery"
+  | "warranty";
+const selectClass =
+  "h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-sm text-foreground disabled:opacity-60";
+const priorityLabels: Record<string, string> = {
+  low: "منخفضة",
+  normal: "عادية",
+  high: "عالية",
+  critical: "حرجة",
+};
+const statusTone = (status: string) =>
+  ["ready", "delivered", "closed"].includes(status)
+    ? "bg-emerald-50 text-emerald-700"
+    : ["awaiting_approval", "awaiting_parts"].includes(status)
+      ? "bg-amber-50 text-amber-700"
+      : "bg-blue-50 text-blue-700";
+const labelStatus = (status: string) =>
+  workshopStatusLabels[status as WorkshopJobStatus] ?? status;
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block min-w-0 space-y-1.5 text-sm font-medium text-slate-700">
+      <span>{label}</span>
+      {children}
+    </label>
+  );
+}
+function ErrorBox({ message, retry }: { message: string; retry?: () => void }) {
+  return (
+    <div
+      role="alert"
+      className="flex flex-wrap items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"
+    >
+      <CircleAlert className="size-5 shrink-0" />
+      <span className="min-w-0 flex-1 break-words">{message}</span>
+      {retry && (
+        <Button variant="outline" size="sm" onClick={retry}>
+          إعادة المحاولة
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export default function Workshop59() {
-  const businessEntityId = 1;
-  const dashboard = trpc.workshop59.dashboard.useQuery({ businessEntityId }, { refetchInterval: 30000 });
-  const referenceData = trpc.workshop59.referenceData.useQuery({ businessEntityId }, { refetchInterval: 60000 });
-  const [reportRange] = useState(() => { const to = new Date(); const from = new Date(to); from.setDate(from.getDate() - 30); return { from, to }; });
-  const performanceReport = trpc.workshop59.performanceReport.useQuery({ businessEntityId, ...reportRange }, { refetchInterval: 60000 });
-  const [boardRange] = useState(() => { const from = new Date(); from.setHours(0, 0, 0, 0); const to = new Date(from); to.setDate(to.getDate() + 7); return { from, to }; });
-  const appointmentsBoard = trpc.workshop59.appointmentsBoard.useQuery({ businessEntityId, ...boardRange }, { refetchInterval: 30000 });
-  const jobs = dashboard.data?.jobs ?? [];
-  const [selectedJobId, setSelectedJobId] = useState(0);
+  const { user } = useAuth();
+  const access = trpc.workshop59.access.useQuery(undefined, {
+    enabled: Boolean(user),
+    retry: false,
+    refetchInterval: 60000,
+  });
+  const [selectedEntityId, setSelectedEntityId] = useState(0);
+  const entities = access.data?.entities ?? [];
+  const entity = entities.find(item => item.id === selectedEntityId);
+  useEffect(() => {
+    if (!user || !entities.length) return;
+    if (entities.some(item => item.id === selectedEntityId)) return;
+    let saved = 0;
+    try {
+      saved = Number(sessionStorage.getItem(`rasd:workshop-entity:${user.id}`));
+    } catch {}
+    setSelectedEntityId(
+      entities.find(item => item.id === saved)?.id ?? entities[0].id
+    );
+  }, [access.data, selectedEntityId, user?.id]);
+  const selectEntity = (id: number) => {
+    setSelectedEntityId(id);
+    try {
+      if (user)
+        sessionStorage.setItem(`rasd:workshop-entity:${user.id}`, String(id));
+    } catch {}
+  };
+  return (
+    <DashboardLayout>
+      <div
+        dir="rtl"
+        className="-m-4 min-h-[calc(100dvh-2rem)] bg-[#f6f8fc] p-4 sm:p-6 lg:p-8"
+      >
+        <div className="mx-auto max-w-7xl space-y-6">
+          <header className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <Badge className="mb-3 border-0 bg-blue-50 text-blue-700">
+                RASD WORKSHOP · تشغيل تجريبي 1.0
+              </Badge>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                مركز عمليات الورشة
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-500">
+                مساحة عمل للاستقبال والفنيين والقطع والجودة والتسليم، ببيانات
+                فعلية وصلاحيات مرتبطة بكيان الورشة.
+              </p>
+            </div>
+            <div className="w-full sm:w-72">
+              <Field label="كيان الورشة">
+                <select
+                  aria-label="كيان الورشة"
+                  className={selectClass}
+                  value={entity?.id ?? ""}
+                  disabled={!entities.length}
+                  onChange={event => selectEntity(Number(event.target.value))}
+                >
+                  <option value="" disabled>
+                    اختر كياناً مصرحاً
+                  </option>
+                  {entities.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.nameAr}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {entity && (
+                <p className="mt-2 text-xs text-slate-500">
+                  {entity.roleNames.join(" · ") || "صلاحيات كيان"} ·{" "}
+                  {entity.currency}
+                </p>
+              )}
+            </div>
+          </header>
+          {access.isLoading ? (
+            <Card>
+              <CardContent role="status" className="p-8">
+                جارٍ التحقق من صلاحيات الورشة…
+              </CardContent>
+            </Card>
+          ) : access.error ? (
+            <ErrorBox
+              message={access.error.message}
+              retry={() => void access.refetch()}
+            />
+          ) : !entities.length ? (
+            <Card className="border-amber-200">
+              <CardContent className="space-y-3 p-6">
+                <LockKeyhole className="text-amber-600" />
+                <h2 className="text-lg font-semibold">
+                  لا توجد صلاحية دخول للورشة
+                </h2>
+                <p className="text-sm leading-7 text-slate-600">
+                  اطلب من المسؤول عضوية نشطة وصلاحيات الورشة على مستوى كيان
+                  الأعمال. الأدوار المقيدة بفرع أو بأعمال مسندة لا تُمنح وصولاً
+                  إلى كل الكيان.
+                </p>
+                <Link
+                  href="/admin/roles"
+                  className="inline-block text-sm text-blue-600 underline"
+                >
+                  إدارة أدوار المستخدمين
+                </Link>
+              </CardContent>
+            </Card>
+          ) : entity ? (
+            <WorkshopWorkspace
+              key={`${user?.id}:${entity.id}`}
+              entity={entity}
+            />
+          ) : (
+            <p role="status">جارٍ تجهيز مساحة الكيان…</p>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
+  const businessEntityId = entity.id;
+  const currency = entity.currency || "OMR";
+  const can = (action: string) => entity.permissions.includes(action);
+  const utils = trpc.useUtils();
+  const [view, setView] = useState<View>("jobs");
   const [panel, setPanel] = useState<Panel>("overview");
-  const selectedJob = jobs.find(job => job.id === selectedJobId) ?? jobs[0];
-  const activeJobId = selectedJob?.id ?? selectedJobId;
-  const details = trpc.workshop59.jobDetails.useQuery({ businessEntityId, jobCardId: activeJobId }, { enabled: activeJobId > 0, refetchInterval: 30000 });
-  const refresh = () => { void dashboard.refetch(); void details.refetch(); };
-
-  const [checkin, setCheckin] = useState({ customerId: "1", vehicleId: "1", mileage: "0", complaint: "" });
-  const [jobForm, setJobForm] = useState({ jobNo: "", checkinId: "", priority: "normal" as "low" | "normal" | "high" | "critical" });
-  const [estimate, setEstimate] = useState({ vehicleId: "1", customerId: "1", labor: "0", parts: "0", subcontract: "0", consumables: "0", tax: "0", discount: "0" });
-  const [operation, setOperation] = useState({ name: "", technician: "", hours: "1", laborCostMinor: "0" });
-  const [inspection, setInspection] = useState({ findings: "", mediaRefs: "" });
-  const [dtc, setDtc] = useState({ code: "", description: "", severity: "medium" as "info" | "low" | "medium" | "high" | "critical" });
-  const [parts, setParts] = useState({ warehouse: "", product: "", qty: "1", requestId: "" });
-  const [road, setRoad] = useState({ id: "", start: "", end: "" });
-  const [warranty, setWarranty] = useState({ coverage: "", claimNo: "", rootCause: "", action: "" });
+  const [selectedJobId, setSelectedJobId] = useState(0);
+  const [receiveOpen, setReceiveOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [reportRange] = useState(() => {
+    const to = new Date();
+    const from = new Date(to);
+    from.setDate(from.getDate() - 30);
+    return { from, to };
+  });
+  const [boardRange] = useState(() => {
+    const from = new Date();
+    from.setHours(0, 0, 0, 0);
+    const to = new Date(from);
+    to.setDate(to.getDate() + 7);
+    return { from, to };
+  });
+  const dashboard = trpc.workshop59.dashboard.useQuery(
+    { businessEntityId },
+    { refetchInterval: 30000, retry: false }
+  );
+  const refs = trpc.workshop59.referenceData.useQuery(
+    { businessEntityId },
+    { refetchInterval: 60000, retry: false }
+  );
+  const details = trpc.workshop59.jobDetails.useQuery(
+    { businessEntityId, jobCardId: selectedJobId },
+    { enabled: selectedJobId > 0, refetchInterval: 30000, retry: false }
+  );
+  const appointments = trpc.workshop59.appointmentsBoard.useQuery(
+    { businessEntityId, ...boardRange },
+    { enabled: view === "appointments", refetchInterval: 30000, retry: false }
+  );
+  const report = trpc.workshop59.performanceReport.useQuery(
+    { businessEntityId, ...reportRange },
+    {
+      enabled: view === "reports" && can("report"),
+      refetchInterval: 60000,
+      retry: false,
+    }
+  );
+  const customers = refs.data?.customers ?? [];
+  const vehicles = refs.data?.vehicles ?? [];
+  const bays = refs.data?.bays ?? [];
+  const technicians = refs.data?.technicians ?? [];
+  const users = refs.data?.users ?? [];
+  const warehouses = refs.data?.warehouses ?? [];
+  const products = refs.data?.products ?? [];
+  const inventory = refs.data?.inventory ?? [];
+  const customerName = (id: number) =>
+    customers.find(item => item.id === id)?.nameAr ?? `عميل #${id}`;
+  const vehicleName = (id: number) => {
+    const v = vehicles.find(item => item.id === id);
+    return v ? `${v.make} ${v.model} · ${v.vehicleNo}` : `مركبة #${id}`;
+  };
+  const job = details.data?.job;
+  const estimateRow = details.data?.estimates?.[0];
+  const invoice = details.data?.invoice;
+  const money = (minor?: number | null) => formatWorkshopMoney(minor, currency);
+  const refresh = () => {
+    void utils.workshop59.invalidate();
+    void utils.workshopSetup.readiness.invalidate({ businessEntityId });
+  };
+  const fail = (error: { message: string }) =>
+    toast.error(error.message, { position: "top-left", closeButton: true });
+  const done = (message: string) => {
+    toast.success(message, {
+      duration: 2500,
+      position: "top-left",
+      closeButton: true,
+    });
+    refresh();
+  };
+  const [estimate, setEstimate] = useState({
+    labor: "0",
+    parts: "0",
+    subcontract: "0",
+    consumables: "0",
+    tax: "0",
+    discount: "0",
+  });
+  const estimateNumbers = Object.values(estimate).map(value =>
+    parseWorkshopMoney(value, currency)
+  );
+  const [consentNote, setConsentNote] = useState("");
+  const [consentConfirmed, setConsentConfirmed] = useState(false);
+  const [inspection, setInspection] = useState("");
   const [uploadedMedia, setUploadedMedia] = useState<string[]>([]);
-  const [appointment, setAppointment] = useState({ customerId: "", vehicleId: "", serviceType: "صيانة دورية", bayId: "", technicianId: "", startsAt: "", endsAt: "", notes: "" });
+  const [dtc, setDtc] = useState({
+    code: "",
+    description: "",
+    severity: "medium" as "info" | "low" | "medium" | "high" | "critical",
+  });
+  const [operation, setOperation] = useState({
+    name: "",
+    userId: "",
+    hours: "1",
+    cost: "0",
+  });
+  const [operationHours, setOperationHours] = useState<Record<number, string>>(
+    {}
+  );
+  const [parts, setParts] = useState({
+    warehouseId: "",
+    productId: "",
+    qty: "1",
+    key: workshopRequestKey("part"),
+  });
+  const [quality, setQuality] = useState({
+    result: "passed" as "passed" | "failed" | "rework",
+    defect: "",
+    checks: { repair: false, safety: false, fluids: false, cleanliness: false },
+  });
+  const [road, setRoad] = useState({
+    driverId: "",
+    start: "",
+    end: "",
+    findings: "",
+    incident: false,
+  });
+  const [delivery, setDelivery] = useState({
+    mileage: "",
+    documents: "",
+    acknowledgement: false,
+    key: workshopRequestKey("delivery"),
+  });
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [receipt, setReceipt] = useState({
+    amount: "",
+    method: "cash" as "cash" | "bank_transfer",
+    reference: "",
+    confirmation: false,
+    key: workshopRequestKey("receipt"),
+  });
+  const [warranty, setWarranty] = useState({
+    coverage: "",
+    claimNo: "",
+    rootCause: "",
+    action: "",
+  });
+  const [appointment, setAppointment] = useState({
+    customerId: "",
+    vehicleId: "",
+    bayId: "",
+    technicianId: "",
+    service: "صيانة دورية",
+    starts: "",
+    ends: "",
+    notes: "",
+    key: workshopRequestKey("appointment"),
+  });
+  const activeRoad = details.data?.roadTests?.find(
+    item => item.status === "authorized" || item.status === "in_progress"
+  );
+  const latestQuality = details.data?.quality?.[0];
+  const outstanding = invoice
+    ? Math.max(0, invoice.amountMinor - invoice.paidAmountMinor)
+    : null;
+  const deliveryReady =
+    job?.status === "ready" &&
+    latestQuality?.result === "passed" &&
+    Boolean(
+      invoice &&
+        !["cancelled", "disputed"].includes(invoice.status) &&
+        outstanding === 0
+    );
+  const closedJob = job && ["delivered", "closed"].includes(job.status);
+  const resetJobForms = () => {
+    setPanel("overview");
+    setUploadedMedia([]);
+    setInspection("");
+    setConsentNote("");
+    setConsentConfirmed(false);
+    setEstimate({
+      labor: "0",
+      parts: "0",
+      subcontract: "0",
+      consumables: "0",
+      tax: "0",
+      discount: "0",
+    });
+    setOperation({ name: "", userId: "", hours: "1", cost: "0" });
+    setOperationHours({});
+    setDtc({ code: "", description: "", severity: "medium" });
+    setParts({
+      warehouseId: "",
+      productId: "",
+      qty: "1",
+      key: workshopRequestKey("part"),
+    });
+    setQuality({
+      result: "passed",
+      defect: "",
+      checks: {
+        repair: false,
+        safety: false,
+        fluids: false,
+        cleanliness: false,
+      },
+    });
+    setRoad({
+      driverId: "",
+      start: "",
+      end: "",
+      findings: "",
+      incident: false,
+    });
+    setDelivery({
+      mileage: "",
+      documents: "",
+      acknowledgement: false,
+      key: workshopRequestKey("delivery"),
+    });
+    setInvoiceNo("");
+    setReceipt({
+      amount: "",
+      method: "cash",
+      reference: "",
+      confirmation: false,
+      key: workshopRequestKey("receipt"),
+    });
+    setWarranty({ coverage: "", claimNo: "", rootCause: "", action: "" });
+  };
+  const chooseJob = (id: number) => {
+    resetJobForms();
+    setSelectedJobId(id);
+  };
 
-  const createCheckin = trpc.workshop59.createCheckin.useMutation({ onSuccess: result => { if (result && "id" in result) setJobForm(v => ({ ...v, checkinId: String(result.id) })); setCheckin(v => ({ ...v, complaint: "" })); refresh(); } });
-  const openJobCard = trpc.workshop59.openJobCard.useMutation({ onSuccess: result => { if (result && "id" in result) setSelectedJobId(result.id); setJobForm({ jobNo: "", checkinId: "", priority: "normal" }); refresh(); } });
-  const createEstimate = trpc.workshop59.createEstimate.useMutation({ onSuccess: () => { setPanel("estimate"); refresh(); } });
-  const createOperation = trpc.workshop59.createOperation.useMutation({ onSuccess: () => { setOperation({ name: "", technician: "", hours: "1", laborCostMinor: "0" }); refresh(); } });
-  const updateOperation = trpc.workshop59.updateOperation.useMutation({ onSuccess: refresh });
-  const transition = trpc.workshop59.transitionJobCard.useMutation({ onSuccess: refresh });
-  const createInspection = trpc.workshop59.createInspection.useMutation({ onSuccess: () => { setInspection({ findings: "", mediaRefs: "" }); refresh(); } });
-  const recordDtc = trpc.workshop59.recordDtc.useMutation({ onSuccess: () => setDtc({ code: "", description: "", severity: "medium" }) });
-  const requestPart = trpc.workshop59.requestPart.useMutation({ onSuccess: result => { if (result && "id" in result) setParts(v => ({ ...v, requestId: String(result.id) })); refresh(); } });
-  const issuePart = trpc.workshop59.issuePart.useMutation({ onSuccess: refresh });
-  const returnPart = trpc.workshop59.returnPart.useMutation({ onSuccess: refresh });
-  const consent = trpc.workshop59.recordEstimateConsent.useMutation({ onSuccess: refresh });
-  const authorizeRoad = trpc.workshop59.authorizeRoadTest.useMutation({ onSuccess: result => { if (result && "id" in result) setRoad(v => ({ ...v, id: String(result.id) })); refresh(); } });
-  const completeRoad = trpc.workshop59.completeRoadTest.useMutation({ onSuccess: refresh });
-  const createWarranty = trpc.workshop59.createWarranty.useMutation({ onSuccess: () => { setWarranty({ coverage: "", claimNo: "", rootCause: "", action: "" }); refresh(); } });
-  const scheduleAppointment = trpc.workshop59.scheduleAppointment.useMutation({ onSuccess: () => { setAppointment(v => ({ ...v, notes: "" })); void appointmentsBoard.refetch(); } });
-  const uploadMedia = trpc.workshop59.uploadInspectionMedia.useMutation({ onSuccess: result => setUploadedMedia(current => [...current, result.url]) });
-  const [estimateConsent, setEstimateConsent] = useState({ id: "", customerId: "1", checksum: "" });
+  const transition = trpc.workshop59.transitionJobCard.useMutation({
+    onSuccess: () => done("تم تحديث مرحلة أمر العمل."),
+    onError: fail,
+  });
+  const createEstimate = trpc.workshop59.createEstimate.useMutation({
+    onSuccess: () => done("تم حفظ إصدار التقدير."),
+    onError: fail,
+  });
+  const consent = trpc.workshop59.recordEstimateConsent.useMutation({
+    onSuccess: () => {
+      setConsentConfirmed(false);
+      setConsentNote("");
+      done("تم توثيق قرار العميل وبصمة التقدير.");
+    },
+    onError: fail,
+  });
+  const createInspection = trpc.workshop59.createInspection.useMutation({
+    onSuccess: () => {
+      setInspection("");
+      setUploadedMedia([]);
+      done("تم حفظ الفحص ومراجعه.");
+    },
+    onError: fail,
+  });
+  const upload = trpc.workshop59.uploadInspectionMedia.useMutation();
+  const recordDtc = trpc.workshop59.recordDtc.useMutation({
+    onSuccess: () => {
+      setDtc({ code: "", description: "", severity: "medium" });
+      done("تم ربط رمز العطل بأمر العمل.");
+    },
+    onError: fail,
+  });
+  const createOperation = trpc.workshop59.createOperation.useMutation({
+    onSuccess: () => {
+      setOperation({ name: "", userId: "", hours: "1", cost: "0" });
+      done("تمت إضافة العملية.");
+    },
+    onError: fail,
+  });
+  const updateOperation = trpc.workshop59.updateOperation.useMutation({
+    onSuccess: () => done("تم تحديث تنفيذ العملية."),
+    onError: fail,
+  });
+  const requestPart = trpc.workshop59.requestPart.useMutation({
+    onSuccess: () => {
+      setParts(v => ({ ...v, key: workshopRequestKey("part") }));
+      done("تم حجز القطعة من الرصيد الفعلي.");
+    },
+    onError: fail,
+  });
+  const issuePart = trpc.workshop59.issuePart.useMutation({
+    onSuccess: () => done("تم صرف الكمية الكاملة للطلب."),
+    onError: fail,
+  });
+  const returnPart = trpc.workshop59.returnPart.useMutation({
+    onSuccess: () => done("تم تحديث إرجاع القطعة ورصيد المخزون."),
+    onError: fail,
+  });
+  const recordQuality = trpc.workshop59.recordQuality.useMutation({
+    onSuccess: () => {
+      setQuality({
+        result: "passed",
+        defect: "",
+        checks: {
+          repair: false,
+          safety: false,
+          fluids: false,
+          cleanliness: false,
+        },
+      });
+      done("تم حفظ نتيجة الجودة.");
+    },
+    onError: fail,
+  });
+  const authorizeRoad = trpc.workshop59.authorizeRoadTest.useMutation({
+    onSuccess: () => done("تم تفويض اختبار الطريق."),
+    onError: fail,
+  });
+  const completeRoad = trpc.workshop59.completeRoadTest.useMutation({
+    onSuccess: () => {
+      setRoad({
+        driverId: "",
+        start: "",
+        end: "",
+        findings: "",
+        incident: false,
+      });
+      done("تم إكمال اختبار الطريق.");
+    },
+    onError: fail,
+  });
+  const deliver = trpc.workshop59.deliver.useMutation({
+    onSuccess: () => {
+      setDelivery({
+        mileage: "",
+        documents: "",
+        acknowledgement: false,
+        key: workshopRequestKey("delivery"),
+      });
+      done("تم تسجيل التسليم وتحديث الأمر.");
+    },
+    onError: fail,
+  });
+  const issueInvoice = trpc.workshopSetup.issueInvoice.useMutation({
+    onSuccess: () => done("تم إصدار فاتورة مرتبطة بالأمر في مركز التحصيل."),
+    onError: fail,
+  });
+  const recordPayment = trpc.workshopSetup.recordPayment.useMutation({
+    onSuccess: () => {
+      setReceipt({
+        amount: "",
+        method: "cash",
+        reference: "",
+        confirmation: false,
+        key: workshopRequestKey("receipt"),
+      });
+      done("تم تسجيل التحصيل الموثق وتحديث رصيد الفاتورة.");
+    },
+    onError: fail,
+  });
+  const createWarranty = trpc.workshop59.createWarranty.useMutation({
+    onSuccess: () => {
+      setWarranty({ coverage: "", claimNo: "", rootCause: "", action: "" });
+      done("تم تسجيل الضمان.");
+    },
+    onError: fail,
+  });
+  const schedule = trpc.workshop59.scheduleAppointment.useMutation({
+    onSuccess: () => {
+      setAppointment(v => ({ ...v, key: workshopRequestKey("appointment") }));
+      done("تم حجز الموعد بعد التحقق من التعارض.");
+    },
+    onError: fail,
+  });
+  const anyPending = [
+    transition,
+    createEstimate,
+    consent,
+    createInspection,
+    upload,
+    recordDtc,
+    createOperation,
+    updateOperation,
+    requestPart,
+    issuePart,
+    returnPart,
+    recordQuality,
+    authorizeRoad,
+    completeRoad,
+    deliver,
+    issueInvoice,
+    recordPayment,
+    createWarranty,
+  ].some(item => item.isPending);
+  const uploadPhoto = async (file?: File) => {
+    if (!file) return;
+    if (!can("inspect") || !selectedJobId) return;
+    if (
+      !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+      file.size > 5 * 1024 * 1024
+    ) {
+      toast.error("اختر صورة JPEG أو PNG أو WebP بحجم لا يتجاوز 5 ميجابايت.");
+      return;
+    }
+    const jobAtUpload = selectedJobId;
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () =>
+          typeof reader.result === "string"
+            ? resolve(reader.result)
+            : reject(new Error("تعذر قراءة الصورة"));
+        reader.onerror = () => reject(new Error("تعذر قراءة الصورة"));
+        reader.readAsDataURL(file);
+      });
+      const result = await upload.mutateAsync({
+        businessEntityId,
+        jobCardId: jobAtUpload,
+        fileName: file.name,
+        contentType: file.type as "image/jpeg" | "image/png" | "image/webp",
+        dataUrl,
+      });
+      setUploadedMedia(current => [...current, result.url]);
+      toast.success("تم رفع صورة الفحص. احفظ الفحص لربطها بسجله.");
+    } catch (error) {
+      fail({
+        message: error instanceof Error ? error.message : "تعذر رفع الصورة",
+      });
+    }
+  };
+  const jobs = filterWorkshopJobs(
+    dashboard.data?.jobs ?? [],
+    search,
+    statusFilter,
+    customerName,
+    vehicleName
+  );
+  const panels: [Panel, string][] = [
+    ["overview", "ملخص الأمر"],
+    ["estimate", "التقدير والموافقة"],
+    ["inspection", "الفحص والتشخيص"],
+    ["operations", "عمليات الفنيين"],
+    ["parts", "قطع الغيار"],
+    ["quality", "الجودة"],
+    ["road", "اختبار الطريق"],
+    ["delivery", "الفوترة والتسليم"],
+    ["warranty", "الضمان"],
+  ];
+  const available =
+    inventory.find(
+      item =>
+        item.warehouseId === Number(parts.warehouseId) &&
+        item.productId === Number(parts.productId)
+    )?.availableQty ?? 0;
+  const qualityChecksPassed = Object.values(quality.checks).every(Boolean);
 
-  const currentJob = details.data?.job ?? selectedJob;
-  const selectedEstimate = details.data?.estimates?.[0];
-  const kpis = useMemo(() => ({ open: dashboard.data?.counts.openJobs ?? 0, approval: dashboard.data?.counts.awaitingApproval ?? 0, progress: dashboard.data?.counts.inProgress ?? 0, qc: dashboard.data?.counts.failedQc ?? 0 }), [dashboard.data]);
-  const customers = referenceData.data?.customers ?? [];
-  const vehicles = referenceData.data?.vehicles ?? [];
-  const bays = referenceData.data?.bays ?? [];
-  const technicians = referenceData.data?.technicians ?? [];
-  const report = performanceReport.data?.summary;
-  const customerName = (id: number) => customers.find(item => item.id === id)?.nameAr ?? `عميل #${id}`;
-  const vehicleName = (id: number) => { const item = vehicles.find(vehicle => vehicle.id === id); return item ? `${item.make} ${item.model} · ${item.vehicleNo}` : `مركبة #${id}`; };
-  const uploadPhoto = (file?: File) => { if (!file || !file.type.startsWith("image/")) return; const reader = new FileReader(); reader.onload = () => { if (typeof reader.result === "string") uploadMedia.mutate({ businessEntityId, jobCardId: activeJobId, fileName: file.name, contentType: file.type === "image/png" ? "image/png" : file.type === "image/webp" ? "image/webp" : "image/jpeg", dataUrl: reader.result }); }; reader.readAsDataURL(file); };
-  const panels: [Panel, string, typeof Wrench][] = [["overview", "ملخص الأمر", Wrench], ["estimate", "التقدير والموافقة", FileText], ["inspection", "الفحص والتشخيص", ClipboardCheck], ["parts", "قطع الغيار", PackageCheck], ["quality", "الجودة والتسليم", ShieldCheck], ["road", "اختبار الطريق", Gauge], ["warranty", "الضمان", RefreshCw]];
-
-  return <DashboardLayout><div dir="rtl" className="min-h-[calc(100vh-2rem)] bg-[#f7f9fc] -m-4 p-4 sm:p-8"><div className="mx-auto max-w-7xl space-y-6">
-    <header className="flex flex-wrap items-start justify-between gap-4"><div><Badge className="mb-3 border-0 bg-blue-50 text-[#1e5eff]">WORKSHOP · دورة تشغيل متكاملة</Badge><h1 className="text-3xl font-semibold text-slate-950">مركز عمليات الورشة</h1><p className="mt-2 max-w-2xl text-sm text-slate-500">استقبال المركبة، التشخيص، التقدير، موافقة العميل، تخصيص الفني، القطع، الجودة، اختبار الطريق، التسليم والضمان ضمن سجل موحد.</p></div><div className="flex gap-2"><Button variant="outline" onClick={refresh}><RefreshCw size={16} className="ml-2"/> تحديث</Button><Link href="/customer-experience/domains"><Button variant="outline">بوابة العميل</Button></Link></div></header>
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{([{ label: "أوامر مفتوحة", value: kpis.open, Icon: Wrench, tone: "text-violet-700 bg-violet-50" }, { label: "بانتظار الاعتماد", value: kpis.approval, Icon: FileText, tone: "text-amber-700 bg-amber-50" }, { label: "قيد التنفيذ", value: kpis.progress, Icon: Play, tone: "text-blue-700 bg-blue-50" }, { label: "إعادة عمل الجودة", value: kpis.qc, Icon: ShieldCheck, tone: "text-rose-700 bg-rose-50" }] as { label: string; value: number; Icon: typeof Wrench; tone: string }[]).map(({ label, value, Icon, tone }) => <Card key={label} className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardContent className="p-5"><div className="flex items-center justify-between"><div><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-semibold">{value}</p></div><div className={`rounded-2xl p-3 ${tone}`}><Icon size={20}/></div></div></CardContent></Card>)}</div>
-    <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-      <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardHeader><CardTitle className="flex items-center gap-2"><CalendarDays size={18} className="text-blue-600"/> جدولة المواعيد والبايات</CardTitle><p className="text-xs text-slate-500">حجز موعد فعلي مع التحقق من تعارض الباي والفني.</p></CardHeader><CardContent className="space-y-3"><div className="grid gap-2 sm:grid-cols-2"><select value={appointment.customerId} onChange={e => setAppointment(v => ({ ...v, customerId: e.target.value }))} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">العميل</option>{customers.map(item => <option key={item.id} value={item.id}>{item.nameAr} · {item.customerNo}</option>)}</select><select value={appointment.vehicleId} onChange={e => setAppointment(v => ({ ...v, vehicleId: e.target.value }))} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">المركبة</option>{vehicles.map(item => <option key={item.id} value={item.id}>{vehicleName(item.id)}</option>)}</select><Input value={appointment.serviceType} onChange={e => setAppointment(v => ({ ...v, serviceType: e.target.value }))} placeholder="نوع الخدمة"/><select value={appointment.bayId} onChange={e => setAppointment(v => ({ ...v, bayId: e.target.value }))} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">الباي</option>{bays.map(item => <option key={item.id} value={item.id}>{item.bayCode} · {item.nameAr}</option>)}</select><select value={appointment.technicianId} onChange={e => setAppointment(v => ({ ...v, technicianId: e.target.value }))} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">الفني (اختياري)</option>{technicians.map(item => <option key={item.id} value={item.id}>{item.nameAr} · {item.technicianNo}</option>)}</select><Input type="datetime-local" value={appointment.startsAt} onChange={e => setAppointment(v => ({ ...v, startsAt: e.target.value }))}/><Input type="datetime-local" value={appointment.endsAt} onChange={e => setAppointment(v => ({ ...v, endsAt: e.target.value }))}/></div><Textarea value={appointment.notes} onChange={e => setAppointment(v => ({ ...v, notes: e.target.value }))} placeholder="ملاحظات الموعد"/><Button className="w-full" disabled={!appointment.customerId || !appointment.vehicleId || !appointment.bayId || !appointment.startsAt || !appointment.endsAt || scheduleAppointment.isPending} onClick={() => scheduleAppointment.mutate({ businessEntityId, customerId: Number(appointment.customerId), vehicleId: Number(appointment.vehicleId), serviceType: appointment.serviceType, bayId: Number(appointment.bayId), technicianId: appointment.technicianId ? Number(appointment.technicianId) : undefined, startsAt: new Date(appointment.startsAt), endsAt: new Date(appointment.endsAt), notes: appointment.notes || undefined, idempotencyKey: `schedule-${appointment.customerId}-${appointment.startsAt}-${appointment.bayId}` })}>{scheduleAppointment.isPending ? "جارٍ الحجز…" : "حجز الموعد والتحقق من التعارض"}</Button><div className="max-h-36 space-y-2 overflow-auto border-t pt-3">{(appointmentsBoard.data?.schedules ?? []).slice(0, 5).map(item => <div key={item.id} className="flex items-center justify-between rounded-lg bg-slate-50 p-2 text-xs"><span>{new Date(item.startsAt).toLocaleString("ar-OM", { dateStyle: "short", timeStyle: "short" })}</span><Badge variant="outline">باي #{item.bayId} · {item.status}</Badge></div>)}{!(appointmentsBoard.data?.schedules?.length) && <p className="text-xs text-slate-500">لا توجد مواعيد خلال الأيام السبعة القادمة.</p>}</div></CardContent></Card>
-      <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardHeader><CardTitle className="flex items-center gap-2"><Gauge size={18} className="text-emerald-600"/> ربحية الورشة وأداء الفريق</CardTitle><p className="text-xs text-slate-500">آخر 30 يوماً من البيانات المسجلة فعلياً دون بيانات تجريبية.</p></CardHeader><CardContent className="space-y-3"><div className="grid gap-2 sm:grid-cols-2"><div className="rounded-xl bg-emerald-50 p-3"><p className="text-xs text-emerald-700">الإيراد</p><strong>{money(report?.revenueMinor)}</strong></div><div className="rounded-xl bg-blue-50 p-3"><p className="text-xs text-blue-700">الهامش الإجمالي</p><strong>{money(report?.grossMarginMinor)}</strong></div><div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">متوسط دورة الأمر</p><strong>{report?.averageCycleHours ?? 0} ساعة</strong></div><div className="rounded-xl bg-amber-50 p-3"><p className="text-xs text-amber-700">الإصلاح من أول مرة</p><strong>{((report?.firstTimeFixRateBps ?? 0) / 100).toFixed(1)}%</strong></div></div><div className="flex flex-wrap gap-2 text-xs"><Badge variant="outline">مكتملة: {report?.completedJobs ?? 0}</Badge><Badge variant="outline">مفتوحة: {report?.openJobs ?? 0}</Badge><Badge variant="outline">عودة ضمان: {((report?.comebackRateBps ?? 0) / 100).toFixed(1)}%</Badge></div><div className="space-y-2 border-t pt-3">{(performanceReport.data?.technicianPerformance ?? []).slice(0, 5).map(item => <div key={item.technicianId} className="flex items-center justify-between rounded-lg bg-slate-50 p-2 text-xs"><span>فني #{item.technicianId} · {item.completed}/{item.operations} مكتملة</span><span>{Number(item.actualHours).toFixed(1)} ساعة</span></div>)}{!(performanceReport.data?.technicianPerformance?.length) && <p className="text-xs text-slate-500">ستظهر مؤشرات الفنيين بعد تسجيل العمليات.</p>}</div></CardContent></Card>
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-white p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className="border-0 bg-emerald-50 text-emerald-700">
+            <ShieldCheck size={13} className="ml-1" />
+            صلاحيات كيان معزولة
+          </Badge>
+          <span className="text-xs text-slate-500">
+            {entity.nameAr} · تحديث دوري كل 30 ثانية
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={refresh}>
+            <RefreshCw size={15} className="ml-1" />
+            تحديث
+          </Button>
+          {can("receive") && (
+            <Button
+              size="sm"
+              onClick={() => setReceiveOpen(true)}
+              disabled={refs.isLoading || Boolean(refs.error)}
+            >
+              <Plus size={16} className="ml-1" />
+              استقبال جديد
+            </Button>
+          )}
+        </div>
+      </div>
+      <nav
+        aria-label="أقسام الورشة"
+        className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
+      >
+        {(
+          [
+            ["jobs", "أوامر العمل", Wrench],
+            ["appointments", "المواعيد", CalendarDays],
+            ["reports", "التقارير", Gauge],
+            ["setup", "التهيئة ودليل المستخدم", BookOpen],
+          ] as const
+        )
+          .filter(([key]) => key !== "reports" || can("report"))
+          .map(([key, label, Icon]) => (
+            <Button
+              key={key}
+              variant={view === key ? "default" : "outline"}
+              className="h-11 text-xs sm:text-sm"
+              onClick={() => setView(key)}
+            >
+              <Icon size={16} className="ml-1.5" />
+              {label}
+            </Button>
+          ))}
+      </nav>
+      {refs.error && (
+        <ErrorBox
+          message={`تعذر تحميل البيانات المرجعية: ${refs.error.message}`}
+          retry={() => void refs.refetch()}
+        />
+      )}
+      {view === "setup" && (
+        <WorkshopSetupPanel
+          businessEntityId={businessEntityId}
+          currency={currency}
+          canConfigure={can("configure")}
+        />
+      )}
+      {view === "reports" && (
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle role="heading" aria-level={2}>
+              ربحية الورشة وأداء الفريق
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              آخر 30 يوماً. قيم التقديرات مؤشرات تشغيلية وليست إيراداً محاسبياً
+              مرحّلاً.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {report.error ? (
+              <ErrorBox
+                message={report.error.message}
+                retry={() => void report.refetch()}
+              />
+            ) : report.isLoading ? (
+              <p role="status">جارٍ تحميل التقرير…</p>
+            ) : (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    [
+                      "قيمة التقديرات المعتمدة",
+                      money(report.data?.summary.revenueMinor),
+                    ],
+                    [
+                      "هامش تشغيلي تقديري",
+                      money(report.data?.summary.grossMarginMinor),
+                    ],
+                    [
+                      "متوسط دورة الأمر",
+                      `${report.data?.summary.averageCycleHours ?? 0} ساعة`,
+                    ],
+                    [
+                      "إصلاح من أول مرة",
+                      `${((report.data?.summary.firstTimeFixRateBps ?? 0) / 100).toFixed(1)}%`,
+                    ],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-xl bg-slate-50 p-4">
+                      <p className="text-xs text-slate-500">{label}</p>
+                      <strong className="mt-2 block text-lg">{value}</strong>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  {report.data?.technicianPerformance.map(item => (
+                    <div
+                      key={item.technicianId}
+                      className="flex flex-wrap justify-between gap-2 rounded-xl border p-3 text-sm"
+                    >
+                      <span>
+                        {users.find(user => user.id === item.technicianId)
+                          ?.name ?? `مستخدم #${item.technicianId}`}{" "}
+                        · {item.completed}/{item.operations} مكتملة
+                      </span>
+                      <span>{Number(item.actualHours).toFixed(1)} ساعة</span>
+                    </div>
+                  ))}
+                  {!report.data?.technicianPerformance.length && (
+                    <p className="py-4 text-center text-sm text-slate-500">
+                      ستظهر المؤشرات بعد تسجيل عمليات التنفيذ.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      {view === "appointments" && (
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle role="heading" aria-level={2}>
+              المواعيد والبايات
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              مواعيد الأيام السبعة القادمة. تُعرض الأوقات بتوقيت جهازك وتحفظ
+              كتواريخ UTC.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {can("schedule") && (
+              <form
+                className="space-y-4"
+                onSubmit={event => {
+                  event.preventDefault();
+                  schedule.mutate({
+                    businessEntityId,
+                    customerId: Number(appointment.customerId),
+                    vehicleId: Number(appointment.vehicleId),
+                    bayId: Number(appointment.bayId),
+                    technicianId: appointment.technicianId
+                      ? Number(appointment.technicianId)
+                      : undefined,
+                    serviceType: appointment.service,
+                    startsAt: new Date(appointment.starts),
+                    endsAt: new Date(appointment.ends),
+                    notes: appointment.notes || undefined,
+                    idempotencyKey: appointment.key,
+                  });
+                }}
+              >
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field label="العميل">
+                    <select
+                      aria-label="عميل الموعد"
+                      className={selectClass}
+                      value={appointment.customerId}
+                      onChange={e =>
+                        setAppointment(v => ({
+                          ...v,
+                          customerId: e.target.value,
+                        }))
+                      }
+                      required
+                    >
+                      <option value="">اختر العميل</option>
+                      {customers.map(item => (
+                        <option key={item.id} value={item.id}>
+                          {item.nameAr}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="المركبة">
+                    <select
+                      aria-label="مركبة الموعد"
+                      className={selectClass}
+                      value={appointment.vehicleId}
+                      onChange={e =>
+                        setAppointment(v => ({
+                          ...v,
+                          vehicleId: e.target.value,
+                        }))
+                      }
+                      required
+                    >
+                      <option value="">اختر المركبة</option>
+                      {vehicles.map(item => (
+                        <option key={item.id} value={item.id}>
+                          {vehicleName(item.id)}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="الباي">
+                    <select
+                      aria-label="باي الموعد"
+                      className={selectClass}
+                      value={appointment.bayId}
+                      onChange={e =>
+                        setAppointment(v => ({ ...v, bayId: e.target.value }))
+                      }
+                      required
+                    >
+                      <option value="">اختر الباي</option>
+                      {bays.map(item => (
+                        <option key={item.id} value={item.id}>
+                          {item.nameAr} · {item.bayCode}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="فني الجدولة">
+                    <select
+                      aria-label="فني الموعد"
+                      className={selectClass}
+                      value={appointment.technicianId}
+                      onChange={e =>
+                        setAppointment(v => ({
+                          ...v,
+                          technicianId: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">اختياري</option>
+                      {technicians.map(item => (
+                        <option key={item.id} value={item.id}>
+                          {item.nameAr}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="البداية">
+                    <Input
+                      aria-label="بداية الموعد"
+                      type="datetime-local"
+                      value={appointment.starts}
+                      onChange={e =>
+                        setAppointment(v => ({ ...v, starts: e.target.value }))
+                      }
+                      required
+                    />
+                  </Field>
+                  <Field label="النهاية">
+                    <Input
+                      aria-label="نهاية الموعد"
+                      type="datetime-local"
+                      value={appointment.ends}
+                      onChange={e =>
+                        setAppointment(v => ({ ...v, ends: e.target.value }))
+                      }
+                      required
+                    />
+                  </Field>
+                  <Field label="نوع الخدمة">
+                    <Input
+                      value={appointment.service}
+                      aria-label="نوع خدمة الموعد"
+                      maxLength={120}
+                      onChange={e =>
+                        setAppointment(v => ({ ...v, service: e.target.value }))
+                      }
+                    />
+                  </Field>
+                  <Field label="ملاحظات">
+                    <Input
+                      value={appointment.notes}
+                      aria-label="ملاحظات الموعد"
+                      maxLength={2000}
+                      onChange={e =>
+                        setAppointment(v => ({ ...v, notes: e.target.value }))
+                      }
+                    />
+                  </Field>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={
+                    schedule.isPending ||
+                    !appointment.customerId ||
+                    !appointment.vehicleId ||
+                    !appointment.bayId ||
+                    !appointment.starts ||
+                    !appointment.ends ||
+                    appointment.service.trim().length < 2 ||
+                    new Date(appointment.ends) <= new Date(appointment.starts)
+                  }
+                >
+                  {schedule.isPending ? "جارٍ التحقق والحجز…" : "حجز الموعد"}
+                </Button>
+              </form>
+            )}
+            {appointments.error ? (
+              <ErrorBox message={appointments.error.message} />
+            ) : (
+              <div className="space-y-2 border-t pt-4">
+                {appointments.data?.schedules.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-50 p-3 text-sm"
+                  >
+                    <span>
+                      {bays.find(bay => bay.id === item.bayId)?.nameAr ??
+                        `باي #${item.bayId}`}{" "}
+                      · {new Date(item.startsAt).toLocaleString("ar-OM")} →{" "}
+                      {new Date(item.endsAt).toLocaleTimeString("ar-OM", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <Badge variant="outline">
+                      {item.status === "planned"
+                        ? "مجدول"
+                        : item.status === "cancelled"
+                          ? "ملغى"
+                          : item.status}
+                    </Badge>
+                  </div>
+                ))}
+                {!appointments.isLoading &&
+                  !appointments.data?.schedules.length && (
+                    <p className="py-4 text-center text-sm text-slate-500">
+                      لا توجد مواعيد خلال الفترة.
+                    </p>
+                  )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      {view === "jobs" && (
+        <>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              ["أوامر مفتوحة", dashboard.data?.counts.openJobs],
+              ["بانتظار موافقة", dashboard.data?.counts.awaitingApproval],
+              ["قيد الإصلاح", dashboard.data?.counts.inProgress],
+              ["ملاحظات جودة", dashboard.data?.counts.failedQc],
+            ].map(([label, value]) => (
+              <Card key={String(label)} className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <p className="text-xs text-slate-500 sm:text-sm">{label}</p>
+                  <strong className="mt-2 block text-2xl">
+                    {dashboard.isLoading || dashboard.error
+                      ? "—"
+                      : (value ?? 0)}
+                  </strong>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {dashboard.error && (
+            <ErrorBox
+              message={dashboard.error.message}
+              retry={() => void dashboard.refetch()}
+            />
+          )}
+          <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,.8fr)_minmax(0,1.5fr)]">
+            <Card className="min-w-0 border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle role="heading" aria-level={2} className="text-lg">
+                  لوحة أوامر العمل
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  أحدث 50 أمراً ضمن كيانك. اختر الأمر لفتح سجل العمل.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute right-3 top-3 size-4 text-slate-400" />
+                  <Input
+                    aria-label="البحث في أوامر الورشة"
+                    placeholder="رقم الأمر، العميل، المركبة…"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="h-11 pr-9"
+                  />
+                </div>
+                <select
+                  aria-label="تصفية حالة أمر العمل"
+                  className={selectClass}
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">كل المراحل</option>
+                  {Object.entries(workshopStatusLabels).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <div className="max-h-[32rem] space-y-2 overflow-y-auto">
+                  {jobs.map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      disabled={anyPending}
+                      onClick={() => chooseJob(item.id)}
+                      aria-pressed={selectedJobId === item.id}
+                      className={`w-full rounded-xl border p-3 text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-60 ${selectedJobId === item.id ? "border-blue-500 bg-blue-50" : "border-slate-100 bg-white hover:bg-slate-50"}`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <strong className="break-all text-sm">
+                          {item.jobNo}
+                        </strong>
+                        <Badge
+                          className={`border-0 text-xs ${statusTone(item.status)}`}
+                        >
+                          {labelStatus(item.status)}
+                        </Badge>
+                      </div>
+                      <p className="mt-2 break-words text-xs leading-6 text-slate-500">
+                        {vehicleName(item.vehicleId)} ·{" "}
+                        {customerName(item.customerId)}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        الأولوية:{" "}
+                        {priorityLabels[item.priority] ?? item.priority}
+                      </p>
+                    </button>
+                  ))}
+                  {!dashboard.isLoading && !jobs.length && (
+                    <p className="rounded-xl bg-slate-50 p-5 text-center text-sm leading-7 text-slate-500">
+                      {search || statusFilter !== "all"
+                        ? "لا توجد أوامر مطابقة للتصفية."
+                        : "لا توجد أوامر بعد. ابدأ باستقبال جديد أو راجع دليل التهيئة."}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            <div className="min-w-0 space-y-4">
+              {selectedJobId === 0 ? (
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="space-y-3 py-14 text-center">
+                    <Wrench className="mx-auto size-9 text-blue-300" />
+                    <h2 className="text-lg font-semibold">سجل العمل الموحد</h2>
+                    <p className="text-sm text-slate-500">
+                      اختر أمراً أو سجّل استقبالاً جديداً لبدء الدورة.
+                    </p>
+                    <Button variant="outline" onClick={() => setView("setup")}>
+                      <BookOpen size={16} className="ml-2" />
+                      دليل بدء العمل
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : details.error ? (
+                <ErrorBox
+                  message={details.error.message}
+                  retry={() => void details.refetch()}
+                />
+              ) : details.isLoading || !job ? (
+                <Card>
+                  <CardContent role="status" className="p-8">
+                    جارٍ تحميل سجل الأمر…
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <Card className="border-0 shadow-sm">
+                    <CardContent className="space-y-3 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <h2 className="break-all text-lg font-semibold">
+                            {job.jobNo}
+                          </h2>
+                          <p className="mt-1 text-xs leading-6 text-slate-500">
+                            {customerName(job.customerId)} ·{" "}
+                            {vehicleName(job.vehicleId)}
+                          </p>
+                        </div>
+                        <Badge className={`border-0 ${statusTone(job.status)}`}>
+                          {labelStatus(job.status)}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2 border-t pt-3">
+                        <span className="w-full text-xs text-slate-500">
+                          الانتقال إلى المرحلة التالية بعد استيفاء متطلباتها:
+                        </span>
+                        {(workshopNextStatuses[job.status] ?? []).map(
+                          target => (
+                            <Button
+                              key={target}
+                              size="sm"
+                              variant="outline"
+                              disabled={
+                                anyPending ||
+                                !can(
+                                  target === "closed"
+                                    ? "deliver"
+                                    : ["qc", "ready", "road_test"].includes(
+                                          target
+                                        )
+                                      ? "quality"
+                                      : "operate"
+                                )
+                              }
+                              onClick={() =>
+                                transition.mutate({
+                                  businessEntityId,
+                                  jobCardId: job.id,
+                                  from: job.status,
+                                  to: target,
+                                })
+                              }
+                            >
+                              {labelStatus(target)}
+                            </Button>
+                          )
+                        )}
+                        {job.status === "ready" && (
+                          <Button
+                            size="sm"
+                            onClick={() => setPanel("delivery")}
+                          >
+                            افتح نموذج التسليم
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <nav
+                    aria-label="مراحل أمر العمل"
+                    className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+                  >
+                    {panels.map(([key, label]) => (
+                      <Button
+                        key={key}
+                        className="min-w-0 whitespace-normal text-xs"
+                        variant={panel === key ? "default" : "outline"}
+                        onClick={() => setPanel(key)}
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </nav>
+                  <Card className="min-w-0 border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle
+                        role="heading"
+                        aria-level={2}
+                        className="text-lg"
+                      >
+                        {panels.find(([key]) => key === panel)?.[1]}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {panel === "overview" && (
+                        <>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-xl bg-slate-50 p-4">
+                              <p className="text-xs text-slate-500">
+                                التقدير الحالي
+                              </p>
+                              <strong>
+                                {estimateRow
+                                  ? formatWorkshopMoney(
+                                      estimateRow.totalMinor,
+                                      estimateRow.currency
+                                    )
+                                  : "لم يصدر بعد"}
+                              </strong>
+                            </div>
+                            <div className="rounded-xl bg-slate-50 p-4">
+                              <p className="text-xs text-slate-500">
+                                المراحل المسجلة
+                              </p>
+                              <strong>
+                                {details.data?.inspections.length ?? 0} فحص ·{" "}
+                                {details.data?.operations.length ?? 0} عملية
+                              </strong>
+                            </div>
+                          </div>
+                          <p className="text-sm leading-7 text-slate-600">
+                            أكمل التشخيص والتقدير وموافقة العميل، ثم الإصلاح
+                            والجودة. التسليم يتطلب سداد الفاتورة فعلياً في السجل
+                            المركزي، ولا يتم بمجرد تغيير الحالة.
+                          </p>
+                          <div className="space-y-2">
+                            {details.data?.checkins.map(item => (
+                              <div
+                                key={item.id}
+                                className="rounded-xl border p-3 text-sm"
+                              >
+                                <p className="font-medium">
+                                  استقبال المركبة ·{" "}
+                                  {item.mileage.toLocaleString("ar-OM")} كم
+                                </p>
+                                <p className="mt-1 whitespace-pre-wrap break-words leading-7 text-slate-600">
+                                  {item.complaint}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {panel === "estimate" && (
+                        <>
+                          {can("estimate") && !closedJob && !invoice && (
+                            <form
+                              className="space-y-3"
+                              onSubmit={event => {
+                                event.preventDefault();
+                                if (
+                                  estimateNumbers.some(value => value === null)
+                                )
+                                  return;
+                                createEstimate.mutate({
+                                  businessEntityId,
+                                  jobCardId: job.id,
+                                  vehicleId: job.vehicleId,
+                                  customerId: job.customerId,
+                                  currency,
+                                  version: (estimateRow?.version ?? 0) + 1,
+                                  laborMinor: parseWorkshopMoney(
+                                    estimate.labor,
+                                    currency
+                                  )!,
+                                  partsMinor: parseWorkshopMoney(
+                                    estimate.parts,
+                                    currency
+                                  )!,
+                                  subcontractMinor: parseWorkshopMoney(
+                                    estimate.subcontract,
+                                    currency
+                                  )!,
+                                  consumablesMinor: parseWorkshopMoney(
+                                    estimate.consumables,
+                                    currency
+                                  )!,
+                                  taxMinor: parseWorkshopMoney(
+                                    estimate.tax,
+                                    currency
+                                  )!,
+                                  discountMinor: parseWorkshopMoney(
+                                    estimate.discount,
+                                    currency
+                                  )!,
+                                });
+                              }}
+                            >
+                              <p className="text-xs text-slate-500">
+                                أدخل المبالغ بـ {currency}، ويحوّلها النظام
+                                للوحدات الصغرى بدقة.
+                              </p>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {(
+                                  [
+                                    ["labor", "أجور العمالة"],
+                                    ["parts", "قطع الغيار"],
+                                    ["subcontract", "مقاول خارجي"],
+                                    ["consumables", "مواد استهلاكية"],
+                                    ["tax", "الضريبة"],
+                                    ["discount", "الخصم"],
+                                  ] as const
+                                ).map(([key, label]) => (
+                                  <Field key={key} label={label}>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="any"
+                                      aria-label={label}
+                                      value={estimate[key]}
+                                      onChange={e =>
+                                        setEstimate(v => ({
+                                          ...v,
+                                          [key]: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  </Field>
+                                ))}
+                              </div>
+                              <Button
+                                type="submit"
+                                disabled={
+                                  anyPending ||
+                                  estimateNumbers.some(value => value === null)
+                                }
+                              >
+                                {createEstimate.isPending
+                                  ? "جارٍ الحفظ…"
+                                  : "حفظ إصدار التقدير"}
+                              </Button>
+                            </form>
+                          )}
+                          {estimateRow ? (
+                            <div className="space-y-3 rounded-xl border bg-slate-50 p-4">
+                              <div className="flex flex-wrap justify-between gap-2">
+                                <strong>
+                                  الإصدار {estimateRow.version} ·{" "}
+                                  {formatWorkshopMoney(
+                                    estimateRow.totalMinor,
+                                    estimateRow.currency
+                                  )}
+                                </strong>
+                                <Badge variant="outline">
+                                  {estimateRow.status === "approved"
+                                    ? "معتمد"
+                                    : estimateRow.status === "rejected"
+                                      ? "مرفوض"
+                                      : estimateRow.status ===
+                                          "partially_approved"
+                                        ? "طلب تعديل"
+                                        : "قيد المراجعة"}
+                                </Badge>
+                              </div>
+                              <p className="break-all text-xs text-slate-500">
+                                بصمة الإصدار: {estimateRow.checksum}
+                              </p>
+                              {can("estimate") && !closedJob && !invoice && (
+                                <>
+                                  <Field label="مرجع قرار العميل أو سبب التعديل">
+                                    <Input
+                                      aria-label="مرجع موافقة العميل"
+                                      value={consentNote}
+                                      maxLength={2000}
+                                      onChange={e =>
+                                        setConsentNote(e.target.value)
+                                      }
+                                      placeholder="رقم موافقة مكتوبة، اتصال موثّق، سبب الرفض…"
+                                    />
+                                  </Field>
+                                  <label className="flex items-start gap-2 text-sm leading-6">
+                                    <Checkbox
+                                      aria-label="تأكيد قرار العميل على إصدار التقدير"
+                                      checked={consentConfirmed}
+                                      onCheckedChange={checked =>
+                                        setConsentConfirmed(checked === true)
+                                      }
+                                    />
+                                    <span>
+                                      أؤكد أن القرار يخص هذا الإصدار وقد صدر عن
+                                      العميل. هذا توثيق داخلي وليس توقيعاً
+                                      رقمياً.
+                                    </span>
+                                  </label>
+                                  <div className="flex flex-wrap gap-2">
+                                    {(
+                                      [
+                                        ["approved", "توثيق الموافقة"],
+                                        ["change_requested", "طلب تعديل"],
+                                        ["rejected", "توثيق الرفض"],
+                                      ] as const
+                                    ).map(([decision, label]) => (
+                                      <Button
+                                        key={decision}
+                                        size="sm"
+                                        variant={
+                                          decision === "approved"
+                                            ? "default"
+                                            : "outline"
+                                        }
+                                        disabled={
+                                          anyPending ||
+                                          !consentConfirmed ||
+                                          consentNote.trim().length < 3 ||
+                                          !estimateRow.checksum
+                                        }
+                                        onClick={() =>
+                                          consent.mutate({
+                                            businessEntityId,
+                                            estimateId: estimateRow.id,
+                                            customerId: job.customerId,
+                                            decision,
+                                            version: estimateRow.version,
+                                            estimateChecksum:
+                                              estimateRow.checksum,
+                                            reason: consentNote.trim(),
+                                            channel: "workshop",
+                                          })
+                                        }
+                                      >
+                                        {label}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-slate-500">
+                              لا يوجد تقدير لهذا الأمر.
+                            </p>
+                          )}
+                        </>
+                      )}
+                      {panel === "inspection" && (
+                        <>
+                          {can("inspect") && !closedJob && (
+                            <>
+                              <Field label="نتيجة الفحص الشامل">
+                                <Textarea
+                                  aria-label="نتيجة الفحص الشامل"
+                                  value={inspection}
+                                  maxLength={4000}
+                                  onChange={e => setInspection(e.target.value)}
+                                  placeholder="المحرك، السوائل، الإطارات، الكهرباء، السلامة…"
+                                />
+                              </Field>
+                              <Field label="صور الفحص (حتى 5 ميجابايت للصورة)">
+                                <Input
+                                  aria-label="رفع صورة الفحص"
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp"
+                                  disabled={anyPending}
+                                  onChange={e => {
+                                    void uploadPhoto(e.target.files?.[0]);
+                                    e.target.value = "";
+                                  }}
+                                />
+                              </Field>
+                              <p className="text-xs text-slate-500">
+                                <ImagePlus size={14} className="ml-1 inline" />
+                                {uploadedMedia.length} صورة جاهزة للربط بالفحص
+                              </p>
+                              <Button
+                                disabled={
+                                  anyPending || inspection.trim().length < 3
+                                }
+                                onClick={() =>
+                                  createInspection.mutate({
+                                    businessEntityId,
+                                    jobCardId: job.id,
+                                    vehicleId: job.vehicleId,
+                                    templateCode: "full-vehicle-inspection",
+                                    findingsJson: JSON.stringify({
+                                      notes: inspection,
+                                    }),
+                                    mediaRefsJson:
+                                      JSON.stringify(uploadedMedia),
+                                    summary: inspection,
+                                    status: "completed",
+                                  })
+                                }
+                              >
+                                حفظ الفحص
+                              </Button>
+                              <div className="space-y-3 border-t pt-4">
+                                <h3 className="text-sm font-semibold">
+                                  رمز عطل تشخيصي
+                                </h3>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  <Field label="رمز DTC">
+                                    <Input
+                                      aria-label="رمز DTC"
+                                      value={dtc.code}
+                                      maxLength={40}
+                                      onChange={e =>
+                                        setDtc(v => ({
+                                          ...v,
+                                          code: e.target.value,
+                                        }))
+                                      }
+                                      placeholder="P0300"
+                                    />
+                                  </Field>
+                                  <Field label="الأهمية">
+                                    <select
+                                      aria-label="أهمية DTC"
+                                      className={selectClass}
+                                      value={dtc.severity}
+                                      onChange={e =>
+                                        setDtc(v => ({
+                                          ...v,
+                                          severity: e.target
+                                            .value as typeof v.severity,
+                                        }))
+                                      }
+                                    >
+                                      <option value="info">معلومة</option>
+                                      <option value="low">منخفضة</option>
+                                      <option value="medium">متوسطة</option>
+                                      <option value="high">عالية</option>
+                                      <option value="critical">حرجة</option>
+                                    </select>
+                                  </Field>
+                                </div>
+                                <Field label="وصف العطل">
+                                  <Input
+                                    aria-label="وصف DTC"
+                                    maxLength={2000}
+                                    value={dtc.description}
+                                    onChange={e =>
+                                      setDtc(v => ({
+                                        ...v,
+                                        description: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Field>
+                                <Button
+                                  variant="outline"
+                                  disabled={
+                                    anyPending ||
+                                    dtc.code.trim().length < 2 ||
+                                    dtc.description.trim().length < 2
+                                  }
+                                  onClick={() =>
+                                    recordDtc.mutate({
+                                      businessEntityId,
+                                      jobCardId: job.id,
+                                      ...dtc,
+                                    })
+                                  }
+                                >
+                                  ربط العطل بالأمر
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                          <div className="space-y-2">
+                            {details.data?.inspections.map(item => (
+                              <div
+                                key={item.id}
+                                className="rounded-xl border p-3 text-sm"
+                              >
+                                <p className="text-xs text-slate-500">
+                                  {new Date(item.createdAt).toLocaleString(
+                                    "ar-OM"
+                                  )}
+                                </p>
+                                <p className="mt-1 whitespace-pre-wrap break-words leading-7">
+                                  {item.summary}
+                                </p>
+                              </div>
+                            ))}
+                            {details.data?.dtcs.map(item => (
+                              <p
+                                key={item.id}
+                                className="rounded-lg bg-amber-50 p-3 text-sm"
+                              >
+                                {item.code} · {item.description}
+                              </p>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {panel === "operations" && (
+                        <>
+                          {can("operate") && !closedJob && (
+                            <form
+                              className="space-y-3"
+                              onSubmit={event => {
+                                event.preventDefault();
+                                const cost = parseWorkshopMoney(
+                                  operation.cost,
+                                  currency
+                                );
+                                if (cost !== null)
+                                  createOperation.mutate({
+                                    businessEntityId,
+                                    jobCardId: job.id,
+                                    operation: operation.name,
+                                    technicianUserId: operation.userId
+                                      ? Number(operation.userId)
+                                      : undefined,
+                                    standardHours: operation.hours,
+                                    laborCostMinor: cost,
+                                  });
+                              }}
+                            >
+                              <Field label="وصف العملية">
+                                <Input
+                                  aria-label="وصف العملية"
+                                  maxLength={180}
+                                  value={operation.name}
+                                  onChange={e =>
+                                    setOperation(v => ({
+                                      ...v,
+                                      name: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Field label="حساب المستخدم المنفذ">
+                                <select
+                                  aria-label="المستخدم المنفذ للعملية"
+                                  className={selectClass}
+                                  value={operation.userId}
+                                  onChange={e =>
+                                    setOperation(v => ({
+                                      ...v,
+                                      userId: e.target.value,
+                                    }))
+                                  }
+                                >
+                                  <option value="">غير مسندة بعد</option>
+                                  {users.map(item => (
+                                    <option key={item.id} value={item.id}>
+                                      {item.name ?? `مستخدم #${item.id}`}
+                                    </option>
+                                  ))}
+                                </select>
+                              </Field>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                <Field label="الساعات القياسية">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    max="1000"
+                                    step="0.01"
+                                    aria-label="الساعات القياسية"
+                                    value={operation.hours}
+                                    onChange={e =>
+                                      setOperation(v => ({
+                                        ...v,
+                                        hours: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Field>
+                                <Field label={`تكلفة العمالة (${currency})`}>
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    aria-label="تكلفة العمالة"
+                                    value={operation.cost}
+                                    onChange={e =>
+                                      setOperation(v => ({
+                                        ...v,
+                                        cost: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Field>
+                              </div>
+                              <Button
+                                type="submit"
+                                disabled={
+                                  anyPending ||
+                                  operation.name.trim().length < 2 ||
+                                  !/^\d+(\.\d{1,2})?$/.test(operation.hours) ||
+                                  Number(operation.hours) > 1000 ||
+                                  parseWorkshopMoney(
+                                    operation.cost,
+                                    currency
+                                  ) === null
+                                }
+                              >
+                                إضافة العملية
+                              </Button>
+                            </form>
+                          )}
+                          <div className="space-y-3">
+                            {details.data?.operations.map(item => (
+                              <div
+                                key={item.id}
+                                className="space-y-2 rounded-xl border p-3"
+                              >
+                                <div className="flex flex-wrap justify-between gap-2">
+                                  <strong className="text-sm">
+                                    {item.operation}
+                                  </strong>
+                                  <Badge variant="outline">
+                                    {
+                                      (
+                                        {
+                                          planned: "مخططة",
+                                          in_progress: "قيد التنفيذ",
+                                          paused: "متوقفة",
+                                          completed: "مكتملة",
+                                          rework: "إعادة عمل",
+                                        } as Record<string, string>
+                                      )[item.status]
+                                    }
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-slate-500">
+                                  قياسي: {item.standardHours} ساعة · فعلي:{" "}
+                                  {item.actualHours} ساعة
+                                </p>
+                                {can("operate") && !closedJob && (
+                                  <>
+                                    <Field label="الوقت الفعلي (ساعات)">
+                                      <Input
+                                        aria-label={`الوقت الفعلي ${item.id}`}
+                                        type="number"
+                                        min="0"
+                                        max="1000"
+                                        step="0.01"
+                                        value={
+                                          operationHours[item.id] ??
+                                          item.actualHours
+                                        }
+                                        onChange={e =>
+                                          setOperationHours(v => ({
+                                            ...v,
+                                            [item.id]: e.target.value,
+                                          }))
+                                        }
+                                      />
+                                    </Field>
+                                    <div className="flex flex-wrap gap-2">
+                                      {(
+                                        [
+                                          ["in_progress", "بدء"],
+                                          ["paused", "إيقاف"],
+                                          ["completed", "إتمام"],
+                                          ["rework", "إعادة عمل"],
+                                        ] as const
+                                      ).map(([status, label]) => (
+                                        <Button
+                                          key={status}
+                                          variant="outline"
+                                          size="sm"
+                                          disabled={
+                                            anyPending ||
+                                            item.status === status ||
+                                            !/^\d+(\.\d{1,2})?$/.test(
+                                              operationHours[item.id] ??
+                                                item.actualHours
+                                            ) ||
+                                            Number(
+                                              operationHours[item.id] ??
+                                                item.actualHours
+                                            ) > 1000
+                                          }
+                                          onClick={() =>
+                                            updateOperation.mutate({
+                                              businessEntityId,
+                                              operationId: item.id,
+                                              status,
+                                              actualHours:
+                                                operationHours[item.id] ??
+                                                item.actualHours,
+                                            })
+                                          }
+                                        >
+                                          {label}
+                                        </Button>
+                                      ))}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                            {!details.data?.operations.length && (
+                              <p className="text-sm text-slate-500">
+                                لا توجد عمليات مسجلة.
+                              </p>
+                            )}
+                          </div>
+                        </>
+                      )}
+                      {panel === "parts" && (
+                        <>
+                          {can("parts") && !closedJob && (
+                            <div className="space-y-3">
+                              <Field label="المستودع">
+                                <select
+                                  aria-label="مستودع قطع الورشة"
+                                  className={selectClass}
+                                  value={parts.warehouseId}
+                                  onChange={e =>
+                                    setParts(v => ({
+                                      ...v,
+                                      warehouseId: e.target.value,
+                                      productId: "",
+                                      key: workshopRequestKey("part"),
+                                    }))
+                                  }
+                                >
+                                  <option value="">اختر المستودع</option>
+                                  {warehouses.map(item => (
+                                    <option key={item.id} value={item.id}>
+                                      {item.nameAr} · {item.warehouseCode}
+                                    </option>
+                                  ))}
+                                </select>
+                              </Field>
+                              <Field label="الصنف">
+                                <select
+                                  aria-label="صنف قطع الورشة"
+                                  className={selectClass}
+                                  value={parts.productId}
+                                  onChange={e =>
+                                    setParts(v => ({
+                                      ...v,
+                                      productId: e.target.value,
+                                      key: workshopRequestKey("part"),
+                                    }))
+                                  }
+                                >
+                                  <option value="">اختر القطعة</option>
+                                  {products.map(item => (
+                                    <option key={item.id} value={item.id}>
+                                      {item.nameAr} · {item.sku}
+                                    </option>
+                                  ))}
+                                </select>
+                              </Field>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                <Field label="الكمية">
+                                  <Input
+                                    aria-label="كمية قطع الورشة"
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value={parts.qty}
+                                    onChange={e =>
+                                      setParts(v => ({
+                                        ...v,
+                                        qty: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Field>
+                                <div className="rounded-xl bg-slate-50 p-3 text-sm">
+                                  المتاح حالياً: <strong>{available}</strong>
+                                </div>
+                              </div>
+                              <Button
+                                disabled={
+                                  anyPending ||
+                                  !parts.productId ||
+                                  !parts.warehouseId ||
+                                  !validWorkshopInteger(parts.qty) ||
+                                  Number(parts.qty) < 1 ||
+                                  Number(parts.qty) > available
+                                }
+                                onClick={() =>
+                                  requestPart.mutate({
+                                    businessEntityId,
+                                    jobCardId: job.id,
+                                    warehouseId: Number(parts.warehouseId),
+                                    productId: Number(parts.productId),
+                                    quantity: Number(parts.qty),
+                                    idempotencyKey: parts.key,
+                                  })
+                                }
+                              >
+                                حجز الكمية
+                              </Button>
+                            </div>
+                          )}
+                          <div className="space-y-2">
+                            {details.data?.parts.map(item => (
+                              <div
+                                key={item.id}
+                                className="space-y-2 rounded-xl border p-3"
+                              >
+                                <div className="flex flex-wrap justify-between gap-2 text-sm">
+                                  <span>
+                                    {products.find(p => p.id === item.productId)
+                                      ?.nameAr ?? `صنف #${item.productId}`}{" "}
+                                    · {item.quantity}
+                                  </span>
+                                  <Badge variant="outline">
+                                    {item.status === "reserved"
+                                      ? "محجوز"
+                                      : item.status === "issued"
+                                        ? "مصروف"
+                                        : item.status === "returned"
+                                          ? "مرجع"
+                                          : item.status}
+                                  </Badge>
+                                </div>
+                                {can("parts") && !closedJob && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {item.status === "reserved" && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={anyPending}
+                                        onClick={() =>
+                                          issuePart.mutate({
+                                            businessEntityId,
+                                            requestId: item.id,
+                                            quantity: item.quantity,
+                                            idempotencyKey: `ws-issue-${businessEntityId}-${item.id}`,
+                                          })
+                                        }
+                                      >
+                                        صرف الطلب كاملاً
+                                      </Button>
+                                    )}
+                                    {["reserved", "issued"].includes(
+                                      item.status
+                                    ) && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={anyPending}
+                                        onClick={() =>
+                                          returnPart.mutate({
+                                            businessEntityId,
+                                            requestId: item.id,
+                                            quantity: item.quantity,
+                                            idempotencyKey: `ws-return-${businessEntityId}-${item.id}`,
+                                          })
+                                        }
+                                      >
+                                        {item.status === "reserved"
+                                          ? "إلغاء الحجز وإرجاعه"
+                                          : "إرجاع القطع المصروفة"}
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {panel === "quality" && (
+                        <>
+                          <p className="text-sm leading-7 text-slate-500">
+                            تسجّل الجودة أثناء مرحلة فحص الجودة أو اختبار
+                            الطريق. نجاح الفحص لا يغيّر الأمر إلى جاهز تلقائياً.
+                          </p>
+                          {can("quality") && !closedJob && (
+                            <div className="space-y-3">
+                              {(
+                                [
+                                  ["repair", "تم التحقق من إصلاح شكوى العميل"],
+                                  [
+                                    "safety",
+                                    "السلامة والفرامل والأنظمة الأساسية",
+                                  ],
+                                  ["fluids", "السوائل وعدم وجود تسرب"],
+                                  ["cleanliness", "النظافة وإعادة التجهيز"],
+                                ] as const
+                              ).map(([key, label]) => (
+                                <label
+                                  key={key}
+                                  className="flex items-center gap-2 rounded-lg bg-slate-50 p-3 text-sm"
+                                >
+                                  <Checkbox
+                                    aria-label={label}
+                                    checked={quality.checks[key]}
+                                    onCheckedChange={checked =>
+                                      setQuality(v => ({
+                                        ...v,
+                                        checks: {
+                                          ...v.checks,
+                                          [key]: checked === true,
+                                        },
+                                      }))
+                                    }
+                                  />
+                                  {label}
+                                </label>
+                              ))}
+                              <Field label="نتيجة الفحص">
+                                <select
+                                  aria-label="نتيجة الجودة"
+                                  className={selectClass}
+                                  value={quality.result}
+                                  onChange={e =>
+                                    setQuality(v => ({
+                                      ...v,
+                                      result: e.target.value as typeof v.result,
+                                    }))
+                                  }
+                                >
+                                  <option value="passed">اجتاز</option>
+                                  <option value="failed">لم يجتز</option>
+                                  <option value="rework">إعادة عمل</option>
+                                </select>
+                              </Field>
+                              <Field label="العيب أو الملاحظة">
+                                <Textarea
+                                  aria-label="ملاحظات الجودة"
+                                  maxLength={2000}
+                                  value={quality.defect}
+                                  onChange={e =>
+                                    setQuality(v => ({
+                                      ...v,
+                                      defect: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Button
+                                disabled={
+                                  anyPending ||
+                                  !["qc", "road_test"].includes(job.status) ||
+                                  (quality.result === "passed"
+                                    ? !qualityChecksPassed
+                                    : quality.defect.trim().length < 3)
+                                }
+                                onClick={() =>
+                                  recordQuality.mutate({
+                                    businessEntityId,
+                                    jobCardId: job.id,
+                                    result: quality.result,
+                                    checklistJson: JSON.stringify(
+                                      quality.checks
+                                    ),
+                                    defect: quality.defect || undefined,
+                                  })
+                                }
+                              >
+                                حفظ نتيجة الجودة
+                              </Button>
+                            </div>
+                          )}
+                          {details.data?.quality.map(item => (
+                            <div
+                              key={item.id}
+                              className="rounded-xl border p-3 text-sm"
+                            >
+                              <Badge
+                                className={`border-0 ${item.result === "passed" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}
+                              >
+                                {item.result === "passed"
+                                  ? "اجتاز"
+                                  : item.result === "failed"
+                                    ? "لم يجتز"
+                                    : "إعادة عمل"}
+                              </Badge>
+                              <p className="mt-2 text-slate-600">
+                                {item.defect || "لا توجد ملاحظات"}
+                              </p>
+                              <p className="mt-1 text-xs text-slate-400">
+                                {new Date(item.createdAt).toLocaleString(
+                                  "ar-OM"
+                                )}
+                              </p>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                      {panel === "road" && (
+                        <>
+                          {can("operate") && !closedJob && (
+                            <div className="space-y-3">
+                              {!activeRoad ? (
+                                <>
+                                  <Field label="حساب السائق المخوّل">
+                                    <select
+                                      aria-label="سائق اختبار الطريق"
+                                      className={selectClass}
+                                      value={road.driverId}
+                                      onChange={e =>
+                                        setRoad(v => ({
+                                          ...v,
+                                          driverId: e.target.value,
+                                        }))
+                                      }
+                                    >
+                                      <option value="">اختر المستخدم</option>
+                                      {users.map(item => (
+                                        <option key={item.id} value={item.id}>
+                                          {item.name ?? `مستخدم #${item.id}`}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </Field>
+                                  <Field label="العداد عند البداية">
+                                    <Input
+                                      aria-label="بداية عداد الطريق"
+                                      type="number"
+                                      min="0"
+                                      step="1"
+                                      value={road.start}
+                                      onChange={e =>
+                                        setRoad(v => ({
+                                          ...v,
+                                          start: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  </Field>
+                                  <Button
+                                    disabled={
+                                      anyPending ||
+                                      !road.driverId ||
+                                      !validWorkshopInteger(road.start) ||
+                                      job.status !== "road_test"
+                                    }
+                                    onClick={() =>
+                                      authorizeRoad.mutate({
+                                        businessEntityId,
+                                        jobCardId: job.id,
+                                        driverUserId: Number(road.driverId),
+                                        startMileage: Number(road.start),
+                                      })
+                                    }
+                                  >
+                                    تفويض اختبار الطريق
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="rounded-lg bg-blue-50 p-3 text-sm">
+                                    اختبار جارٍ · عداد البداية{" "}
+                                    {activeRoad.startMileage}
+                                  </p>
+                                  <Field label="العداد عند النهاية">
+                                    <Input
+                                      aria-label="نهاية عداد الطريق"
+                                      type="number"
+                                      min={activeRoad.startMileage}
+                                      step="1"
+                                      value={road.end}
+                                      onChange={e =>
+                                        setRoad(v => ({
+                                          ...v,
+                                          end: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  </Field>
+                                  <Field label="نتائج اختبار الطريق">
+                                    <Textarea
+                                      aria-label="نتائج اختبار الطريق"
+                                      maxLength={3000}
+                                      value={road.findings}
+                                      onChange={e =>
+                                        setRoad(v => ({
+                                          ...v,
+                                          findings: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  </Field>
+                                  <label className="flex items-center gap-2 text-sm">
+                                    <Checkbox
+                                      aria-label="حادث أثناء اختبار الطريق"
+                                      checked={road.incident}
+                                      onCheckedChange={checked =>
+                                        setRoad(v => ({
+                                          ...v,
+                                          incident: checked === true,
+                                        }))
+                                      }
+                                    />
+                                    حدثت واقعة أو ملاحظة سلامة
+                                  </label>
+                                  <Button
+                                    disabled={
+                                      anyPending ||
+                                      !validWorkshopInteger(road.end) ||
+                                      Number(road.end) <
+                                        activeRoad.startMileage ||
+                                      road.findings.trim().length < 3
+                                    }
+                                    onClick={() =>
+                                      completeRoad.mutate({
+                                        businessEntityId,
+                                        roadTestId: activeRoad.id,
+                                        endMileage: Number(road.end),
+                                        findings: road.findings,
+                                        incident: road.incident,
+                                      })
+                                    }
+                                  >
+                                    إكمال اختبار الطريق
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          )}
+                          {details.data?.roadTests.map(item => (
+                            <div
+                              key={item.id}
+                              className="rounded-xl border p-3 text-sm"
+                            >
+                              <strong>
+                                {item.status === "completed"
+                                  ? "اختبار مكتمل"
+                                  : "اختبار مفوّض"}
+                              </strong>
+                              <p className="mt-1">
+                                {item.startMileage} → {item.endMileage ?? "—"}{" "}
+                                كم
+                              </p>
+                              <p className="mt-1 whitespace-pre-wrap break-words text-slate-600">
+                                {item.findings}
+                              </p>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                      {panel === "delivery" && (
+                        <>
+                          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-7 text-blue-900">
+                            التسليم يتحقق خادمياً من الحالة والجودة والفاتورة
+                            والتحصيل. لا يؤدي الضغط هنا إلى تحصيل دفعة أو ترحيل
+                            محاسبي تلقائي.
+                          </div>
+                          {!invoice ? (
+                            <div className="space-y-3">
+                              <p className="text-sm text-slate-500">
+                                لا توجد فاتورة مرتبطة بهذا الأمر.
+                              </p>
+                              {can("invoice") && (
+                                <>
+                                  <Field label="رقم الفاتورة">
+                                    <Input
+                                      aria-label="رقم فاتورة الورشة"
+                                      value={invoiceNo}
+                                      maxLength={100}
+                                      onChange={e =>
+                                        setInvoiceNo(e.target.value)
+                                      }
+                                      placeholder={`WS-INV-${job.jobNo}`}
+                                    />
+                                  </Field>
+                                  <Button
+                                    disabled={
+                                      anyPending ||
+                                      invoiceNo.trim().length < 3 ||
+                                      estimateRow?.status !== "approved" ||
+                                      Boolean(closedJob)
+                                    }
+                                    onClick={() =>
+                                      issueInvoice.mutate({
+                                        businessEntityId,
+                                        jobCardId: job.id,
+                                        invoiceNo,
+                                      })
+                                    }
+                                  >
+                                    إصدار الفاتورة المركزية
+                                  </Button>
+                                  <p className="text-xs text-slate-500">
+                                    يلزم تقدير معتمد؛ تنشأ الفاتورة مرة واحدة
+                                    لكل أمر.
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="rounded-xl border p-4 text-sm">
+                              <p className="font-semibold">
+                                {invoice.invoiceNo} ·{" "}
+                                {formatWorkshopMoney(
+                                  invoice.amountMinor,
+                                  invoice.currency
+                                )}
+                              </p>
+                              <p className="mt-2">
+                                المحصّل:{" "}
+                                {formatWorkshopMoney(
+                                  invoice.paidAmountMinor,
+                                  invoice.currency
+                                )}{" "}
+                                · المتبقي:{" "}
+                                {formatWorkshopMoney(
+                                  outstanding,
+                                  invoice.currency
+                                )}
+                              </p>
+                              <p className="mt-3 text-xs text-slate-500">
+                                فاتورة مشتركة مع سجل الفوترة والتحصيل المركزي.
+                              </p>
+                            </div>
+                          )}
+                          {can("collect") &&
+                            invoice &&
+                            outstanding !== null &&
+                            outstanding > 0 &&
+                            !["cancelled", "disputed"].includes(
+                              invoice.status
+                            ) && (
+                              <form
+                                className="space-y-3 rounded-xl border p-4"
+                                onSubmit={event => {
+                                  event.preventDefault();
+                                  const amount = parseWorkshopMoney(
+                                    receipt.amount,
+                                    invoice.currency
+                                  );
+                                  if (amount !== null && amount > 0)
+                                    recordPayment.mutate({
+                                      businessEntityId,
+                                      jobCardId: job.id,
+                                      amountMinor: amount,
+                                      method: receipt.method,
+                                      reference: receipt.reference.trim(),
+                                      receivedConfirmation: true,
+                                      idempotencyKey: receipt.key,
+                                    });
+                                }}
+                              >
+                                <h3 className="font-semibold">
+                                  تسجيل مبلغ مستلم فعلياً
+                                </h3>
+                                <p className="text-xs leading-6 text-slate-500">
+                                  هذا سجل قبض داخلي. لا يخصم من بطاقة ولا ينفذ
+                                  حوالة خارجية أو ترحيلاً إلى دفتر الأستاذ.
+                                </p>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  <Field label={`المبلغ (${invoice.currency})`}>
+                                    <Input
+                                      aria-label="مبلغ تحصيل الورشة"
+                                      type="number"
+                                      min="0"
+                                      step="any"
+                                      value={receipt.amount}
+                                      onChange={e =>
+                                        setReceipt(v => ({
+                                          ...v,
+                                          amount: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  </Field>
+                                  <Field label="طريقة الاستلام">
+                                    <select
+                                      aria-label="طريقة تحصيل الورشة"
+                                      className={selectClass}
+                                      value={receipt.method}
+                                      onChange={e =>
+                                        setReceipt(v => ({
+                                          ...v,
+                                          method: e.target
+                                            .value as typeof v.method,
+                                        }))
+                                      }
+                                    >
+                                      <option value="cash">نقد</option>
+                                      <option value="bank_transfer">
+                                        حوالة مستلمة
+                                      </option>
+                                    </select>
+                                  </Field>
+                                </div>
+                                <Field label="مرجع سند القبض أو الحوالة">
+                                  <Input
+                                    aria-label="مرجع تحصيل الورشة"
+                                    value={receipt.reference}
+                                    maxLength={120}
+                                    onChange={e =>
+                                      setReceipt(v => ({
+                                        ...v,
+                                        reference: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </Field>
+                                <label className="flex items-start gap-2 text-sm leading-6">
+                                  <Checkbox
+                                    aria-label="تأكيد استلام مبلغ التحصيل فعلياً"
+                                    checked={receipt.confirmation}
+                                    onCheckedChange={checked =>
+                                      setReceipt(v => ({
+                                        ...v,
+                                        confirmation: checked === true,
+                                      }))
+                                    }
+                                  />
+                                  <span>
+                                    أؤكد استلام المبلغ فعلياً والتحقق من مرجع
+                                    سند القبض أو الحوالة.
+                                  </span>
+                                </label>
+                                <Button
+                                  type="submit"
+                                  disabled={
+                                    anyPending ||
+                                    !receipt.confirmation ||
+                                    receipt.reference.trim().length < 3 ||
+                                    parseWorkshopMoney(
+                                      receipt.amount,
+                                      invoice.currency
+                                    ) === null ||
+                                    (parseWorkshopMoney(
+                                      receipt.amount,
+                                      invoice.currency
+                                    ) ?? 0) <= 0 ||
+                                    (parseWorkshopMoney(
+                                      receipt.amount,
+                                      invoice.currency
+                                    ) ?? Infinity) > outstanding
+                                  }
+                                >
+                                  {recordPayment.isPending
+                                    ? "جارٍ التسجيل…"
+                                    : "تسجيل التحصيل الموثق"}
+                                </Button>
+                              </form>
+                            )}
+                          <div className="grid gap-2 sm:grid-cols-3">
+                            {[
+                              ["المرحلة جاهزة", job.status === "ready"],
+                              [
+                                "آخر جودة ناجحة",
+                                latestQuality?.result === "passed",
+                              ],
+                              [
+                                "الفاتورة مسددة",
+                                Boolean(
+                                  invoice &&
+                                    outstanding === 0 &&
+                                    !["cancelled", "disputed"].includes(
+                                      invoice.status
+                                    )
+                                ),
+                              ],
+                            ].map(([label, passed]) => (
+                              <div
+                                key={String(label)}
+                                className={`rounded-lg p-3 text-xs ${passed ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}
+                              >
+                                {passed ? "مكتمل" : "مطلوب"} · {label}
+                              </div>
+                            ))}
+                          </div>
+                          {can("deliver") && !closedJob && (
+                            <div className="space-y-3">
+                              <Field label="العداد عند التسليم">
+                                <Input
+                                  aria-label="عداد التسليم"
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  value={delivery.mileage}
+                                  onChange={e =>
+                                    setDelivery(v => ({
+                                      ...v,
+                                      mileage: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Field label="مراجع مستندات التسليم">
+                                <Textarea
+                                  aria-label="مستندات التسليم"
+                                  maxLength={3000}
+                                  value={delivery.documents}
+                                  onChange={e =>
+                                    setDelivery(v => ({
+                                      ...v,
+                                      documents: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="رقم محضر التسليم، تقرير الجودة، مرجع الفاتورة…"
+                                />
+                              </Field>
+                              <label className="flex items-start gap-2 text-sm leading-6">
+                                <Checkbox
+                                  aria-label="إقرار استلام العميل"
+                                  checked={delivery.acknowledgement}
+                                  onCheckedChange={checked =>
+                                    setDelivery(v => ({
+                                      ...v,
+                                      acknowledgement: checked === true,
+                                    }))
+                                  }
+                                />
+                                <span>
+                                  أؤكد تسليم المستندات وحصول الورشة على إقرار
+                                  استلام العميل.
+                                </span>
+                              </label>
+                              <Button
+                                disabled={
+                                  anyPending ||
+                                  !deliveryReady ||
+                                  !validWorkshopInteger(delivery.mileage) ||
+                                  delivery.documents.trim().length < 3 ||
+                                  !delivery.acknowledgement
+                                }
+                                onClick={() =>
+                                  deliver.mutate({
+                                    businessEntityId,
+                                    jobCardId: job.id,
+                                    customerId: job.customerId,
+                                    mileage: Number(delivery.mileage),
+                                    documentsJson: JSON.stringify({
+                                      references: delivery.documents,
+                                      invoiceNo: invoice?.invoiceNo,
+                                    }),
+                                    customerAcknowledgement: true,
+                                    idempotencyKey: delivery.key,
+                                  })
+                                }
+                              >
+                                {deliver.isPending
+                                  ? "جارٍ تسجيل التسليم…"
+                                  : "تأكيد التسليم"}
+                              </Button>
+                            </div>
+                          )}
+                          {details.data?.deliveries.map(item => (
+                            <p
+                              key={item.id}
+                              className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800"
+                            >
+                              تم التسليم ·{" "}
+                              {item.deliveredAt
+                                ? new Date(item.deliveredAt).toLocaleString(
+                                    "ar-OM"
+                                  )
+                                : "—"}{" "}
+                              · {item.mileage} كم
+                            </p>
+                          ))}
+                        </>
+                      )}
+                      {panel === "warranty" && (
+                        <>
+                          {can("operate") && (
+                            <div className="space-y-3">
+                              <Field label="التغطية والشروط">
+                                <Textarea
+                                  aria-label="تغطية ضمان الورشة"
+                                  maxLength={3000}
+                                  value={warranty.coverage}
+                                  onChange={e =>
+                                    setWarranty(v => ({
+                                      ...v,
+                                      coverage: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Field label="رقم المطالبة (اختياري)">
+                                <Input
+                                  aria-label="رقم مطالبة الضمان"
+                                  maxLength={100}
+                                  value={warranty.claimNo}
+                                  onChange={e =>
+                                    setWarranty(v => ({
+                                      ...v,
+                                      claimNo: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Field label="السبب الجذري">
+                                <Textarea
+                                  aria-label="سبب عودة الضمان"
+                                  maxLength={2000}
+                                  value={warranty.rootCause}
+                                  onChange={e =>
+                                    setWarranty(v => ({
+                                      ...v,
+                                      rootCause: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Field label="الإجراء التصحيحي">
+                                <Textarea
+                                  aria-label="الإجراء التصحيحي للضمان"
+                                  maxLength={4000}
+                                  value={warranty.action}
+                                  onChange={e =>
+                                    setWarranty(v => ({
+                                      ...v,
+                                      action: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Field>
+                              <Button
+                                disabled={
+                                  anyPending ||
+                                  warranty.coverage.trim().length < 3
+                                }
+                                onClick={() =>
+                                  createWarranty.mutate({
+                                    businessEntityId,
+                                    jobCardId: job.id,
+                                    vehicleId: job.vehicleId,
+                                    warrantyType: "workshop",
+                                    coverageJson: JSON.stringify({
+                                      coverage: warranty.coverage,
+                                    }),
+                                    claimNo: warranty.claimNo || undefined,
+                                    rootCause: warranty.rootCause || undefined,
+                                    correctiveAction:
+                                      warranty.action || undefined,
+                                  })
+                                }
+                              >
+                                حفظ الضمان
+                              </Button>
+                            </div>
+                          )}
+                          {details.data?.warranties.map(item => (
+                            <div
+                              key={item.id}
+                              className="rounded-xl border p-3 text-sm"
+                            >
+                              {item.claimNo || "ضمان الورشة"} ·{" "}
+                              {item.warrantyType}
+                              <p className="mt-1 text-slate-500">
+                                {item.rootCause}
+                              </p>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+      {can("receive") && (
+        <WorkshopReceiveDialog
+          businessEntityId={businessEntityId}
+          customers={customers}
+          vehicles={vehicles}
+          open={receiveOpen}
+          onOpenChange={setReceiveOpen}
+          onCreated={id => {
+            chooseJob(id);
+            setView("jobs");
+            refresh();
+          }}
+        />
+      )}
     </div>
-    <div className="grid gap-6 xl:grid-cols-[0.8fr_1.7fr]">
-      <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardHeader><CardTitle className="flex items-center gap-2"><CalendarDays size={18} className="text-blue-600"/> استقبال مركبة</CardTitle><p className="text-xs text-slate-500">يفتح بداية دورة جديدة مع موافقة العميل وبصمة منع التكرار.</p></CardHeader><CardContent className="space-y-3"><select value={checkin.customerId} onChange={e => setCheckin(v => ({ ...v, customerId: e.target.value }))} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">اختر العميل من البيانات المركزية</option>{customers.map(item => <option key={item.id} value={item.id}>{item.nameAr} · {item.customerNo}{item.phone ? ` · ${item.phone}` : ""}</option>)}</select><select value={checkin.vehicleId} onChange={e => setCheckin(v => ({ ...v, vehicleId: e.target.value }))} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">اختر المركبة من السجل المركزي</option>{vehicles.map(item => <option key={item.id} value={item.id}>{vehicleName(item.id)} · {item.vin.slice(-6)}</option>)}</select><Input type="number" value={checkin.mileage} onChange={e => setCheckin(v => ({ ...v, mileage: e.target.value }))} placeholder="قراءة العداد"/><Textarea value={checkin.complaint} onChange={e => setCheckin(v => ({ ...v, complaint: e.target.value }))} placeholder="شكوى العميل والأعراض"/><Button className="w-full" disabled={checkin.complaint.trim().length < 3 || !checkin.customerId || !checkin.vehicleId || createCheckin.isPending} onClick={() => createCheckin.mutate({ businessEntityId, customerId: Number(checkin.customerId), vehicleId: Number(checkin.vehicleId), mileage: Number(checkin.mileage), complaint: checkin.complaint, consent: true, idempotencyKey: `checkin-${Date.now()}` })}>{createCheckin.isPending ? "جارٍ التسجيل…" : "تسجيل الاستقبال"}</Button><div className="border-t pt-3"><p className="mb-2 text-xs font-semibold text-slate-700">تحويل الاستقبال إلى أمر عمل</p><div className="grid gap-2 sm:grid-cols-2"><Input value={jobForm.jobNo} onChange={e => setJobForm(v => ({ ...v, jobNo: e.target.value }))} placeholder="رقم أمر العمل"/><Input value={jobForm.checkinId} onChange={e => setJobForm(v => ({ ...v, checkinId: e.target.value }))} placeholder="معرف الاستقبال"/></div><select value={jobForm.priority} onChange={e => setJobForm(v => ({ ...v, priority: e.target.value as typeof v.priority }))} className="mt-2 h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="low">أولوية منخفضة</option><option value="normal">أولوية عادية</option><option value="high">أولوية مرتفعة</option><option value="critical">حرجة</option></select><Button variant="outline" className="mt-2 w-full" disabled={jobForm.jobNo.trim().length < 3 || openJobCard.isPending} onClick={() => openJobCard.mutate({ businessEntityId, jobNo: jobForm.jobNo, customerId: Number(checkin.customerId), vehicleId: Number(checkin.vehicleId), checkinId: jobForm.checkinId ? Number(jobForm.checkinId) : undefined, priority: jobForm.priority, idempotencyKey: `job-${jobForm.jobNo}-${businessEntityId}` })}>{openJobCard.isPending ? "جارٍ فتح الأمر…" : "فتح أمر العمل"}</Button></div></CardContent></Card>
-      <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardHeader><div className="flex items-center justify-between"><div><CardTitle>لوحة أوامر العمل</CardTitle><p className="text-xs text-slate-500">اختر أمراً لإدارة جميع مراحله من نفس الشاشة.</p></div><Badge variant="outline">كيان #{businessEntityId}</Badge></div></CardHeader><CardContent className="space-y-3"><div className="max-h-72 space-y-2 overflow-auto">{jobs.length ? jobs.map(job => <button type="button" key={job.id} onClick={() => { setSelectedJobId(job.id); setPanel("overview"); }} className={`w-full rounded-xl border p-3 text-right transition ${activeJobId === job.id ? "border-blue-500 bg-blue-50/60" : "border-slate-200 bg-white hover:border-blue-200"}`}><div className="flex items-center justify-between gap-3"><div><p className="font-semibold">{job.jobNo}</p><p className="text-xs text-slate-500">{vehicleName(job.vehicleId)} · {customerName(job.customerId)} · أولوية {job.priority}</p></div><Badge className={`border-0 ${statusTone[job.status] ?? "bg-slate-100"}`}>{statusLabel[job.status] ?? job.status}</Badge></div></button>) : <p className="rounded-xl bg-slate-50 p-8 text-center text-sm text-slate-500">لا توجد أوامر عمل بعد.</p>}</div>{currentJob && <div className="flex flex-wrap items-center gap-2 border-t pt-3"><span className="text-sm font-semibold">الإجراء التالي:</span>{(nextStatuses[currentJob.status] ?? []).map(target => <Button key={target} size="sm" variant="outline" disabled={transition.isPending} onClick={() => transition.mutate({ businessEntityId, jobCardId: currentJob.id, from: currentJob.status as never, to: target as never })}>{statusLabel[target]}</Button>)}</div>}</CardContent></Card>
-    </div>
-    <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardContent className="p-3"><div className="flex gap-2 overflow-x-auto pb-1">{panels.map(([key, label, Icon]) => <Button key={key} variant={panel === key ? "default" : "outline"} className="shrink-0" onClick={() => setPanel(key)} disabled={!activeJobId}><Icon size={16} className="ml-2"/>{label}</Button>)}</div></CardContent></Card>
-    {!activeJobId ? <Card><CardContent className="p-12 text-center text-sm text-slate-500">سجل استقبال مركبة أو اختر أمر عمل لبدء التشغيل.</CardContent></Card> : <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
-      <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardHeader><CardTitle>{panels.find(item => item[0] === panel)?.[1]}</CardTitle></CardHeader><CardContent className="space-y-4">
-        {panel === "overview" && <><div className="grid gap-3 sm:grid-cols-3"><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">أمر العمل</p><strong>{currentJob?.jobNo}</strong></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">الحالة</p><strong>{statusLabel[currentJob?.status ?? ""]}</strong></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">التقدير الأخير</p><strong>{money(selectedEstimate?.totalMinor)}</strong></div></div><div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 text-sm text-slate-700">هذه الصفحة هي سجل العمل الموحد. كل إجراء مرتبط بالكيان وأمر العمل، مع الحفاظ على عزل الشركة والفرع في طبقة الخادم.</div><div className="grid gap-2 sm:grid-cols-2"><Button onClick={() => setPanel("inspection")}><ClipboardCheck size={16} className="ml-2"/>ابدأ الفحص الشامل</Button><Button variant="outline" onClick={() => setPanel("estimate")}><FileText size={16} className="ml-2"/>أنشئ تقديراً للعميل</Button></div></>}
-        {panel === "estimate" && <><div className="grid gap-2 sm:grid-cols-2">{([["labor", "أجور العمالة"], ["parts", "قطع الغيار"], ["subcontract", "مقاولين فرعيين"], ["consumables", "مواد استهلاكية"], ["tax", "الضريبة"], ["discount", "الخصم"]] as const).map(([key, label]) => <Input key={key} type="number" min="0" value={estimate[key]} onChange={e => setEstimate(v => ({ ...v, [key]: e.target.value }))} placeholder={`${label} (بالبيسة)`}/>)}</div><Button disabled={createEstimate.isPending} onClick={() => createEstimate.mutate({ businessEntityId, jobCardId: activeJobId, vehicleId: Number(currentJob?.vehicleId ?? estimate.vehicleId), customerId: Number(currentJob?.customerId ?? estimate.customerId), laborMinor: Number(estimate.labor), partsMinor: Number(estimate.parts), subcontractMinor: Number(estimate.subcontract), consumablesMinor: Number(estimate.consumables), taxMinor: Number(estimate.tax), discountMinor: Number(estimate.discount), currency: "OMR", version: (details.data?.estimates?.[0]?.version ?? 0) + 1 })}>حفظ وإصدار التقدير</Button>{selectedEstimate && <div className="rounded-xl border bg-slate-50 p-4"><div className="flex items-center justify-between"><strong>التقدير v{selectedEstimate.version}</strong><Badge>{selectedEstimate.status}</Badge></div><p className="mt-2 text-lg font-semibold">{money(selectedEstimate.totalMinor)}</p><div className="mt-3 grid gap-2 sm:grid-cols-2"><Input value={estimateConsent.id} onChange={e => setEstimateConsent(v => ({ ...v, id: e.target.value }))} placeholder="معرف التقدير للموافقة"/><Input value={estimateConsent.checksum} onChange={e => setEstimateConsent(v => ({ ...v, checksum: e.target.value }))} placeholder="بصمة التقدير 16 حرفاً على الأقل"/></div><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" disabled={estimateConsent.checksum.length < 16} onClick={() => consent.mutate({ businessEntityId, estimateId: Number(estimateConsent.id || selectedEstimate.id), customerId: currentJob?.customerId ?? 1, decision: "approved", version: selectedEstimate.version, estimateChecksum: estimateConsent.checksum, channel: "workshop" })}>اعتماد العميل</Button><Button size="sm" variant="outline" disabled={estimateConsent.checksum.length < 16} onClick={() => consent.mutate({ businessEntityId, estimateId: Number(estimateConsent.id || selectedEstimate.id), customerId: currentJob?.customerId ?? 1, decision: "change_requested", version: selectedEstimate.version, estimateChecksum: estimateConsent.checksum, channel: "workshop", reason: "طلب مراجعة التقدير" })}>طلب تعديل</Button></div></div>}</>}
-        {panel === "inspection" && <><Textarea value={inspection.findings} onChange={e => setInspection(v => ({ ...v, findings: e.target.value }))} placeholder="الفحص الشامل: الهيكل، المحرك، السوائل، الإطارات، الكهرباء، ملاحظات الفني"/><Input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => uploadPhoto(e.target.files?.[0])}/><Input value={inspection.mediaRefs} onChange={e => setInspection(v => ({ ...v, mediaRefs: e.target.value }))} placeholder="مراجع صور إضافية مفصولة بفواصل"/><p className="text-xs text-slate-500"><ImagePlus size={14} className="ml-1 inline"/> {uploadedMedia.length} صور مرفوعة لهذه الجلسة</p><Button disabled={inspection.findings.trim().length < 2 || createInspection.isPending} onClick={() => createInspection.mutate({ businessEntityId, jobCardId: activeJobId, vehicleId: currentJob?.vehicleId ?? 1, templateCode: "full-vehicle-inspection", findingsJson: JSON.stringify({ notes: inspection.findings }), mediaRefsJson: JSON.stringify([...uploadedMedia, ...inspection.mediaRefs.split(",").map(v => v.trim()).filter(Boolean)]), summary: inspection.findings, status: "completed" })}>حفظ الفحص التشخيصي</Button><div className="border-t pt-4"><h3 className="mb-2 font-semibold">رمز عطل DTC</h3><div className="grid gap-2 sm:grid-cols-3"><Input value={dtc.code} onChange={e => setDtc(v => ({ ...v, code: e.target.value }))} placeholder="P0300"/><Input className="sm:col-span-2" value={dtc.description} onChange={e => setDtc(v => ({ ...v, description: e.target.value }))} placeholder="وصف العطل"/></div><Button variant="outline" className="mt-2" disabled={!dtc.code || !dtc.description} onClick={() => recordDtc.mutate({ businessEntityId, jobCardId: activeJobId, code: dtc.code, description: dtc.description, severity: dtc.severity })}>ربط رمز العطل بأمر العمل</Button></div></>}
-        {panel === "parts" && <><div className="grid gap-2 sm:grid-cols-3"><Input value={parts.warehouse} onChange={e => setParts(v => ({ ...v, warehouse: e.target.value }))} placeholder="معرف المستودع"/><Input value={parts.product} onChange={e => setParts(v => ({ ...v, product: e.target.value }))} placeholder="معرف الصنف"/><Input type="number" min="1" value={parts.qty} onChange={e => setParts(v => ({ ...v, qty: e.target.value }))} placeholder="الكمية"/></div><Button disabled={!parts.warehouse || !parts.product} onClick={() => requestPart.mutate({ businessEntityId, jobCardId: activeJobId, warehouseId: Number(parts.warehouse), productId: Number(parts.product), quantity: Number(parts.qty), idempotencyKey: `part-${activeJobId}-${Date.now()}` })}>حجز قطعة من المخزون</Button><Input value={parts.requestId} onChange={e => setParts(v => ({ ...v, requestId: e.target.value }))} placeholder="معرف طلب القطعة للصرف أو الإرجاع"/><div className="flex gap-2"><Button variant="outline" disabled={!parts.requestId} onClick={() => issuePart.mutate({ businessEntityId, requestId: Number(parts.requestId), quantity: Number(parts.qty), idempotencyKey: `issue-${parts.requestId}` })}>صرف</Button><Button variant="outline" disabled={!parts.requestId} onClick={() => returnPart.mutate({ businessEntityId, requestId: Number(parts.requestId), quantity: Number(parts.qty), idempotencyKey: `return-${parts.requestId}` })}>إرجاع</Button></div><div className="space-y-2">{(details.data?.parts ?? []).map(item => <div key={item.id} className="flex justify-between rounded-lg bg-slate-50 p-3 text-sm"><span>صنف #{item.productId} · كمية {item.quantity}</span><Badge variant="outline">{item.status}</Badge></div>)}</div></>}
-        {panel === "quality" && <><div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm">قبل التسليم: يجب اجتياز الجودة، اكتمال المستندات، إصدار الفاتورة، سداد الرصيد، وتأكيد استلام العميل.</div><div className="space-y-2">{(details.data?.quality ?? []).map(item => <div key={item.id} className="flex justify-between rounded-lg bg-slate-50 p-3 text-sm"><span>فحص #{item.id} · {item.defect ?? "بدون عيوب"}</span><Badge className={item.result === "passed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}>{item.result}</Badge></div>)}</div></>}
-        {panel === "road" && <><div className="grid gap-2 sm:grid-cols-2"><Input type="number" value={road.start} onChange={e => setRoad(v => ({ ...v, start: e.target.value }))} placeholder="قراءة العداد عند البدء"/><Button disabled={!road.start} onClick={() => authorizeRoad.mutate({ businessEntityId, jobCardId: activeJobId, driverUserId: 1, startMileage: Number(road.start) })}>تفويض اختبار الطريق</Button><Input value={road.id} onChange={e => setRoad(v => ({ ...v, id: e.target.value }))} placeholder="معرف اختبار الطريق"/><Input type="number" value={road.end} onChange={e => setRoad(v => ({ ...v, end: e.target.value }))} placeholder="قراءة العداد عند النهاية"/></div><Button variant="outline" disabled={!road.id || !road.end} onClick={() => completeRoad.mutate({ businessEntityId, roadTestId: Number(road.id), endMileage: Number(road.end), findings: "تمت مراجعة اختبار الطريق" })}>إكمال اختبار الطريق</Button><div className="space-y-2">{(details.data?.roadTests ?? []).map(item => <div key={item.id} className="rounded-lg bg-slate-50 p-3 text-sm">اختبار #{item.id} · {item.startMileage} → {item.endMileage ?? "—"} · {item.status}</div>)}</div></>}
-        {panel === "warranty" && <><Textarea value={warranty.coverage} onChange={e => setWarranty(v => ({ ...v, coverage: e.target.value }))} placeholder="نطاق التغطية وشروط الضمان"/><Input value={warranty.claimNo} onChange={e => setWarranty(v => ({ ...v, claimNo: e.target.value }))} placeholder="رقم المطالبة"/><Textarea value={warranty.rootCause} onChange={e => setWarranty(v => ({ ...v, rootCause: e.target.value }))} placeholder="السبب الجذري والإجراء التصحيحي"/><Button disabled={!warranty.coverage} onClick={() => createWarranty.mutate({ businessEntityId, jobCardId: activeJobId, vehicleId: currentJob?.vehicleId ?? 1, warrantyType: "workshop", coverageJson: JSON.stringify({ coverage: warranty.coverage }), claimNo: warranty.claimNo || undefined, rootCause: warranty.rootCause || undefined, correctiveAction: warranty.action || undefined })}>تسجيل ضمان أو عودة إصلاح</Button><div className="space-y-2">{(details.data?.warranties ?? []).map(item => <div key={item.id} className="flex justify-between rounded-lg bg-slate-50 p-3 text-sm"><span>{item.claimNo ?? "بدون مطالبة"} · {item.warrantyType}</span><Badge variant="outline">{item.status}</Badge></div>)}</div></>}
-      </CardContent></Card>
-      <Card className="border-0 shadow-[0_10px_35px_rgba(19,36,55,.06)]"><CardHeader><CardTitle className="flex items-center gap-2"><Wrench size={18} className="text-violet-600"/> عمليات الفنيين</CardTitle><p className="text-xs text-slate-500">تخطيط الساعات ومتابعة التنفيذ والوقت الفعلي.</p></CardHeader><CardContent className="space-y-3"><Input value={operation.name} onChange={e => setOperation(v => ({ ...v, name: e.target.value }))} placeholder="وصف العملية"/><Input value={operation.technician} onChange={e => setOperation(v => ({ ...v, technician: e.target.value }))} placeholder="معرف الفني (اختياري)"/><Input type="number" value={operation.hours} onChange={e => setOperation(v => ({ ...v, hours: e.target.value }))} placeholder="الساعات القياسية"/><Input type="number" min="0" value={operation.laborCostMinor} onChange={e => setOperation(v => ({ ...v, laborCostMinor: e.target.value }))} placeholder="تكلفة العمالة (بالبيسة)"/><Button className="w-full" disabled={!operation.name} onClick={() => createOperation.mutate({ businessEntityId, jobCardId: activeJobId, operation: operation.name, technicianUserId: operation.technician ? Number(operation.technician) : undefined, standardHours: operation.hours, laborCostMinor: Number(operation.laborCostMinor) })}>إضافة عملية</Button><div className="space-y-2 border-t pt-3">{(details.data?.operations ?? []).map(item => <div key={item.id} className="rounded-xl border p-3"><div className="flex items-center justify-between gap-2"><strong className="text-sm">{item.operation}</strong><Badge variant="outline">{item.status}</Badge></div><p className="mt-1 text-xs text-slate-500">قياسي {item.standardHours} ساعة · فعلي {item.actualHours} ساعة</p><div className="mt-2 flex flex-wrap gap-1">{(["in_progress", "paused", "completed", "rework"] as const).map(status => <Button key={status} size="sm" variant="outline" disabled={item.status === status} onClick={() => updateOperation.mutate({ businessEntityId, operationId: item.id, status, actualHours: item.actualHours })}>{status === "in_progress" ? "بدء" : status === "paused" ? "إيقاف" : status === "completed" ? "إتمام" : "إعادة"}</Button>)}</div></div>)}{!details.data?.operations?.length && <p className="py-5 text-center text-xs text-slate-500">لم تتم إضافة عمليات لهذا الأمر.</p>}</div></CardContent></Card>
-    </div>}
-  </div></div></DashboardLayout>;
+  );
 }

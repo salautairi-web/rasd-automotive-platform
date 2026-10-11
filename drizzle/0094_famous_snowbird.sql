@@ -1,0 +1,2 @@
+ALTER TABLE `workshop_job_cards_59` ADD `checkinId` int;--> statement-breakpoint
+ALTER TABLE `workshop_job_cards_59` ADD CONSTRAINT `workshop_job_card_59_checkin` UNIQUE(`businessEntityId`,`checkinId`);
