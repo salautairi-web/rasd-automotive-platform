@@ -666,6 +666,13 @@
       "when": 1791753133699,
       "tag": "0094_famous_snowbird",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "5",
+      "when": 1791811251873,
+      "tag": "0095_jittery_puppet_master",
+      "breakpoints": true
     }
   ]
 }

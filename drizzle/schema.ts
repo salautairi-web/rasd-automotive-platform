@@ -1,4 +1,4 @@
-import { boolean, decimal, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { bigint, boolean, decimal, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -21,6 +21,12 @@ export const organizations = mysqlTable("organizations", {
   nameEn: varchar("nameEn", { length: 180 }),
   status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const customerRegistrationSettings = mysqlTable("customer_registration_settings", {
+  businessEntityId: int("businessEntityId").primaryKey(),
+  organizationId: int("organizationId").notNull(),
+  enabled: boolean("enabled").default(false).notNull(),
 });
 
 export const branches = mysqlTable("branches", {
@@ -68,6 +74,34 @@ export const customers = mysqlTable("customers", {
   status: mysqlEnum("status", ["active", "inactive"]).default("active").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({ customerEntityNo: uniqueIndex("customers_entity_no_unique").on(table.businessEntityId, table.customerNo) }));
+
+export const customerCredentials = mysqlTable("customer_credentials", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  phone: varchar("phone", { length: 32 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 500 }).notNull(),
+  status: mysqlEnum("status", ["active", "suspended"]).default("active").notNull(),
+  emailVerifiedAt: timestamp("emailVerifiedAt"),
+  phoneVerifiedAt: timestamp("phoneVerifiedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const customerSessions = mysqlTable("customer_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  credentialId: int("credentialId").notNull(),
+  tokenHash: varchar("tokenHash", { length: 64 }).notNull().unique(),
+  expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
+  revokedAt: bigint("revokedAt", { mode: "number" }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const customerAuthLimits = mysqlTable("customer_auth_limits", {
+  keyHash: varchar("keyHash", { length: 64 }).primaryKey(),
+  attempts: int("attempts").default(0).notNull(),
+  expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
+});
 
 export const vehicles = mysqlTable("vehicles", {
   id: int("id").autoincrement().primaryKey(),

@@ -35,6 +35,13 @@ describe("Portal customer actions through tRPC", () => {
     await expect(portalV2Router.createCaller({ ...ctx, user: null }).ticketThread({ ...scope, ticketId: 55 })).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     expect(db.select).not.toHaveBeenCalled();
   });
+  it("ignores client cache identities for authorization and uses the validated actor", async () => {
+    const { conditions } = dbWith([[pu], []]);
+    const localContext = { ...ctx, user: null, customer: { userId: 9, credentialId: 1, sessionId: 2, name: "عميل", email: "qa@example.invalid", phone: "+96891234567" } };
+    await portalV2Router.createCaller(localContext).account({ cacheIdentity: "oauth:another-user" });
+    expect(conditions[0].params).toEqual([9]);
+    expect(conditions[1].params).toEqual([7, "active", "active"]);
+  });
   it("rejects requests without an active owned relationship", async () => {
     const { db } = dbWith([[pu], []]);
     await expect(portalV2Router.createCaller(ctx).ticketThread({ ...scope, ticketId: 55 })).rejects.toMatchObject({ code: "FORBIDDEN" });
@@ -44,7 +51,7 @@ describe("Portal customer actions through tRPC", () => {
     const { conditions } = dbWith([[pu], [relation], [ticket], [{ body: "رسالة اختبار" }]]);
     const result = await portalV2Router.createCaller(ctx).ticketThread({ ...scope, ticketId: 55 });
     expect(result.messages).toHaveLength(1);
-    expect(conditions[1].params).toEqual([7, 101, "active", 42]);
+    expect(conditions[1].params).toEqual([7, 101, "active", "active", 42]);
     for (const condition of conditions.slice(2)) {
       expect(condition.params).toEqual([55, 7, 101, 42]);
       expect(condition.sql).toContain("relationshipId");

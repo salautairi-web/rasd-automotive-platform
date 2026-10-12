@@ -12,6 +12,8 @@ import { getDb } from "./db";
 import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { importExportRouter } from "./importExport";
 import { portalRouter } from "./portal";
+import { customerServicesRouter } from "./customerServices";
+import { customerAuthRouter } from "./customerAuth";
 import { portalV2Router } from "./portalV2";
 import { communicationRouter } from "./communication";
 import { communication54Router } from "./communication54";
@@ -111,6 +113,8 @@ export const appRouter = router({
   importExport: importExportRouter,
   portal: portalRouter,
   portalV2: portalV2Router,
+  customerAuth: customerAuthRouter,
+  customerServices: customerServicesRouter,
   communication: communicationRouter,
   communication54: communication54Router,
   procurementNetwork: procurementNetworkRouter,
