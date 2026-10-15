@@ -14,26 +14,43 @@ export default function CustomerRegistrationSetupPanel() {
   const [entity, setEntity] = useState("");
   const [organization, setOrganization] = useState("");
   const [enabled, setEnabled] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const utils = trpc.useUtils();
   const selectedEntity = settings.data?.entities.find(
     item => item.id === Number(entity)
   );
   const configure = trpc.customerAuth.configureRegistration.useMutation({
     onSuccess: () => {
-      toast.success("تم حفظ إعداد التسجيل لهذه الشركة.");
+      const message =
+        "تم حفظ إعداد التسجيل وربط الفروع غير المرتبطة تلقائياً عند وضوح المؤسسة.";
+      setFeedback({ type: "success", message });
+      toast.success(message);
       void utils.customerAuth.registrationSettings.invalidate();
       void utils.customerAuth.entities.invalidate();
     },
-    onError: e => toast.error(e.message),
+    onError: e => {
+      setFeedback({ type: "error", message: e.message });
+      toast.error(e.message);
+    },
   });
   const activateEntity = trpc.customerAuth.activateEntity.useMutation({
     onSuccess: () => {
-      toast.success("تم تفعيل الكيان ويمكن الآن إتاحة تسجيل العملاء.");
+      const message =
+        "تم تفعيل الكيان؛ يمكنك الآن اختيار المنظمة وإتاحة تسجيل العملاء.";
+      setFeedback({ type: "success", message });
+      toast.success(message);
       void settings.refetch();
     },
-    onError: e => toast.error(e.message),
+    onError: e => {
+      setFeedback({ type: "error", message: e.message });
+      toast.error(e.message);
+    },
   });
   const chooseEntity = (id: string) => {
+    setFeedback(null);
     setEntity(id);
     const row = settings.data?.settings.find(
       s => s.businessEntityId === Number(id)
@@ -55,6 +72,14 @@ export default function CustomerRegistrationSetupPanel() {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          {feedback && (
+            <div
+              role="status"
+              className={`rounded-xl border p-3 text-sm leading-7 ${feedback.type === "error" ? "border-rose-200 bg-rose-50 text-rose-800" : "border-emerald-200 bg-emerald-50 text-emerald-800"}`}
+            >
+              {feedback.message}
+            </div>
+          )}
           {settings.isError ? (
             <div role="alert" className="text-sm text-rose-700">
               تعذر تحميل إعدادات التسجيل.{" "}
@@ -153,6 +178,21 @@ export default function CustomerRegistrationSetupPanel() {
               >
                 {configure.isPending ? "جارٍ الحفظ…" : "حفظ إعداد التسجيل"}
               </Button>
+              {!entity && (
+                <p className="text-xs text-slate-500">
+                  اختر كيان الخدمة أولاً لعرض حالته وخياراته.
+                </p>
+              )}
+              {entity && !organization && (
+                <p className="text-xs text-amber-700">
+                  اختر المنظمة المحاسبية قبل الحفظ.
+                </p>
+              )}
+              {selectedEntity?.status === "planned" && (
+                <p className="text-xs text-amber-700">
+                  لا يمكن الحفظ الآن: الكيان مخطط. استخدم زر تفعيل الكيان أولاً.
+                </p>
+              )}
               <div className="space-y-2">
                 {settings.data?.settings.map(row => (
                   <div

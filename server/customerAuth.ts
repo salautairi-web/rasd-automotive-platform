@@ -11,6 +11,7 @@ import {
   customerRegistrationSettings,
   customerSessions,
   customers,
+  branches,
   organizations,
   portalAudit,
   portalEntityRelationships,
@@ -342,6 +343,13 @@ export const customerAuthRouter = router({
           code: "BAD_REQUEST",
           message: "فعّل الكيان أولاً قبل إتاحة التسجيل للعملاء",
         });
+      const organizationEntitySettings = await db
+        .select({ businessEntityId: customerRegistrationSettings.businessEntityId })
+        .from(customerRegistrationSettings)
+        .where(eq(customerRegistrationSettings.organizationId, input.organizationId));
+      const canAutoLinkBranches = organizationEntitySettings.every(
+        row => row.businessEntityId === input.businessEntityId
+      );
       await db.transaction(async (tx: any) => {
         await tx
           .insert(customerRegistrationSettings)
@@ -362,6 +370,16 @@ export const customerAuthRouter = router({
               outcome: "success",
             })
           );
+        if (canAutoLinkBranches)
+          await tx
+            .update(branches)
+            .set({ businessEntityId: input.businessEntityId })
+            .where(
+              and(
+                eq(branches.organizationId, input.organizationId),
+                isNull(branches.businessEntityId)
+              )
+            );
       });
       return { success: true };
     }),
@@ -385,6 +403,11 @@ export const customerAuthRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "لا يمكن تفعيل كيان غير نشط؛ راجع دورة حياة الكيان أولاً",
+        });
+      if (entity.status === "archived")
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "الكيان مؤرشف ولا يمكن إعادة تفعيله؛ أنشئ كياناً جديداً أو راجع الإدارة المركزية",
         });
       if (entity.status === "active") return { activated: false as const };
       await db.transaction(async (tx: any) => {

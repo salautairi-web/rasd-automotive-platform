@@ -121,7 +121,11 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
-export type CustomerRegistrationEntityStatus = "active" | "inactive" | "planned";
+export type CustomerRegistrationEntityStatus =
+  | "active"
+  | "inactive"
+  | "planned"
+  | "archived";
 
 export function canEnableCustomerRegistration(
   status: CustomerRegistrationEntityStatus

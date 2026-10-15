@@ -1,0 +1,2 @@
+ALTER TABLE `business_entities` MODIFY COLUMN `status` enum('active','inactive','planned','archived') NOT NULL DEFAULT 'planned';--> statement-breakpoint
+ALTER TABLE `branches` ADD `businessEntityId` int;
