@@ -15,11 +15,21 @@ export default function CustomerRegistrationSetupPanel() {
   const [organization, setOrganization] = useState("");
   const [enabled, setEnabled] = useState(false);
   const utils = trpc.useUtils();
+  const selectedEntity = settings.data?.entities.find(
+    item => item.id === Number(entity)
+  );
   const configure = trpc.customerAuth.configureRegistration.useMutation({
     onSuccess: () => {
       toast.success("تم حفظ إعداد التسجيل لهذه الشركة.");
       void utils.customerAuth.registrationSettings.invalidate();
       void utils.customerAuth.entities.invalidate();
+    },
+    onError: e => toast.error(e.message),
+  });
+  const activateEntity = trpc.customerAuth.activateEntity.useMutation({
+    onSuccess: () => {
+      toast.success("تم تفعيل الكيان ويمكن الآن إتاحة تسجيل العملاء.");
+      void settings.refetch();
     },
     onError: e => toast.error(e.message),
   });
@@ -71,7 +81,7 @@ export default function CustomerRegistrationSetupPanel() {
                     <option value="">اختر الكيان</option>
                     {settings.data?.entities.map(e => (
                       <option key={e.id} value={e.id}>
-                        {e.nameAr}
+                        {e.nameAr} · {e.status === "planned" ? "مخطط" : "نشط"}
                       </option>
                     ))}
                   </select>
@@ -96,11 +106,28 @@ export default function CustomerRegistrationSetupPanel() {
                   </select>
                 </div>
               </div>
+              {selectedEntity?.status === "planned" && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-7 text-amber-900">
+                  <span>
+                    هذا الكيان مخطط ولم يُفعّل بعد؛ فعّله أولاً ليظهر للعملاء.
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={activateEntity.isPending || configure.isPending}
+                    onClick={() =>
+                      activateEntity.mutate({ businessEntityId: Number(entity) })
+                    }
+                  >
+                    {activateEntity.isPending ? "جارٍ التفعيل…" : "تفعيل الكيان"}
+                  </Button>
+                </div>
+              )}
               <label className="flex items-start gap-2 text-sm leading-7">
                 <Checkbox
                   aria-label="تفعيل التسجيل الذاتي لهذا الكيان"
                   checked={enabled}
-                  disabled={configure.isPending}
+                  disabled={configure.isPending || selectedEntity?.status !== "active"}
                   onCheckedChange={v => setEnabled(v === true)}
                   className="mt-1"
                 />
@@ -109,7 +136,13 @@ export default function CustomerRegistrationSetupPanel() {
                 </span>
               </label>
               <Button
-                disabled={!entity || !organization || configure.isPending}
+                disabled={
+                  !entity ||
+                  !organization ||
+                  selectedEntity?.status !== "active" ||
+                  configure.isPending ||
+                  activateEntity.isPending
+                }
                 onClick={() =>
                   configure.mutate({
                     businessEntityId: Number(entity),

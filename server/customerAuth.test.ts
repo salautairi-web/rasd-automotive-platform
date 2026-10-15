@@ -427,6 +427,41 @@ describe("Isolated registration and login", () => {
   });
 });
 describe("Password changes and administrative configuration", () => {
+  it("lists planned entities for administrators so setup is not an empty selector", async () => {
+    state.rows = [
+      [{ id: 7, nameAr: "كيان مخطط", status: "planned" }],
+      [{ id: 3, nameAr: "شركة رصد", status: "active" }],
+      [],
+    ];
+    const result = await customerAuthRouter
+      .createCaller(context({ user: { id: 1, role: "admin" } }).ctx)
+      .registrationSettings();
+    expect(result.entities).toEqual([
+      { id: 7, nameAr: "كيان مخطط", status: "planned" },
+    ]);
+    expect(result.organizations).toEqual([
+      { id: 3, nameAr: "شركة رصد", status: "active" },
+    ]);
+  });
+
+  it("activates a planned entity atomically and records an audit event", async () => {
+    state.rows = [[{ id: 7, status: "planned" }]];
+    const result = await customerAuthRouter
+      .createCaller(context({ user: { id: 1, role: "admin" } }).ctx)
+      .activateEntity({ businessEntityId: 7 });
+    expect(result).toEqual({ activated: true });
+    expect(state.transactions).toBe(1);
+    expect(state.writes).toContainEqual(
+      expect.objectContaining({
+        table: "business_entities",
+        set: { status: "active" },
+      })
+    );
+    expect(state.writes.some(write => write.table === "portal_audit")).toBe(
+      true
+    );
+  });
+
   it("does not allow OAuth-only identities to change customer credentials", async () => {
     const { ctx } = context({ user: { id: 1, role: "admin" } });
     await expect(

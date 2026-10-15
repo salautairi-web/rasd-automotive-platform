@@ -1,5 +1,5 @@
 import { randomUUID, createHash } from "node:crypto";
-import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
@@ -20,6 +20,7 @@ import {
 } from "../drizzle/schema";
 import {
   changePasswordSchema,
+  canEnableCustomerRegistration,
   loginSchema,
   normalizeCustomerEmail,
   normalizeCustomerPhone,
@@ -276,9 +277,13 @@ export const customerAuthRouter = router({
     const db = await dbRequired();
     const [entities, organizationRows, settings] = await Promise.all([
       db
-        .select({ id: businessEntities.id, nameAr: businessEntities.nameAr })
+        .select({
+          id: businessEntities.id,
+          nameAr: businessEntities.nameAr,
+          status: businessEntities.status,
+        })
         .from(businessEntities)
-        .where(eq(businessEntities.status, "active"))
+        .where(inArray(businessEntities.status, ["active", "planned"]))
         .orderBy(businessEntities.nameAr),
       db
         .select({ id: organizations.id, nameAr: organizations.nameAr })
@@ -308,12 +313,12 @@ export const customerAuthRouter = router({
       assertCsrf(ctx.req);
       const db = await dbRequired();
       const [entity] = await db
-        .select({ id: businessEntities.id })
+        .select({ id: businessEntities.id, status: businessEntities.status })
         .from(businessEntities)
         .where(
           and(
             eq(businessEntities.id, input.businessEntityId),
-            eq(businessEntities.status, "active")
+            inArray(businessEntities.status, ["active", "planned"])
           )
         )
         .limit(1);
@@ -331,6 +336,11 @@ export const customerAuthRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "الكيان أو المنظمة غير صالح",
+        });
+      if (input.enabled && !canEnableCustomerRegistration(entity.status))
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "فعّل الكيان أولاً قبل إتاحة التسجيل للعملاء",
         });
       await db.transaction(async (tx: any) => {
         await tx
@@ -354,6 +364,44 @@ export const customerAuthRouter = router({
           );
       });
       return { success: true };
+    }),
+
+  activateEntity: adminProcedure
+    .input(z.object({ businessEntityId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      assertCsrf(ctx.req);
+      const db = await dbRequired();
+      const [entity] = await db
+        .select({ id: businessEntities.id, status: businessEntities.status })
+        .from(businessEntities)
+        .where(eq(businessEntities.id, input.businessEntityId))
+        .limit(1);
+      if (!entity)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "الكيان غير موجود",
+        });
+      if (entity.status === "inactive")
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "لا يمكن تفعيل كيان غير نشط؛ راجع دورة حياة الكيان أولاً",
+        });
+      if (entity.status === "active") return { activated: false as const };
+      await db.transaction(async (tx: any) => {
+        await tx
+          .update(businessEntities)
+          .set({ status: "active" })
+          .where(eq(businessEntities.id, input.businessEntityId));
+        await tx.insert(portalAudit).values(
+          auditValues({
+            userId: ctx.user.id,
+            businessEntityId: input.businessEntityId,
+            action: "customer.registration.entity.activate",
+            outcome: "success",
+          })
+        );
+      });
+      return { activated: true as const };
     }),
 
   register: publicProcedure

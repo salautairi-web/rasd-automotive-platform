@@ -120,3 +120,11 @@ export const changePasswordSchema = z
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export type CustomerRegistrationEntityStatus = "active" | "inactive" | "planned";
+
+export function canEnableCustomerRegistration(
+  status: CustomerRegistrationEntityStatus
+) {
+  return status === "active";
+}
