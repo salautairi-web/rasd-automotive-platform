@@ -18,6 +18,8 @@ export type CustomerActor = {
   name: string;
   email: string;
   phone: string;
+  emailVerifiedAt?: Date | null;
+  phoneVerifiedAt?: Date | null;
 };
 
 export function hashCustomerSessionToken(token: string) {
@@ -108,9 +110,7 @@ export async function revokeCustomerSession(
     .where(
       and(
         eq(customerSessions.id, sessionId),
-        isNull(customerSessions.revokedAt),
-        gt(customerSessions.expiresAt, now),
-        eq(customerCredentials.status, "active")
+        isNull(customerSessions.revokedAt)
       )
     );
 }
@@ -126,9 +126,7 @@ export async function revokeAllCustomerSessions(
     .where(
       and(
         eq(customerSessions.credentialId, credentialId),
-        isNull(customerSessions.revokedAt),
-        gt(customerSessions.expiresAt, now),
-        eq(customerCredentials.status, "active")
+        isNull(customerSessions.revokedAt)
       )
     );
 }
@@ -152,6 +150,8 @@ export async function resolveCustomerSession(
         name: users.name,
         email: customerCredentials.email,
         phone: customerCredentials.phone,
+        emailVerifiedAt: customerCredentials.emailVerifiedAt,
+        phoneVerifiedAt: customerCredentials.phoneVerifiedAt,
         credentialStatus: customerCredentials.status,
         expiresAt: customerSessions.expiresAt,
         revokedAt: customerSessions.revokedAt,
@@ -186,6 +186,8 @@ export async function resolveCustomerSession(
       name: row.name ?? "",
       email: row.email,
       phone: row.phone,
+      emailVerifiedAt: row.emailVerifiedAt,
+      phoneVerifiedAt: row.phoneVerifiedAt,
     };
   } catch {
     // Customer authentication is optional in context; a malformed/expired cookie is a normal null.

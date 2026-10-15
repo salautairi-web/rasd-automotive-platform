@@ -66,7 +66,7 @@ function requestHost(req: any) {
     : null;
 }
 
-function assertCsrf(req: any) {
+export function assertCsrf(req: any) {
   const origin = req.headers?.origin;
   // Non-browser callers/tests may omit Origin. A supplied browser Origin must match this request host.
   if (!origin) {
@@ -88,7 +88,7 @@ function assertCsrf(req: any) {
   }
 }
 
-function clientIp(req: any) {
+export function clientIp(req: any) {
   // Never trust arbitrary X-Forwarded-For; Express' req.ip is safe only when proxy trust is configured.
   const value = req.ip || req.socket?.remoteAddress || "unknown";
   return typeof value === "string" && value.length <= 180 ? value : "unknown";
@@ -136,7 +136,7 @@ async function recordLimitFailure(
   return (await limitState(db, key, max, now)).allowed;
 }
 
-async function consumeAttempts(db: any, keys: Array<[string, number]>) {
+export async function consumeAttempts(db: any, keys: Array<[string, number]>) {
   // Consume atomically BEFORE password work; concurrent requests cannot all pass a stale count.
   await Promise.all(
     keys.map(async ([key, max]) => {
@@ -160,18 +160,20 @@ function publicUser(user: {
   name: string | null;
   email: string;
   phone: string;
+  emailVerifiedAt?: Date | null;
+  phoneVerifiedAt?: Date | null;
 }) {
   return {
     id: user.id,
     name: user.name ?? "",
     email: user.email,
     phone: user.phone,
-    emailVerified: false,
-    phoneVerified: false,
+    emailVerified: Boolean(user.emailVerifiedAt),
+    phoneVerified: Boolean(user.phoneVerifiedAt),
   };
 }
 
-function auditValues(input: {
+export function auditValues(input: {
   userId?: number;
   businessEntityId?: number;
   action: string;
@@ -264,8 +266,8 @@ export const customerAuthRouter = router({
           name: ctx.customer.name,
           email: ctx.customer.email,
           phone: ctx.customer.phone,
-          emailVerified: false,
-          phoneVerified: false,
+          emailVerified: Boolean(ctx.customer.emailVerifiedAt),
+          phoneVerified: Boolean(ctx.customer.phoneVerifiedAt),
         }
       : null
   ),
@@ -555,6 +557,8 @@ export const customerAuthRouter = router({
         name: row.user.name,
         email: row.credential.email,
         phone: row.credential.phone,
+        emailVerifiedAt: row.credential.emailVerifiedAt,
+        phoneVerifiedAt: row.credential.phoneVerifiedAt,
       }),
     };
   }),

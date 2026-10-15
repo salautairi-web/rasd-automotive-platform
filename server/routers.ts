@@ -13,6 +13,8 @@ import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { importExportRouter } from "./importExport";
 import { portalRouter } from "./portal";
 import { customerServicesRouter } from "./customerServices";
+import { customerVerificationRouter } from "./customerVerification";
+import { customerLinkReviewRouter } from "./customerLinkReview";
 import { customerAuthRouter } from "./customerAuth";
 import { portalV2Router } from "./portalV2";
 import { communicationRouter } from "./communication";
@@ -114,6 +116,8 @@ export const appRouter = router({
   portal: portalRouter,
   portalV2: portalV2Router,
   customerAuth: customerAuthRouter,
+  customerVerification: customerVerificationRouter,
+  customerLinkReview: customerLinkReviewRouter,
   customerServices: customerServicesRouter,
   communication: communicationRouter,
   communication54: communication54Router,

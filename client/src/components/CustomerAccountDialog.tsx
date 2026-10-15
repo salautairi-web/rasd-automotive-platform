@@ -1,3 +1,4 @@
+import CustomerVerificationPanel from "./CustomerVerificationPanel";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
@@ -98,9 +99,10 @@ export default function CustomerAccountDialog({
           <p className="text-xs leading-6 text-amber-700">
             {profile.emailVerified && profile.phoneVerified
               ? "بيانات الاتصال متحققة."
-              : "بيانات الاتصال محفوظة، لكن التحقق بالبريد والرسائل النصية لم يُفعّل بعد. لا تربط سجلات قديمة اعتماداً عليها وحدها."}
+              : "أكمل توثيق كل وسيلة اتصال باستخدام رمز يصل إليها قبل طلب الربط بسجل سابق."}
           </p>
         </div>
+        <CustomerVerificationPanel />
         <form onSubmit={submit} className="space-y-4">
           <h2 className="flex items-center gap-2 font-semibold">
             <ShieldCheck size={17} className="text-blue-600" />

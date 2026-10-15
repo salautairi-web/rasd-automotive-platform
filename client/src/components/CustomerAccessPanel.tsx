@@ -1,3 +1,4 @@
+import CustomerRecoveryDialog from "./CustomerRecoveryDialog";
 import { useState, type FormEvent } from "react";
 import { Link } from "wouter";
 import {
@@ -29,6 +30,7 @@ export default function CustomerAccessPanel({
   onAuthenticated: () => Promise<unknown> | void;
   initialMode?: "login" | "register";
 }) {
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -454,9 +456,24 @@ export default function CustomerAccessPanel({
               )}
             </Button>
           </form>
+          {mode === "login" && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-3 min-h-11 w-full text-blue-700"
+              onClick={() => setRecoveryOpen(true)}
+              disabled={pending}
+            >
+              نسيت كلمة المرور؟
+            </Button>
+          )}
+          <CustomerRecoveryDialog
+            open={recoveryOpen}
+            onOpenChange={setRecoveryOpen}
+          />
           <p className="mt-5 text-xs leading-7 text-slate-400">
             لا تشارك كلمة المرور. ربط سجلات سابقة أو استعادة حساب يحتاج التحقق
-            من هويتك عبر فريق الشركة؛ لن نكشف سجلات اعتماداً على بيانات اتصال
+            من ملكية وسيلة اتصال موثقة؛ لن نكشف سجلات اعتماداً على بيانات اتصال
             غير متحققة.
           </p>
         </section>

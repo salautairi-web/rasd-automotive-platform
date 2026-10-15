@@ -1,4 +1,4 @@
-import { bigint, boolean, decimal, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { bigint, boolean, decimal, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -95,7 +95,7 @@ export const customerSessions = mysqlTable("customer_sessions", {
   expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
   revokedAt: bigint("revokedAt", { mode: "number" }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (t) => ({ credential: index("customer_sessions_credential_idx").on(t.credentialId), expiry: index("customer_sessions_expiry_idx").on(t.expiresAt) }));
 
 export const customerAuthLimits = mysqlTable("customer_auth_limits", {
   keyHash: varchar("keyHash", { length: 64 }).primaryKey(),
@@ -1607,3 +1607,48 @@ export const uiLayoutTemplateVersions = mysqlTable("ui_layout_template_versions"
   restoredFromVersionId: int("restoredFromVersionId"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (t) => ({ versionUnique: uniqueIndex("ui_layout_template_version_unique").on(t.templateKey, t.versionNo) }));
+
+
+export const customerVerificationChallenges = mysqlTable("customer_verification_challenges", {
+ id: varchar("id", { length: 40 }).primaryKey(),
+ credentialId: int("credentialId"),
+ purpose: mysqlEnum("purpose", ["verify_contact", "password_reset"]).notNull(),
+ channel: mysqlEnum("channel", ["email", "sms"]).notNull(),
+ destination: varchar("destination", { length: 320 }).notNull(),
+ codeHash: varchar("codeHash", { length: 64 }),
+ providerSid: varchar("providerSid", { length: 80 }),
+ status: mysqlEnum("status", ["sending", "active", "used", "failed", "revoked", "locked"]).notNull(),
+ attempts: int("attempts").default(0).notNull(),
+ expiresAt: bigint("expiresAt", { mode: "number" }).notNull(),
+ createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+ consumedAt: bigint("consumedAt", { mode: "number" }),
+ passwordFingerprint: varchar("passwordFingerprint", { length: 64 }),
+}, (t) => ({ credential: index("customer_challenges_credential_idx").on(t.credentialId), expiry: index("customer_challenges_expiry_idx").on(t.expiresAt) }));
+
+export const customerLinkRequests = mysqlTable("customer_link_requests", {
+ id: int("id").autoincrement().primaryKey(),
+ credentialId: int("credentialId").notNull(),
+ userId: int("userId").notNull(),
+ businessEntityId: int("businessEntityId").notNull(),
+ relationshipId: int("relationshipId").notNull(),
+ customerNo: varchar("customerNo", { length: 32 }).notNull(),
+ requesterNote: varchar("requesterNote", { length: 1000 }).notNull(),
+ status: mysqlEnum("status", ["pending", "approved", "rejected", "cancelled"]).default("pending").notNull(),
+ reviewedBy: int("reviewedBy"),
+ reviewNote: text("reviewNote"),
+ evidenceReference: varchar("evidenceReference", { length: 180 }),
+ identityCheckMethod: varchar("identityCheckMethod", { length: 80 }),
+ createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+ reviewedAt: bigint("reviewedAt", { mode: "number" }),
+}, (t) => ({ credential: index("customer_link_requests_credential_idx").on(t.credentialId), entity: index("customer_link_requests_entity_idx").on(t.businessEntityId) }));
+
+export const customerVerifiedLinks = mysqlTable("customer_verified_links", {
+ id: int("id").autoincrement().primaryKey(),
+ credentialId: int("credentialId").notNull(),
+ userId: int("userId").notNull(),
+ businessEntityId: int("businessEntityId").notNull(),
+ customerId: int("customerId").notNull(),
+ requestId: int("requestId").notNull().unique(),
+ approvedBy: int("approvedBy").notNull(),
+ createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+}, (t) => ({ target: uniqueIndex("customer_verified_target_unique").on(t.businessEntityId, t.customerId), owner: uniqueIndex("customer_verified_owner_unique").on(t.credentialId, t.businessEntityId) }));

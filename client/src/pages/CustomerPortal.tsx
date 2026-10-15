@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
+import CustomerLinkRequestPanel from "@/components/CustomerLinkRequestPanel";
 import CustomerServiceRequests from "@/components/CustomerServiceRequests";
 import CustomerAccessPanel from "@/components/CustomerAccessPanel";
 import CustomerAccountDialog from "@/components/CustomerAccountDialog";
@@ -176,6 +177,13 @@ export default function CustomerPortal() {
   });
   const clearPortalCache = () => {
     queryClient.removeQueries({ queryKey: getQueryKey(trpc.portalV2) });
+    queryClient.removeQueries({
+      queryKey: getQueryKey(trpc.customerVerification),
+    });
+    queryClient.removeQueries({
+      queryKey: getQueryKey(trpc.customerLinkReview),
+    });
+    queryClient.removeQueries({ queryKey: getQueryKey(trpc.customerServices) });
     setRelationshipId("");
   };
   const signedIn = async () => {
@@ -367,18 +375,32 @@ export default function CustomerPortal() {
             </CardContent>
           </Card>
         ) : (
-          <CustomerWorkspace
-            key={`${user.id}:${relationship.businessEntityId}:${relationship.id}`}
-            scope={{
-              businessEntityId: relationship.businessEntityId,
-              relationshipId: relationship.id,
-              entityName: relationship.entityName,
-            }}
-          />
+          <>
+            {local.data && relationship.relationshipType === "customer" && (
+              <CustomerLinkRequestPanel
+                key={`link:${local.data.id}:${relationship.id}`}
+                scope={{
+                  businessEntityId: relationship.businessEntityId,
+                  relationshipId: relationship.id,
+                  entityName: relationship.entityName,
+                }}
+                onVerify={() => setProfileOpen(true)}
+              />
+            )}
+            <CustomerWorkspace
+              key={`${user.id}:${relationship.businessEntityId}:${relationship.id}`}
+              scope={{
+                businessEntityId: relationship.businessEntityId,
+                relationshipId: relationship.id,
+                entityName: relationship.entityName,
+              }}
+            />
+          </>
         )}
       </div>
       {local.data && (
         <CustomerAccountDialog
+          key={`account:${local.data.id}`}
           open={profileOpen}
           onOpenChange={setProfileOpen}
           profile={local.data}
