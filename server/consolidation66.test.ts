@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 describe("Step 66 financial consolidation", () => {
   it("keeps entity ledgers separate from group reporting", () => {
@@ -16,5 +18,11 @@ describe("Step 66 financial consolidation", () => {
   });
   it("blocks new snapshots after a period is locked", () => {
     expect(["locked", "closed"].includes("locked")).toBe(true);
+  });
+  it("keeps group-level consolidation procedures behind the admin boundary", () => {
+    const source = readFileSync(resolve(import.meta.dirname, "consolidation66.ts"), "utf8");
+    expect(source).toContain('import { adminProcedure, router } from "./_core/trpc";');
+    expect(source).not.toContain("protectedProcedure");
+    expect(source).toContain("groupInScope");
   });
 });
