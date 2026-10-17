@@ -58,7 +58,7 @@ describe("Auto Sales persisted procedure behavior", () => {
   });
 
   it("denies a quotation when both persisted records belong to different entities", async () => {
-    state.selectResponses = [[{ id: 11, businessEntityId: 1 }], [{ id: 22, businessEntityId: 2 }]];
+    state.selectResponses = [[{ id: 900 }], [{ id: 11, businessEntityId: 1 }], [{ id: 22, businessEntityId: 2 }]];
     await expect(appRouter.createCaller(context()).sales.createQuotation({
       businessEntityId: 1,
       customerId: 11,
@@ -73,7 +73,7 @@ describe("Auto Sales persisted procedure behavior", () => {
   });
 
   it("replays an existing reservation without changing vehicle state", async () => {
-    state.selectResponses = [[{ reservationNo: "SALES-RES-001" }]];
+    state.selectResponses = [[{ id: 900 }], [{ reservationNo: "SALES-RES-001" }]];
     const result = await appRouter.createCaller(context()).sales.reserveVehicle({
       businessEntityId: 1,
       customerId: 11,
@@ -88,7 +88,7 @@ describe("Auto Sales persisted procedure behavior", () => {
   });
 
   it("replays a confirmed payment without a duplicate insert", async () => {
-    state.selectResponses = [[{ paymentNo: "PAY-001" }]];
+    state.selectResponses = [[{ id: 900 }], [{ paymentNo: "PAY-001" }]];
     const result = await appRouter.createCaller(context()).sales.postPayment({
       businessEntityId: 1,
       invoiceId: 15,
@@ -102,7 +102,7 @@ describe("Auto Sales persisted procedure behavior", () => {
   });
 
   it("rejects delivery when the persisted vehicle is not reserved", async () => {
-    state.selectResponses = [[{ status: "ready" }], [{ status: "paid" }]];
+    state.selectResponses = [[{ id: 900 }], [{ status: "ready" }], [{ status: "paid" }]];
     await expect(appRouter.createCaller(context()).sales.deliverVehicle({
       businessEntityId: 1,
       salesOrderId: 3,
