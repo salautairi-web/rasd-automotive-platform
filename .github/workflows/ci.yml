@@ -16,8 +16,42 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - name: Restore previous performance history
+        uses: actions/cache@v4
+        with:
+          key: rasd-performance-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            rasd-performance-history-${{ github.ref_name }}-
+          path: performance-history
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm test -- --run
       - run: pnpm build
       - run: pnpm test:performance
+      - run: pnpm record:performance
+      - name: Upload performance history
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rasd-performance-history
+          path: performance-history
+          retention-days: 90
+      - name: Notify Slack on failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl --fail-with-body -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            --data "{\"text\":\"RASD CI failed: $GITHUB_REPOSITORY@$GITHUB_REF_NAME ($GITHUB_SHA)\"}"
+      - name: Notify email on failure
+        if: failure() && env.RESEND_API_KEY != '' && env.CI_ALERT_EMAIL != '' && env.RESEND_FROM_EMAIL != ''
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CI_ALERT_EMAIL: ${{ secrets.CI_ALERT_EMAIL }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+        run: |
+          curl --fail-with-body https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H 'Content-Type: application/json' \
+            --data "{\"from\":\"$RESEND_FROM_EMAIL\",\"to\":[\"$CI_ALERT_EMAIL\"],\"subject\":\"RASD CI failed\",\"html\":\"<p>CI failed for $GITHUB_REPOSITORY@$GITHUB_REF_NAME.</p><p><a href=\\\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\\\">Open run</a></p>\"}"

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import WorkshopSetupPanel from "@/components/WorkshopSetupPanel";
+import BranchSelector from "@/components/BranchSelector";
 import WorkshopReceiveDialog from "@/components/WorkshopReceiveDialog";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
@@ -231,6 +232,7 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [branchId, setBranchId] = useState("");
   const [reportRange] = useState(() => {
     const to = new Date();
     const from = new Date(to);
@@ -245,7 +247,7 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
     return { from, to };
   });
   const dashboard = trpc.workshop59.dashboard.useQuery(
-    { businessEntityId },
+    { businessEntityId, branchId: branchId ? Number(branchId) : undefined },
     { refetchInterval: 30000, retry: false }
   );
   const refs = trpc.workshop59.referenceData.useQuery(
@@ -683,21 +685,31 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
             {entity.nameAr} · تحديث دوري كل 30 ثانية
           </span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={refresh}>
-            <RefreshCw size={15} className="ml-1" />
-            تحديث
-          </Button>
-          {can("receive") && (
-            <Button
-              size="sm"
-              onClick={() => setReceiveOpen(true)}
-              disabled={refs.isLoading || Boolean(refs.error)}
-            >
-              <Plus size={16} className="ml-1" />
-              استقبال جديد
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-52">
+            <BranchSelector
+              businessEntityId={businessEntityId}
+              value={branchId}
+              onChange={setBranchId}
+              ariaLabel="فرع الورشة"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={refresh}>
+              <RefreshCw size={15} className="ml-1" />
+              تحديث
             </Button>
-          )}
+            {can("receive") && (
+              <Button
+                size="sm"
+                onClick={() => setReceiveOpen(true)}
+                disabled={refs.isLoading || Boolean(refs.error)}
+              >
+                <Plus size={16} className="ml-1" />
+                استقبال جديد
+              </Button>
+            )}
+          </div>
         </div>
       </div>
       <nav

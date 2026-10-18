@@ -1,4 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
+import BranchSelector from "@/components/BranchSelector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,7 +22,14 @@ const amount = (minor: number) =>
 
 export default function AutoSales() {
   const [businessEntityId, setBusinessEntityId] = useState(1);
-  const input = useMemo(() => ({ businessEntityId }), [businessEntityId]);
+  const [branchId, setBranchId] = useState("");
+  const input = useMemo(
+    () => ({
+      businessEntityId,
+      branchId: branchId ? Number(branchId) : undefined,
+    }),
+    [businessEntityId, branchId]
+  );
   const { data, isLoading, isError } = trpc.sales.dashboard.useQuery(input, {
     retry: false,
   });
@@ -87,6 +95,14 @@ export default function AutoSales() {
                     Math.max(1, Number(event.target.value) || 1)
                   )
                 }
+              />
+            </div>
+            <div className="w-full sm:w-56">
+              <BranchSelector
+                businessEntityId={businessEntityId}
+                value={branchId}
+                onChange={setBranchId}
+                ariaLabel="فرع المبيعات"
               />
             </div>
           </div>

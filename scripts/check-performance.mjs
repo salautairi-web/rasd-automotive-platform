@@ -1,4 +1,4 @@
-import { readdirSync, statSync, existsSync, readFileSync } from "node:fs";
+import { readdirSync, statSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(new URL("..", import.meta.url).pathname);
@@ -39,15 +39,12 @@ if ((assets[0]?.bytes ?? 0) > limits.maxLargestBytes)
   throw new Error(
     `largest chunk ${assets[0].bytes} bytes exceeds ${limits.maxLargestBytes}`
   );
-console.log(
-  JSON.stringify(
-    {
-      limits,
-      chunkCount: assets.length,
-      totalBytes,
-      largest: assets.slice(0, 5),
-    },
-    null,
-    2
-  )
-);
+const result = {
+  limits,
+  chunkCount: assets.length,
+  totalBytes,
+  largest: assets.slice(0, 5),
+};
+if (process.env.RASD_PERF_REPORT)
+  writeFileSync(process.env.RASD_PERF_REPORT, JSON.stringify(result, null, 2));
+console.log(JSON.stringify(result, null, 2));

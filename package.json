@@ -10,7 +10,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:performance": "node scripts/check-performance.mjs",
+    "test:performance": "RASD_PERF_REPORT=performance-report.json node scripts/check-performance.mjs",
+    "record:performance": "node scripts/record-performance-history.mjs",
     "ci:verify": "pnpm check && pnpm test -- --run && pnpm build && pnpm test:performance",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },

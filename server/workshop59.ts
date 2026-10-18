@@ -51,7 +51,10 @@ import {
   isValidWorkshopScheduleWindow,
 } from "../shared/workshop59";
 
-const scope = z.object({ businessEntityId: z.number().int().positive() });
+const scope = z.object({
+  businessEntityId: z.number().int().positive(),
+  branchId: z.number().int().positive().optional(),
+});
 const idem = z.string().trim().min(8).max(160);
 const statuses = [
   "received",

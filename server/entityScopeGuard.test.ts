@@ -24,7 +24,7 @@ describe("central entity scope guard", () => {
   });
 
   it("keeps the shared guard strict for malformed entity identifiers", () => {
-    expect(routersSource).toContain("protectedProcedure.input(z.object({ businessEntityId: z.number().int().positive() })).use");
-    expect(routersSource).toContain("const businessEntityId = input.businessEntityId");
+    expect(routersSource).toContain("branchOptions: protectedProcedure");
+    expect(routersSource).toContain("assertEntityMembership(ctx.user.id, ctx.user.role, input.businessEntityId)");
   });
 });

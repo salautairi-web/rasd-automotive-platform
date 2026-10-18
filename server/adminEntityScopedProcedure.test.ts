@@ -43,8 +43,9 @@ describe("administrative entity-scoped procedure", () => {
       "utf8"
     );
     expect(packageSource).toContain(
-      '"test:performance": "node scripts/check-performance.mjs"'
+      '"test:performance": "RASD_PERF_REPORT=performance-report.json node scripts/check-performance.mjs"'
     );
+    expect(packageSource).toContain('"record:performance": "node scripts/record-performance-history.mjs"');
     expect(gateSource).toContain("maxTotalBytes");
     expect(gateSource).toContain("maxLargestBytes");
     expect(gateSource).toContain("maxFirstLoadMs");

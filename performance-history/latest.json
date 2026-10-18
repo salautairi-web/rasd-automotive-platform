@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-10-18T21:07:38.288Z",
+  "commit": "local",
+  "ref": "local",
+  "firstLoadMs": 0,
+  "chunkCount": 117,
+  "totalBytes": 2660932,
+  "largestBytes": 559465,
+  "largestName": "index-BBA90tvX.js"
+}
