@@ -37,6 +37,7 @@ const selectClass =
 
 export default function WorkshopReceiveDialog({
   businessEntityId,
+  branchId,
   customers,
   vehicles,
   open,
@@ -44,6 +45,7 @@ export default function WorkshopReceiveDialog({
   onCreated,
 }: {
   businessEntityId: number;
+  branchId?: number;
   customers: Customer[];
   vehicles: Vehicle[];
   open: boolean;
@@ -70,6 +72,7 @@ export default function WorkshopReceiveDialog({
       if (!id) {
         const row = await receive.mutateAsync({
           businessEntityId,
+          branchId,
           customerId: Number(form.customerId),
           vehicleId: Number(form.vehicleId),
           mileage: Number(form.mileage),
@@ -84,6 +87,7 @@ export default function WorkshopReceiveDialog({
       }
       const job = await createJob.mutateAsync({
         businessEntityId,
+        branchId,
         customerId: Number(form.customerId),
         vehicleId: Number(form.vehicleId),
         checkinId: id,

@@ -429,7 +429,10 @@ export const workshop59Router = router({
             and(
               eq(workshopAppointments.businessEntityId, input.businessEntityId),
               sql`${workshopAppointments.scheduledAt} >= ${input.from}`,
-              sql`${workshopAppointments.scheduledAt} < ${input.to}`
+              sql`${workshopAppointments.scheduledAt} < ${input.to}`,
+              input.branchId
+                ? eq(workshopAppointments.branchId, input.branchId)
+                : undefined
             )
           )
           .orderBy(workshopAppointments.scheduledAt),
@@ -440,7 +443,10 @@ export const workshop59Router = router({
             and(
               eq(workshopSchedules59.businessEntityId, input.businessEntityId),
               sql`${workshopSchedules59.startsAt} < ${input.to}`,
-              sql`${workshopSchedules59.endsAt} > ${input.from}`
+              sql`${workshopSchedules59.endsAt} > ${input.from}`,
+              input.branchId
+                ? eq(workshopSchedules59.branchId, input.branchId)
+                : undefined
             )
           )
           .orderBy(workshopSchedules59.startsAt),
@@ -564,6 +570,7 @@ export const workshop59Router = router({
         const appointmentNo = `WS-APT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const a = await tx.insert(workshopAppointments).values({
           businessEntityId: input.businessEntityId,
+          branchId: input.branchId ?? null,
           appointmentNo,
           customerId: input.customerId,
           vehicleId: input.vehicleId,
@@ -574,6 +581,7 @@ export const workshop59Router = router({
         const appointmentId = idOf(a);
         const s = await tx.insert(workshopSchedules59).values({
           businessEntityId: input.businessEntityId,
+          branchId: input.branchId ?? null,
           appointmentId,
           jobCardId: input.jobCardId,
           bayId: input.bayId,
@@ -883,6 +891,7 @@ export const workshop59Router = router({
           !checkin ||
           checkin.customerId !== input.customerId ||
           checkin.vehicleId !== input.vehicleId ||
+          (input.branchId !== undefined && checkin.branchId !== input.branchId) ||
           !checkin.consent
         )
           throw new TRPCError({
@@ -939,6 +948,7 @@ export const workshop59Router = router({
           });
         const r = await tx.insert(workshopJobCards59).values({
           businessEntityId: input.businessEntityId,
+          branchId: input.branchId ?? checkin.branchId ?? null,
           checkinId: input.checkinId,
           jobNo: input.jobNo,
           customerId: input.customerId,
@@ -2446,25 +2456,34 @@ export const workshop59Router = router({
     .input(scope)
     .query(async ({ input }) => {
       const db = await dbOrThrow();
-      const [jobs, quality] = await Promise.all([
-        db
-          .select()
-          .from(workshopJobCards59)
-          .where(
-            eq(workshopJobCards59.businessEntityId, input.businessEntityId)
+      const jobs = await db
+        .select()
+        .from(workshopJobCards59)
+        .where(
+          and(
+            eq(workshopJobCards59.businessEntityId, input.businessEntityId),
+            input.branchId
+              ? eq(workshopJobCards59.branchId, input.branchId)
+              : undefined
           )
-          .orderBy(desc(workshopJobCards59.updatedAt))
-          .limit(50),
-        db
-          .select()
-          .from(workshopQuality59)
-          .where(eq(workshopQuality59.businessEntityId, input.businessEntityId))
-          .orderBy(
-            desc(workshopQuality59.createdAt),
-            desc(workshopQuality59.id)
+        )
+        .orderBy(desc(workshopJobCards59.updatedAt))
+        .limit(50);
+      const quality = await db
+        .select()
+        .from(workshopQuality59)
+        .where(
+          and(
+            eq(workshopQuality59.businessEntityId, input.businessEntityId),
+            input.branchId
+              ? jobs.length
+                ? inArray(workshopQuality59.jobCardId, jobs.map(job => job.id))
+                : sql`1 = 0`
+              : undefined
           )
-          .limit(20),
-      ]);
+        )
+        .orderBy(desc(workshopQuality59.createdAt), desc(workshopQuality59.id))
+        .limit(20);
       return {
         jobs,
         checkins: [],
@@ -2499,7 +2518,10 @@ export const workshop59Router = router({
           and(
             eq(workshopJobCards59.businessEntityId, input.businessEntityId),
             sql`${workshopJobCards59.createdAt} >= ${input.from}`,
-            sql`${workshopJobCards59.createdAt} < ${input.to}`
+            sql`${workshopJobCards59.createdAt} < ${input.to}`,
+            input.branchId
+              ? eq(workshopJobCards59.branchId, input.branchId)
+              : undefined
           )
         );
       const jobIds = jobs.map(job => job.id);

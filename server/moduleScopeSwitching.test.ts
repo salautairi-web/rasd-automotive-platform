@@ -13,6 +13,23 @@ describe("module entity and branch switching contracts", () => {
     expect(source).toContain("businessEntityId = entity.id");
     expect(source).toContain("BranchSelector");
     expect(source).toContain('ariaLabel="فرع الورشة"');
+    expect(source).toContain(
+      "branchId={branchId ? Number(branchId) : undefined}"
+    );
+    expect(source).toContain(
+      "branchId: branchId ? Number(branchId) : undefined, ...boardRange"
+    );
+    expect(source).toContain(
+      "branchId: branchId ? Number(branchId) : undefined,\n                    customerId"
+    );
+    const server = read("server/workshop59.ts");
+    expect(server).toContain("eq(workshopJobCards59.branchId, input.branchId)");
+    expect(server).toContain(
+      "eq(workshopSchedules59.branchId, input.branchId)"
+    );
+    expect(server).toContain(
+      "eq(workshopAppointments.branchId, input.branchId)"
+    );
   });
 
   it("sends the selected inventory entity and branch to operational queries", () => {
@@ -22,6 +39,11 @@ describe("module entity and branch switching contracts", () => {
     expect(source).toContain("inventory56.dashboard.useQuery(input");
     expect(source).toContain("reorderRules.useQuery(input");
     expect(source).toContain("BranchSelector");
+    const server = read("server/inventory56.ts");
+    expect(server).toContain("inventoryReceipts56.warehouseId");
+    expect(server).toContain("inventoryIssues56.warehouseId");
+    expect(server).toContain("inventoryTransfers.sourceWarehouseId");
+    expect(server).toContain("inventoryStockouts56.warehouseId");
   });
 
   it("sends the selected sales entity and branch to dashboard and vehicle queries", () => {

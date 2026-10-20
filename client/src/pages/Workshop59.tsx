@@ -259,11 +259,11 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
     { enabled: selectedJobId > 0, refetchInterval: 30000, retry: false }
   );
   const appointments = trpc.workshop59.appointmentsBoard.useQuery(
-    { businessEntityId, ...boardRange },
+    { businessEntityId, branchId: branchId ? Number(branchId) : undefined, ...boardRange },
     { enabled: view === "appointments", refetchInterval: 30000, retry: false }
   );
   const report = trpc.workshop59.performanceReport.useQuery(
-    { businessEntityId, ...reportRange },
+    { businessEntityId, branchId: branchId ? Number(branchId) : undefined, ...reportRange },
     {
       enabled: view === "reports" && can("report"),
       refetchInterval: 60000,
@@ -840,6 +840,7 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
                   event.preventDefault();
                   schedule.mutate({
                     businessEntityId,
+                    branchId: branchId ? Number(branchId) : undefined,
                     customerId: Number(appointment.customerId),
                     vehicleId: Number(appointment.vehicleId),
                     bayId: Number(appointment.bayId),
@@ -2704,6 +2705,7 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
       {can("receive") && (
         <WorkshopReceiveDialog
           businessEntityId={businessEntityId}
+          branchId={branchId ? Number(branchId) : undefined}
           customers={customers}
           vehicles={vehicles}
           open={receiveOpen}
