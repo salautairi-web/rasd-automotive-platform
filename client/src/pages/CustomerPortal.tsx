@@ -46,6 +46,8 @@ import {
   Search,
   ShieldCheck,
   ShoppingBag,
+  UserRound,
+  CalendarDays,
 } from "lucide-react";
 import { type FormEvent, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -584,6 +586,9 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
             <TabsTrigger className="min-h-11" value="overview">
               ملخص حسابي
             </TabsTrigger>
+            <TabsTrigger className="min-h-11" value="profile">
+              ملفي والفواتير
+            </TabsTrigger>
             <TabsTrigger className="min-h-11" value="activity">
               الطلبات والحجوزات
             </TabsTrigger>
@@ -662,6 +667,119 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="profile" className="mt-5">
+          <div className="grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <UserRound size={18} className="text-blue-600" />
+                  بيانات ملف العميل
+                </CardTitle>
+                <p className="text-xs text-slate-500">
+                  بيانات السجل المرتبط بهذا الكيان فقط؛ لا تظهر سجلات كيانات
+                  أخرى.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {dashboard.data.profile ? (
+                  <>
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">الاسم</p>
+                      <p className="mt-1 font-semibold">
+                        {dashboard.data.profile.nameAr}
+                      </p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl border p-3">
+                        <p className="text-xs text-slate-500">رقم العميل</p>
+                        <p className="mt-1 font-medium">
+                          {dashboard.data.profile.customerNo}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border p-3">
+                        <p className="text-xs text-slate-500">حالة السجل</p>
+                        <p className="mt-1 font-medium text-emerald-700">
+                          {dashboard.data.profile.status === "active"
+                            ? "نشط"
+                            : "غير نشط"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="rounded-xl border p-3">
+                      <p className="text-xs text-slate-500">
+                        البريد الإلكتروني
+                      </p>
+                      <p dir="ltr" className="mt-1 text-right">
+                        {dashboard.data.profile.email || "غير مسجل"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border p-3">
+                      <p className="text-xs text-slate-500">رقم الجوال</p>
+                      <p dir="ltr" className="mt-1 text-right">
+                        {dashboard.data.profile.phone || "غير مسجل"}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-xl border border-dashed p-5 text-sm text-slate-500">
+                    لم يتم ربط الحساب بسجل عميل سابق. يمكنك متابعة الخدمات وطلب
+                    ربط سجل من تبويب الدعم.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Receipt size={18} className="text-emerald-600" />
+                  الفواتير الخاصة بي
+                </CardTitle>
+                <p className="text-xs text-slate-500">
+                  الفواتير المطابقة لسجل العميل داخل {scope.entityName}.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {dashboard.data.invoices.map(invoice => (
+                  <div
+                    key={invoice.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
+                  >
+                    <div>
+                      <p className="font-medium">{invoice.invoiceNo}</p>
+                      <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                        <CalendarDays size={13} /> {date(invoice.createdAt)}
+                      </p>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold">
+                        {formatPortalMoney(
+                          invoice.amountMinor,
+                          invoice.currency
+                        )}
+                      </p>
+                      <p
+                        className={`mt-1 text-xs ${invoice.status === "paid" ? "text-emerald-700" : invoice.status === "overdue" ? "text-rose-700" : "text-amber-700"}`}
+                      >
+                        {invoice.status === "paid"
+                          ? "مدفوعة"
+                          : invoice.status === "overdue"
+                            ? "متأخرة"
+                            : invoice.status === "partially_paid"
+                              ? "مدفوعة جزئياً"
+                              : "مستحقة"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {!dashboard.data.invoices.length && (
+                  <Empty>
+                    لا توجد فواتير مرتبطة بهذا السجل داخل الكيان الحالي.
+                  </Empty>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
         <TabsContent value="activity" className="mt-5">

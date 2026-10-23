@@ -44,6 +44,8 @@ export default function CustomerAccessPanel({
   const [error, setError] = useState("");
   const entities = trpc.customerAuth.entities.useQuery(undefined, {
     retry: false,
+    refetchInterval: 15000,
+    staleTime: 5000,
   });
   const authenticated = async () => {
     setPassword("");
