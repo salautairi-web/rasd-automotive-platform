@@ -55,7 +55,11 @@ export default function CustomerAccessPanel({
     onSuccess: authenticated,
     onError: e => {
       setPassword("");
-      setError(e.message);
+      setError(
+        e.message === "طلب غير مسموح"
+          ? "تعذر التحقق من أمان الجلسة. أعد تحميل الصفحة ثم حاول مرة أخرى."
+          : e.message
+      );
     },
   });
   const register = trpc.customerAuth.register.useMutation({
@@ -63,7 +67,11 @@ export default function CustomerAccessPanel({
     onError: e => {
       setPassword("");
       setConfirmPassword("");
-      setError(e.message);
+      setError(
+        e.message === "طلب غير مسموح"
+          ? "تعذر التحقق من أمان الجلسة. أعد تحميل الصفحة ثم حاول مرة أخرى."
+          : e.message
+      );
     },
   });
   const pending = login.isPending || register.isPending;

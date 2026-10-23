@@ -85,4 +85,20 @@ describe("Customer session separation", () => {
       code: "FORBIDDEN",
     });
   });
+  it("accepts customer mutations through the published forwarding host", async () => {
+    const forwarded = {
+      ...ctx,
+      req: {
+        headers: {
+          host: "localhost:3000",
+          origin: "https://rasdauto-ttwjqbzk.manus.space",
+          "x-forwarded-host": "rasdauto-ttwjqbzk.manus.space",
+          "x-forwarded-proto": "https",
+        },
+      } as any,
+    };
+    await expect(demo.createCaller(forwarded).write()).resolves.toEqual({
+      id: 42,
+    });
+  });
 });

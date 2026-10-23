@@ -61,11 +61,16 @@ function dbRequired() {
 }
 
 function requestHost(req: any) {
-  const host =
-    req.headers?.host || (typeof req.host === "string" ? req.host : null);
-  return typeof host === "string"
-    ? host.split(",")[0]!.trim().toLowerCase()
-    : null;
+  const headers = req.headers ?? {};
+  const values = [
+    headers.host,
+    headers["x-forwarded-host"],
+    typeof req.host === "string" ? req.host : null,
+  ];
+  return values
+    .flatMap(value => (typeof value === "string" ? value.split(",") : []))
+    .map(value => value.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 export function assertCsrf(req: any) {
@@ -78,11 +83,11 @@ export function assertCsrf(req: any) {
   }
   try {
     const parsed = new URL(String(origin));
-    const host = requestHost(req);
+    const hosts = requestHost(req);
     if (
       !["http:", "https:"].includes(parsed.protocol) ||
-      !host ||
-      parsed.host.toLowerCase() !== host
+      !hosts.length ||
+      !hosts.includes(parsed.host.toLowerCase())
     )
       throw new Error("origin mismatch");
   } catch {

@@ -425,6 +425,23 @@ describe("Isolated registration and login", () => {
       customerAuthRouter.createCaller(ctx).register(signup)
     ).resolves.toMatchObject({ success: true });
   });
+  it("accepts the published origin when the API is behind a forwarding proxy", async () => {
+    state.rows = [[configured], [configured]];
+    const { ctx } = context({
+      req: {
+        host: "localhost:3000",
+        headers: {
+          host: "localhost:3000",
+          origin: "https://rasdauto-ttwjqbzk.manus.space",
+          "x-forwarded-host": "rasdauto-ttwjqbzk.manus.space",
+          "x-forwarded-proto": "https",
+        },
+      },
+    });
+    await expect(
+      customerAuthRouter.createCaller(ctx).register(signup)
+    ).resolves.toMatchObject({ success: true });
+  });
 });
 describe("Password changes and administrative configuration", () => {
   it("lists planned entities for administrators so setup is not an empty selector", async () => {
