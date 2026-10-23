@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import WorkshopSetupPanel from "@/components/WorkshopSetupPanel";
 import BranchSelector from "@/components/BranchSelector";
 import WorkshopReceiveDialog from "@/components/WorkshopReceiveDialog";
+import EntityMasterDataPanel from "@/components/EntityMasterDataPanel";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ type WorkshopEntity = {
   roleNames: string[];
   permissions: string[];
 };
-type View = "jobs" | "appointments" | "reports" | "setup";
+type View = "jobs" | "appointments" | "reports" | "setup" | "masterData";
 type Panel =
   | "overview"
   | "estimate"
@@ -721,6 +722,7 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
             ["jobs", "أوامر العمل", Wrench],
             ["appointments", "المواعيد", CalendarDays],
             ["reports", "التقارير", Gauge],
+            ["masterData", "العملاء والمركبات", ClipboardCheck],
             ["setup", "التهيئة ودليل المستخدم", BookOpen],
           ] as const
         )
@@ -750,6 +752,7 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
           canConfigure={can("configure")}
         />
       )}
+      {view === "masterData" && (<EntityMasterDataPanel businessEntityId={businessEntityId} title="عملاء ومركبات كيان الورشة" />)}
       {view === "reports" && (
         <Card className="border-0 shadow-sm">
           <CardHeader>
