@@ -31,6 +31,18 @@ export async function hasActiveMfa(userId: number) {
   return Boolean(rows[0]);
 }
 
+export async function assertEntityPermission(userId: number, role: string, businessEntityId: number, permissionKey: string) {
+  if (role === "admin") return;
+  const db = await getDb();
+  if (!db) throw new TRPCError({ code: "FORBIDDEN", message: "لا يمكن التحقق من صلاحية IAM" });
+  const rows = await db.select({ id: iamPermissions.id }).from(iamMemberships)
+    .innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id))
+    .innerJoin(iamRolePermissions, eq(iamRolePermissions.roleId, iamRoles.id))
+    .innerJoin(iamPermissions, eq(iamRolePermissions.permissionId, iamPermissions.id))
+    .where(and(eq(iamMemberships.userId, userId), eq(iamMemberships.businessEntityId, businessEntityId), eq(iamMemberships.status, "active"), eq(iamRoles.status, "active"), eq(iamPermissions.permissionKey, permissionKey))).limit(1);
+  if (!rows[0]) throw new TRPCError({ code: "FORBIDDEN", message: `الصلاحية المطلوبة: ${permissionKey}` });
+}
+
 export const iamRouter = router({
   myAccess: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();

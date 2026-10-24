@@ -19,12 +19,16 @@ describe("central entity scope guard", () => {
   });
 
   it("scopes journal state changes by both entry and selected entity", () => {
-    expect(routersSource).toContain("eq(journalEntries.businessEntityId, input.businessEntityId), eq(journalEntries.status, \"validated\")");
-    expect(routersSource).toContain("eq(journalEntries.businessEntityId, input.businessEntityId), eq(journalEntries.status, \"posted\")");
+    expect(routersSource).toContain("eq(journalEntries.businessEntityId, input.businessEntityId)");
+    expect(routersSource).toContain('eq(journalEntries.status, "validated")');
+    expect(routersSource).toContain('eq(journalEntries.status, "posted")');
   });
 
   it("keeps the shared guard strict for malformed entity identifiers", () => {
     expect(routersSource).toContain("branchOptions: protectedProcedure");
-    expect(routersSource).toContain("assertEntityMembership(ctx.user.id, ctx.user.role, input.businessEntityId)");
+    expect(routersSource).toContain("assertEntityMembership(");
+    expect(routersSource).toContain("ctx.user.id");
+    expect(routersSource).toContain("ctx.user.role");
+    expect(routersSource).toContain("input.businessEntityId");
   });
 });

@@ -40,7 +40,7 @@ export async function getRasdOverview() {
   return { organizationCount, branchCount, customerCount, vehicleCount, productCount, openTaskCount, pendingEventCount, failedEventCount, organizations: orgRows, events };
 }
 
-export async function createAuditLog(input: { userId?: number; organizationId?: number; systemKey: string; entityType: string; entityId: string; action: string; correlationId?: string; requestId?: string; newValue?: string; }) {
+export async function createAuditLog(input: { userId?: number; organizationId?: number; systemKey: string; entityType: string; entityId: string; action: string; correlationId?: string; requestId?: string; oldValue?: string; newValue?: string; }) {
   const db = await getDb(); if (!db) return;
   await db.insert(auditLogs).values(input);
 }

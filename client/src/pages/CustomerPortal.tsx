@@ -781,6 +781,69 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
               </CardContent>
             </Card>
           </div>
+          <div className="mt-5 grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ShoppingBag size={18} className="text-violet-600" />
+                  مركباتي
+                </CardTitle>
+                <p className="text-xs text-slate-500">
+                  المركبات المرتبطة بملفك داخل الكيان الحالي فقط.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {dashboard.data.customerVehicles.map(vehicle => (
+                  <div key={vehicle.id} className="rounded-xl border p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium">
+                          {vehicle.make} {vehicle.model}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {vehicle.vehicleNo} · سنة الصنع {vehicle.modelYear || "غير محددة"}
+                        </p>
+                      </div>
+                      <Badge variant="secondary">{vehicle.status}</Badge>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500" dir="ltr">
+                      VIN: {vehicle.vin}
+                    </p>
+                  </div>
+                ))}
+                {!dashboard.data.customerVehicles.length && (
+                  <Empty>لا توجد مركبات مرتبطة بهذا الملف.</Empty>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText size={18} className="text-blue-600" />
+                  سجل الصيانة
+                </CardTitle>
+                <p className="text-xs text-slate-500">
+                  آخر أوامر العمل وحالاتها من نظام الورشة في الزمن الفعلي.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {dashboard.data.maintenanceHistory.map(job => (
+                  <div key={job.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
+                    <div>
+                      <p className="font-medium">{job.jobNo}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {job.make} {job.model} · {job.vehicleNo} · {date(job.updatedAt)}
+                      </p>
+                    </div>
+                    <Badge variant="outline">{job.status}</Badge>
+                  </div>
+                ))}
+                {!dashboard.data.maintenanceHistory.length && (
+                  <Empty>لا يوجد سجل صيانة مرتبط بهذا الملف حتى الآن.</Empty>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         <TabsContent value="activity" className="mt-5">
           <Card className="border-0 shadow-sm">
