@@ -1,0 +1,1 @@
+ALTER TABLE `employee_credentials` DROP INDEX `employee_credentials_user_unique`;

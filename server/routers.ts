@@ -10,7 +10,7 @@ import {
 } from "./_core/trpc";
 import { createAuditLog, enqueueEvent, getRasdOverview } from "./db";
 import { nanoid } from "nanoid";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { storagePut } from "./storage";
 import {
   documents,
@@ -53,6 +53,7 @@ import {
   workshopPartsRequests,
   workshopInvoices,
   workshopPayments,
+  users,
   rentalVehicles,
   rentalCustomers,
   rentalRatePlans,
@@ -63,6 +64,9 @@ import {
   rentalMaintenanceTasks,
   rentalMaintenanceRequests,
   rentalInvoices,
+  employeeCredentials,
+  iamMemberships,
+  iamRoles,
 } from "../drizzle/schema";
 import { getDb } from "./db";
 import { assertEntityPermission } from "./iam";
@@ -158,6 +162,21 @@ import {
 import { layoutRouter } from "./layout";
 import { rentalSecurityRouter } from "./rentalSecurity";
 import { assertEntityMembership } from "./entityAccess";
+import { sdk } from "./_core/sdk";
+
+const EMPLOYEE_LOGIN_COOKIE = "rasd_employee_session";
+const normalizeEmployeeUsername = (value: string) => value.trim().toLowerCase();
+function hashEmployeePassword(password: string, salt = randomBytes(16).toString("hex")) {
+  const digest = scryptSync(password, salt, 64).toString("hex");
+  return `scrypt$${salt}$${digest}`;
+}
+function verifyEmployeePassword(password: string, encoded: string) {
+  const [, salt, digest] = encoded.split("$");
+  if (!salt || !digest) return false;
+  const actual = scryptSync(password, salt, 64);
+  const expected = Buffer.from(digest, "hex");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
 
 const correlationSchema = z.string().trim().min(8).max(80).optional();
 
@@ -320,6 +339,66 @@ export const appRouter = router({
   adminControl: adminControlRouter,
   layout: layoutRouter,
   system: systemRouter,
+  employeeAuth: router({
+    accessOptions: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { entities: [], roles: [] };
+      const [entities, roles] = await Promise.all([
+        db.select({ id: businessEntities.id, code: businessEntities.code, nameAr: businessEntities.nameAr })
+          .from(businessEntities).where(eq(businessEntities.status, "active")).orderBy(businessEntities.nameAr).limit(100),
+        db.select({ id: iamRoles.id, roleKey: iamRoles.roleKey, nameAr: iamRoles.nameAr, scopeType: iamRoles.scopeType })
+          .from(iamRoles).where(eq(iamRoles.status, "active")).orderBy(iamRoles.nameAr).limit(100),
+      ]);
+      return { entities, roles };
+    }),
+    login: publicProcedure.input(z.object({
+      username: z.string().trim().min(3).max(120),
+      password: z.string().min(8).max(200),
+      businessEntityId: z.number().int().positive(),
+      roleKey: z.string().trim().min(2).max(100),
+    })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      const username = normalizeEmployeeUsername(input.username);
+      const [credential] = await db.select().from(employeeCredentials).where(eq(employeeCredentials.username, username)).limit(1);
+      const genericError = () => new TRPCError({ code: "UNAUTHORIZED", message: "بيانات الدخول أو نطاق الوصول غير صحيح" });
+      if (!credential || credential.status !== "active" || (credential.lockedUntil && credential.lockedUntil > new Date())) throw genericError();
+      const validPassword = verifyEmployeePassword(input.password, credential.passwordHash);
+      if (!validPassword) {
+        const attempts = credential.failedAttempts + 1;
+        await db.update(employeeCredentials).set({ failedAttempts: attempts, lockedUntil: attempts >= 5 ? new Date(Date.now() + 15 * 60_000) : null }).where(eq(employeeCredentials.id, credential.id));
+        throw genericError();
+      }
+      const [user] = await db.select().from(users).where(eq(users.id, credential.userId)).limit(1);
+      const [membership] = await db.select({ id: iamMemberships.id, roleKey: iamRoles.roleKey, roleNameAr: iamRoles.nameAr })
+        .from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id))
+        .where(and(eq(iamMemberships.userId, credential.userId), eq(iamMemberships.businessEntityId, input.businessEntityId), eq(iamMemberships.status, "active"), eq(iamRoles.roleKey, input.roleKey), eq(iamRoles.status, "active"), sql`${iamMemberships.startsAt} <= now()`, sql`(${iamMemberships.endsAt} is null or ${iamMemberships.endsAt} > now())`)).limit(1);
+      const [entity] = await db.select({ id: businessEntities.id, nameAr: businessEntities.nameAr }).from(businessEntities).where(and(eq(businessEntities.id, input.businessEntityId), eq(businessEntities.status, "active"))).limit(1);
+      if (!user || !membership || !entity) throw genericError();
+      await db.update(employeeCredentials).set({ failedAttempts: 0, lockedUntil: null, lastLoginAt: new Date() }).where(eq(employeeCredentials.id, credential.id));
+      const token = await sdk.createSessionToken(user.openId, { name: user.name ?? username });
+      ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: 1000 * 60 * 60 * 12 });
+      return { authenticated: true as const, user: { id: user.id, name: user.name, email: user.email }, entity, role: { key: membership.roleKey, nameAr: membership.roleNameAr } };
+    }),
+    logout: publicProcedure.mutation(({ ctx }) => {
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      return { success: true as const };
+    }),
+    setMyCredential: protectedProcedure.input(z.object({ username: z.string().trim().min(3).max(120), password: z.string().min(8).max(200) })).mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "قاعدة البيانات غير متاحة" });
+      const [activeMembership] = await db.select({ id: iamMemberships.id }).from(iamMemberships).where(and(eq(iamMemberships.userId, ctx.user.id), eq(iamMemberships.status, "active"))).limit(1);
+      if (!activeMembership && ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "تحتاج إلى عضوية IAM فعالة قبل إعداد الدخول المحلي" });
+      const username = normalizeEmployeeUsername(input.username);
+      const [existingUsername] = await db.select({ id: employeeCredentials.id, userId: employeeCredentials.userId }).from(employeeCredentials).where(eq(employeeCredentials.username, username)).limit(1);
+      if (existingUsername && existingUsername.userId !== ctx.user.id) throw new TRPCError({ code: "CONFLICT", message: "اسم المستخدم مستخدم مسبقاً" });
+      const passwordHash = hashEmployeePassword(input.password);
+      if (existingUsername) await db.update(employeeCredentials).set({ passwordHash, status: "active", failedAttempts: 0, lockedUntil: null }).where(eq(employeeCredentials.id, existingUsername.id));
+      else await db.insert(employeeCredentials).values({ userId: ctx.user.id, username, passwordHash });
+      return { saved: true as const, username };
+    }),
+  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

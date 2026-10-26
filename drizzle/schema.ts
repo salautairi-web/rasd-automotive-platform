@@ -12,6 +12,19 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+export const employeeCredentials = mysqlTable("employee_credentials", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  username: varchar("username", { length: 120 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 500 }).notNull(),
+  status: mysqlEnum("status", ["active", "disabled"]).default("active").notNull(),
+  failedAttempts: int("failedAttempts").default(0).notNull(),
+  lockedUntil: timestamp("lockedUntil"),
+  lastLoginAt: timestamp("lastLoginAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const businessEntities = mysqlTable("business_entities", { id: int("id").autoincrement().primaryKey(), entityId: varchar("entityId", { length: 40 }).notNull().unique(), code: varchar("code", { length: 40 }).notNull().unique(), nameAr: varchar("nameAr", { length: 180 }).notNull(), nameEn: varchar("nameEn", { length: 180 }), entityType: mysqlEnum("entityType", ["company", "subsidiary", "business_project", "business_activity", "investment_vehicle", "future"]).notNull(), parentCompanyId: int("parentCompanyId"), currency: varchar("currency", { length: 8 }).default("OMR").notNull(), timezone: varchar("timezone", { length: 64 }).default("Asia/Muscat").notNull(), status: mysqlEnum("status", ["active", "inactive", "planned", "archived"]).default("planned").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
 
 export const organizations = mysqlTable("organizations", {

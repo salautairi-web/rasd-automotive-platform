@@ -701,6 +701,20 @@
       "when": 1792837088630,
       "tag": "0099_chief_roxanne_simpson",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "5",
+      "when": 1792993436045,
+      "tag": "0100_parched_polaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "5",
+      "when": 1792993464402,
+      "tag": "0101_fantastic_the_liberteens",
+      "breakpoints": true
     }
   ]
 }
