@@ -24,7 +24,7 @@ import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSidebarFavorites } from "@/hooks/useSidebarFavorites";
 import { searchSidebarItems } from "../../../shared/sidebarNavigation";
-import { Activity, BarChart3, Boxes, Building2, Calculator, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelRight, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, CreditCard, Target, AlertTriangle, Gavel, BellRing, LockKeyhole, Search, Star, X } from "lucide-react";
+import { Activity, BarChart3, Boxes, Building2, Calculator, ChevronDown, ClipboardCheck, Database, FileText, Files, LayoutDashboard, LogOut, PanelRight, Settings2, ShieldCheck, Workflow, Landmark, BriefcaseBusiness, ChartNoAxesCombined, CarFront, PackageSearch, Wrench, KeyRound, Ship, Globe2, Command, UsersRound, Warehouse, Handshake, Zap, Network, Smartphone, MessageSquare, WalletCards, CreditCard, Target, AlertTriangle, Gavel, BellRing, LockKeyhole, Search, Star, X } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -71,7 +71,6 @@ const menuItems = [
   { icon: Handshake, label: "إدارة علاقات العملاء", path: "/crm" },
   { icon: Files, label: "مركز المستندات", path: "/documents-center" },
   { icon: Boxes, label: "السجلات الرئيسية", path: "/master-data" },
-  { icon: Activity, label: "مركز التكامل", path: "/integrations" },
   { icon: Workflow, label: "سير العمل", path: "/workflows" },
   { icon: ClipboardCheck, label: "المهام والموافقات", path: "/tasks" },
   { icon: FileText, label: "الوثائق", path: "/documents" },
@@ -83,6 +82,27 @@ const menuItems = [
   { icon: LockKeyhole, label: "الأمن المؤسسي وZero Trust", path: "/security-governance" },
   { icon: Settings2, label: "الإعدادات", path: "/settings" },
 ];
+const primaryMenuPaths = new Set([
+  "/",
+  "/admin/control-center",
+  "/sales",
+  "/parts",
+  "/workshop",
+  "/rental",
+  "/import-export",
+  "/operations",
+  "/finance",
+  "/projects",
+  "/inventory",
+  "/crm",
+  "/hr",
+  "/documents-center",
+  "/compliance",
+  "/audit",
+  "/admin/security-operations",
+  "/settings",
+]);
+const primaryMenuItems = menuItems.filter(item => primaryMenuPaths.has(item.path));
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -144,6 +164,7 @@ function DashboardLayoutContent({
   const { state, toggleSidebar, setOpen, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
+  const [showMoreServices, setShowMoreServices] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
@@ -152,6 +173,7 @@ function DashboardLayoutContent({
   const searchRef = useRef<HTMLInputElement>(null);
   const { favorites, toggleFavorite } = useSidebarFavorites(user?.id ?? 0, menuItems);
   const visibleItems = searchSidebarItems(menuItems, menuSearch);
+  const displayedItems = menuSearch.trim() || showMoreServices ? visibleItems : primaryMenuItems;
   const favoriteItems = searchSidebarItems(favorites.map(path => menuItems.find(item => item.path === path)).filter((item): item is typeof menuItems[number] => Boolean(item)), menuSearch);
 
   const navigate = (path: string) => { setLocation(path); setOpenMobile(false); };
@@ -265,9 +287,10 @@ function DashboardLayoutContent({
               {(favoriteItems.length > 0 || !isCompact) && <div className="mt-2 border-b border-border" />}
             </nav>
             <nav aria-label="جميع الخدمات" data-sidebar-section="all" className="px-2 py-1">
-              {!isCompact && <p className="px-2 pb-2 text-xs font-medium text-muted-foreground">جميع الخدمات</p>}
-              <SidebarMenu>{visibleItems.map(item => renderMenuItem(item, "all"))}</SidebarMenu>
+              {!isCompact && <p className="px-2 pb-2 text-xs font-medium text-muted-foreground">الخدمات الأساسية</p>}
+              <SidebarMenu>{displayedItems.map(item => renderMenuItem(item, "all"))}</SidebarMenu>
               {!isCompact && visibleItems.length === 0 && <p role="status" className="rounded-lg bg-muted/50 px-3 py-4 text-center text-xs leading-6 text-muted-foreground">لا توجد خدمة مطابقة. جرّب كلمة أخرى.</p>}
+              {!isCompact && !menuSearch.trim() && <button type="button" onClick={() => setShowMoreServices(value => !value)} className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"><ChevronDown className={`size-4 transition-transform ${showMoreServices ? "rotate-180" : ""}`} />{showMoreServices ? "إخفاء الخدمات المتقدمة" : `عرض المزيد (${menuItems.length - primaryMenuItems.length})`}</button>}
             </nav>
           </SidebarContent>
 
