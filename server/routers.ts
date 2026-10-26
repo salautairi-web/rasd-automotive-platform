@@ -10,7 +10,7 @@ import {
 } from "./_core/trpc";
 import { createAuditLog, enqueueEvent, getRasdOverview } from "./db";
 import { nanoid } from "nanoid";
-import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHash } from "node:crypto";
 import { storagePut } from "./storage";
 import {
   documents,
@@ -67,6 +67,7 @@ import {
   employeeCredentials,
   iamMemberships,
   iamRoles,
+  iamSecurityEvents,
 } from "../drizzle/schema";
 import { getDb } from "./db";
 import { assertEntityPermission } from "./iam";
@@ -163,20 +164,9 @@ import { layoutRouter } from "./layout";
 import { rentalSecurityRouter } from "./rentalSecurity";
 import { assertEntityMembership } from "./entityAccess";
 import { sdk } from "./_core/sdk";
+import { hashEmployeePassword, normalizeEmployeeUsername, roleRequiresMfa, verifyEmployeePassword } from "./employeeAuth";
 
 const EMPLOYEE_LOGIN_COOKIE = "rasd_employee_session";
-const normalizeEmployeeUsername = (value: string) => value.trim().toLowerCase();
-function hashEmployeePassword(password: string, salt = randomBytes(16).toString("hex")) {
-  const digest = scryptSync(password, salt, 64).toString("hex");
-  return `scrypt$${salt}$${digest}`;
-}
-function verifyEmployeePassword(password: string, encoded: string) {
-  const [, salt, digest] = encoded.split("$");
-  if (!salt || !digest) return false;
-  const actual = scryptSync(password, salt, 64);
-  const expected = Buffer.from(digest, "hex");
-  return actual.length === expected.length && timingSafeEqual(actual, expected);
-}
 
 const correlationSchema = z.string().trim().min(8).max(80).optional();
 
@@ -362,11 +352,16 @@ export const appRouter = router({
       const username = normalizeEmployeeUsername(input.username);
       const [credential] = await db.select().from(employeeCredentials).where(eq(employeeCredentials.username, username)).limit(1);
       const genericError = () => new TRPCError({ code: "UNAUTHORIZED", message: "بيانات الدخول أو نطاق الوصول غير صحيح" });
-      if (!credential || credential.status !== "active" || (credential.lockedUntil && credential.lockedUntil > new Date())) throw genericError();
+      if (!credential || credential.status !== "active" || (credential.lockedUntil && credential.lockedUntil > new Date())) {
+        await db.insert(iamSecurityEvents).values({ userId: credential?.userId, businessEntityId: input.businessEntityId, eventType: "EmployeeLoginDenied", outcome: "denied", resourceType: "employee_session", resourceId: username, correlationId: `login-${nanoid(12)}`, detailsJson: JSON.stringify({ roleKey: input.roleKey, reason: credential?.lockedUntil ? "locked" : "invalid_credential" }) });
+        throw genericError();
+      }
       const validPassword = verifyEmployeePassword(input.password, credential.passwordHash);
       if (!validPassword) {
         const attempts = credential.failedAttempts + 1;
-        await db.update(employeeCredentials).set({ failedAttempts: attempts, lockedUntil: attempts >= 5 ? new Date(Date.now() + 15 * 60_000) : null }).where(eq(employeeCredentials.id, credential.id));
+        const lockedUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60_000) : null;
+        await db.update(employeeCredentials).set({ failedAttempts: attempts, lockedUntil }).where(eq(employeeCredentials.id, credential.id));
+        await db.insert(iamSecurityEvents).values({ userId: credential.userId, businessEntityId: input.businessEntityId, eventType: lockedUntil ? "EmployeeLoginLocked" : "EmployeeLoginFailed", outcome: "failure", resourceType: "employee_session", resourceId: username, correlationId: `login-${nanoid(12)}`, detailsJson: JSON.stringify({ roleKey: input.roleKey, failedAttempts: attempts, lockedUntil }) });
         throw genericError();
       }
       const [user] = await db.select().from(users).where(eq(users.id, credential.userId)).limit(1);
@@ -374,8 +369,16 @@ export const appRouter = router({
         .from(iamMemberships).innerJoin(iamRoles, eq(iamMemberships.roleId, iamRoles.id))
         .where(and(eq(iamMemberships.userId, credential.userId), eq(iamMemberships.businessEntityId, input.businessEntityId), eq(iamMemberships.status, "active"), eq(iamRoles.roleKey, input.roleKey), eq(iamRoles.status, "active"), sql`${iamMemberships.startsAt} <= now()`, sql`(${iamMemberships.endsAt} is null or ${iamMemberships.endsAt} > now())`)).limit(1);
       const [entity] = await db.select({ id: businessEntities.id, nameAr: businessEntities.nameAr }).from(businessEntities).where(and(eq(businessEntities.id, input.businessEntityId), eq(businessEntities.status, "active"))).limit(1);
-      if (!user || !membership || !entity) throw genericError();
+      if (!user || !membership || !entity) {
+        await db.insert(iamSecurityEvents).values({ userId: credential.userId, businessEntityId: input.businessEntityId, eventType: "EmployeeScopeDenied", outcome: "denied", resourceType: "employee_session", resourceId: username, correlationId: `login-${nanoid(12)}`, detailsJson: JSON.stringify({ roleKey: input.roleKey }) });
+        throw genericError();
+      }
+      if (roleRequiresMfa(membership.roleKey) && !(await hasActiveMfa(credential.userId))) {
+        await db.insert(iamSecurityEvents).values({ userId: credential.userId, businessEntityId: input.businessEntityId, eventType: "MFARequired", outcome: "denied", resourceType: "employee_session", resourceId: username, correlationId: `login-${nanoid(12)}`, detailsJson: JSON.stringify({ roleKey: membership.roleKey }) });
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "يجب تفعيل MFA لهذا الدور قبل تسجيل الدخول" });
+      }
       await db.update(employeeCredentials).set({ failedAttempts: 0, lockedUntil: null, lastLoginAt: new Date() }).where(eq(employeeCredentials.id, credential.id));
+      await db.insert(iamSecurityEvents).values({ userId: credential.userId, businessEntityId: input.businessEntityId, eventType: "EmployeeLoginSuccess", outcome: "success", resourceType: "employee_session", resourceId: username, correlationId: `login-${nanoid(12)}`, detailsJson: JSON.stringify({ roleKey: membership.roleKey, entityId: input.businessEntityId }) });
       const token = await sdk.createSessionToken(user.openId, { name: user.name ?? username });
       ctx.res.cookie(COOKIE_NAME, token, { ...getSessionCookieOptions(ctx.req), maxAge: 1000 * 60 * 60 * 12 });
       return { authenticated: true as const, user: { id: user.id, name: user.name, email: user.email }, entity, role: { key: membership.roleKey, nameAr: membership.roleNameAr } };

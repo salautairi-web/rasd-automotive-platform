@@ -79,6 +79,7 @@ const menuItems = [
   { icon: Gavel, label: "حوكمة الامتثال والشؤون القانونية", path: "/compliance-governance" },
   { icon: BellRing, label: "تنبيهات تجديد التصاريح والعقود", path: "/compliance-renewals" },
   { icon: ShieldCheck, label: "التدقيق والأمن", path: "/audit" },
+  { icon: LockKeyhole, label: "أمن المستخدمين وبيانات الدخول", path: "/admin/security-operations" },
   { icon: LockKeyhole, label: "الأمن المؤسسي وZero Trust", path: "/security-governance" },
   { icon: Settings2, label: "الإعدادات", path: "/settings" },
 ];
