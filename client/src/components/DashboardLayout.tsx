@@ -20,7 +20,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSidebarFavorites } from "@/hooks/useSidebarFavorites";
 import { searchSidebarItems } from "../../../shared/sidebarNavigation";
@@ -319,7 +318,7 @@ function DashboardLayoutContent({
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>تسجيل الخروج</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
