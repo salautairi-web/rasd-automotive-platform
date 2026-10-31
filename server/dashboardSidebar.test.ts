@@ -44,6 +44,7 @@ describe("Arabic dashboard sidebar layout", () => {
     expect(html).toContain("اختصار البحث: / أو Ctrl+K");
     expect(html).toContain('aria-label="الخدمات المفضلة"');
     expect(html).toContain('aria-label="جميع الخدمات"');
+    expect(html).toContain("دليل الاختصارات");
     expect(html).toContain('aria-label="إضافة تأجير السيارات إلى المفضلة"');
     expect(html).toContain('aria-pressed="false"');
     expect(html).toContain("اضغط النجمة بجوار أي خدمة لإضافتها هنا.");

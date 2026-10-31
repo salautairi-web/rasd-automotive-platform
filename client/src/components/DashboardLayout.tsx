@@ -33,6 +33,7 @@ import { Input } from "./ui/input";
 const menuItems = [
   { icon: LayoutDashboard, label: "نظرة عامة", path: "/" },
   { icon: ShieldCheck, label: "مركز التحكم المؤسسي", path: "/admin/control-center" },
+  { icon: Command, label: "دليل الاختصارات", path: "/help/shortcuts" },
   { icon: Building2, label: "الهيكل المؤسسي", path: "/organization" },
   { icon: Landmark, label: "سجل كيانات الأعمال", path: "/erp/entities" },
   { icon: BriefcaseBusiness, label: "دفاتر المحاسبة", path: "/erp/accounting" },
@@ -84,6 +85,7 @@ const menuItems = [
 const primaryMenuPaths = new Set([
   "/",
   "/admin/control-center",
+  "/help/shortcuts",
   "/sales",
   "/parts",
   "/workshop",

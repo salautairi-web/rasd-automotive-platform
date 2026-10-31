@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adminSectionFromShortcut, adminSectionPreferenceKey, normalizeAdminSection, readAdminSectionPreference } from "../shared/adminNavigation";
+import { adminSectionFromShortcut, adminSectionPreferenceKey, adminTabPreferencesKey, normalizeAdminSection, normalizeAdminTabPreferences, readAdminSectionPreference, readAdminTabPreferences } from "../shared/adminNavigation";
 import { normalizeSidebarFavorites, normalizeSidebarSearch, readSidebarFavorites, searchSidebarItems, sidebarFavoritesKey, toggleSidebarFavorite } from "../shared/sidebarNavigation";
 
 const items = [
@@ -74,5 +74,11 @@ describe("Admin section shortcuts and preferences", () => {
     expect(readAdminSectionPreference("unknown", "operations")).toBe("operations");
     expect(readAdminSectionPreference("x".repeat(101), "governance")).toBe("governance");
     expect(normalizeAdminSection(null, "master")).toBe("master");
+  });
+  it("restores only valid last sub-tabs for each administration section", () => {
+    expect(adminTabPreferencesKey(7)).toBe("rasd:admin-tabs:v1:7");
+    expect(readAdminTabPreferences('{"master":"projects","access":"matrix","unknown":"hack","operations":42}')).toEqual({ master: "projects", access: "matrix" });
+    expect(readAdminTabPreferences("broken")).toEqual({});
+    expect(normalizeAdminTabPreferences({ home: "overview", governance: "layouts", access: "x".repeat(101) })).toEqual({ home: "overview", governance: "layouts" });
   });
 });
