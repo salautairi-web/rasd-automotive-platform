@@ -204,6 +204,19 @@ function DashboardLayoutContent({
       setIsResizing(false);
     }
   }, [isCollapsed]);
+  useEffect(() => {
+    const handleKeyboardShortcut = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTyping = Boolean(target?.closest("input, textarea, select, [contenteditable='true']"));
+      const isSearchShortcut = (event.key === "/" && !isTyping) || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k");
+      if (!isSearchShortcut) return;
+      event.preventDefault();
+      if (isCollapsed) setOpen(true);
+      requestAnimationFrame(() => searchRef.current?.focus());
+    };
+    window.addEventListener("keydown", handleKeyboardShortcut);
+    return () => window.removeEventListener("keydown", handleKeyboardShortcut);
+  }, [isCollapsed, setOpen]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -267,7 +280,7 @@ function DashboardLayoutContent({
               onClick={() => { setOpen(true); requestAnimationFrame(() => searchRef.current?.focus()); }}><Search size={16} /></button> : <>
               <div className="relative">
                 <Search className="pointer-events-none absolute right-3 top-3 size-4 text-muted-foreground" />
-                <Input ref={searchRef} type="search" aria-label="البحث داخل القائمة" placeholder="ابحث عن خدمة…"
+                <Input ref={searchRef} type="search" aria-label="البحث داخل القائمة" aria-keyshortcuts="/ Control+K Meta+K" title="اختصار البحث: / أو Ctrl+K" placeholder="ابحث عن خدمة…"
                   value={menuSearch} onChange={event => setMenuSearch(event.target.value)}
                   onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); setMenuSearch(""); } }}
                   className="h-10 bg-background pl-9 pr-9 text-sm [&::-webkit-search-cancel-button]:appearance-none" />

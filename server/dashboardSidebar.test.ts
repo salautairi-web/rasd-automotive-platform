@@ -40,6 +40,8 @@ describe("Arabic dashboard sidebar layout", () => {
   it("renders search, favorite and all-service sections with accessible star buttons", () => {
     const html = renderToStaticMarkup(React.createElement(DashboardLayout, { children: "اختبار" }));
     expect(html).toContain('aria-label="البحث داخل القائمة"');
+    expect(html).toContain('aria-keyshortcuts="/ Control+K Meta+K"');
+    expect(html).toContain("اختصار البحث: / أو Ctrl+K");
     expect(html).toContain('aria-label="الخدمات المفضلة"');
     expect(html).toContain('aria-label="جميع الخدمات"');
     expect(html).toContain('aria-label="إضافة تأجير السيارات إلى المفضلة"');

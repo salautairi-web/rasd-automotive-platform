@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { adminSectionFromShortcut, adminSectionPreferenceKey, normalizeAdminSection, readAdminSectionPreference } from "../shared/adminNavigation";
 import { normalizeSidebarFavorites, normalizeSidebarSearch, readSidebarFavorites, searchSidebarItems, sidebarFavoritesKey, toggleSidebarFavorite } from "../shared/sidebarNavigation";
 
 const items = [
@@ -58,5 +59,20 @@ describe("Sidebar favorites", () => {
     const favorites = items.filter(item => item.path === "/rental");
     expect(searchSidebarItems(favorites, "finance")).toEqual([]);
     expect(searchSidebarItems(favorites, "تاجير")).toEqual([items[0]]);
+  });
+});
+describe("Admin section shortcuts and preferences", () => {
+  it("maps the five keyboard shortcuts to stable sections", () => {
+    expect(["1", "2", "3", "4", "5"].map(adminSectionFromShortcut)).toEqual(["home", "master", "access", "operations", "governance"]);
+    expect(adminSectionFromShortcut("0")).toBeNull();
+    expect(adminSectionFromShortcut("6")).toBeNull();
+  });
+  it("isolates and validates the saved section per user", () => {
+    expect(adminSectionPreferenceKey(7)).toBe("rasd:admin-section:v1:7");
+    expect(adminSectionPreferenceKey(7)).not.toBe(adminSectionPreferenceKey(8));
+    expect(readAdminSectionPreference("access")).toBe("access");
+    expect(readAdminSectionPreference("unknown", "operations")).toBe("operations");
+    expect(readAdminSectionPreference("x".repeat(101), "governance")).toBe("governance");
+    expect(normalizeAdminSection(null, "master")).toBe("master");
   });
 });
