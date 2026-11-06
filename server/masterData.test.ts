@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { validatePlateNumber } from "../shared/vehicleCatalog";
 
 const router = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
 const panel = readFileSync(
@@ -35,7 +36,13 @@ describe("entity master data contract", () => {
     expect(catalog).toContain('key: "Toyota"');
     expect(catalog).toContain('key: "Hyundai"');
     expect(panel).toContain("VEHICLE_CATALOG");
+    expect(panel).toContain("filteredMakes");
+    expect(panel).toContain("filteredModels");
+    expect(panel).toContain("VEHICLE_TYPES");
+    expect(panel).toContain("PLATE_COUNTRIES");
     expect(panel).toContain("plateNo");
+    expect(panel).toContain("plateCountry");
+    expect(panel).toContain("vehicleType");
     expect(panel).toContain("color");
     expect(router).toContain("plateNo: vehicles.plateNo");
     expect(router).toContain("color: vehicles.color");
@@ -43,6 +50,14 @@ describe("entity master data contract", () => {
     expect(receiveDialog).toContain("customerId, vin: newVehicle.vin.trim()");
     expect(receiveDialog).toContain("VEHICLE_COLORS");
     expect(receiveDialog).toContain("item.customerId === Number(form.customerId)");
+  });
+
+  it("validates plate length and allowed characters by selected country", () => {
+    expect(validatePlateNumber("12345678", "OM").valid).toBe(true);
+    expect(validatePlateNumber("123456789", "OM").valid).toBe(false);
+    expect(validatePlateNumber("12-أ ب", "SA").valid).toBe(true);
+    expect(validatePlateNumber("12/34", "AE").valid).toBe(false);
+    expect(validatePlateNumber("", "KW").valid).toBe(true);
   });
 
   it("is mounted in both operational entities", () => {

@@ -71,6 +71,7 @@ import {
 } from "../drizzle/schema";
 import { getDb } from "./db";
 import { assertEntityPermission } from "./iam";
+import { validatePlateNumber } from "../shared/vehicleCatalog";
 import { rentalAdvancedRouter } from "./rentalAdvanced";
 import { importExportRouter } from "./importExport";
 import { portalRouter } from "./portal";
@@ -445,7 +446,9 @@ export const appRouter = router({
               make: vehicles.make,
               model: vehicles.model,
               modelYear: vehicles.modelYear,
+              vehicleType: vehicles.vehicleType,
               plateNo: vehicles.plateNo,
+              plateCountry: vehicles.plateCountry,
               color: vehicles.color,
               lifecycleStatus: vehicles.lifecycleStatus,
             })
@@ -586,7 +589,9 @@ export const appRouter = router({
           make: z.string().trim().min(2).max(80),
           model: z.string().trim().min(1).max(80),
           modelYear: z.number().int().optional(),
+          vehicleType: z.string().trim().max(40).optional(),
           plateNo: z.string().trim().max(32).optional(),
+          plateCountry: z.enum(["OM", "AE", "SA", "QA", "BH", "KW", "OTHER"]).optional(),
           color: z.string().trim().max(60).optional(),
         })
       )
@@ -599,6 +604,11 @@ export const appRouter = router({
         );
         const db = await getDb();
         if (!db) throw new Error("database_unavailable");
+        if (input.plateNo) {
+          const plateCheck = validatePlateNumber(input.plateNo, input.plateCountry ?? "OTHER");
+          if (!plateCheck.valid)
+            throw new TRPCError({ code: "BAD_REQUEST", message: plateCheck.message });
+        }
         if (input.customerId) {
           const [customer] = await db
             .select({ id: customers.id })
@@ -632,7 +642,9 @@ export const appRouter = router({
             make: input.make,
             model: input.model,
             modelYear: input.modelYear,
+            vehicleType: input.vehicleType,
             plateNo: input.plateNo,
+            plateCountry: input.plateCountry,
             color: input.color,
             vehicleNo,
           });
@@ -656,7 +668,9 @@ export const appRouter = router({
           make: z.string().trim().min(2).max(80),
           model: z.string().trim().min(1).max(80),
           modelYear: z.number().int().optional(),
+          vehicleType: z.string().trim().max(40).optional(),
           plateNo: z.string().trim().max(32).optional(),
+          plateCountry: z.enum(["OM", "AE", "SA", "QA", "BH", "KW", "OTHER"]).optional(),
           color: z.string().trim().max(60).optional(),
         })
       )
@@ -684,6 +698,11 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "المركبة خارج نطاق الكيان",
           });
+        if (input.plateNo) {
+          const plateCheck = validatePlateNumber(input.plateNo, input.plateCountry ?? "OTHER");
+          if (!plateCheck.valid)
+            throw new TRPCError({ code: "BAD_REQUEST", message: plateCheck.message });
+        }
         if (input.customerId) {
           const [customer] = await db
             .select({ id: customers.id })
@@ -709,7 +728,9 @@ export const appRouter = router({
             make: input.make,
             model: input.model,
             modelYear: input.modelYear,
+            vehicleType: input.vehicleType,
             plateNo: input.plateNo,
+            plateCountry: input.plateCountry,
             color: input.color,
           })
           .where(eq(vehicles.id, input.vehicleId));
