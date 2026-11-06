@@ -2711,6 +2711,9 @@ function WorkshopWorkspace({ entity }: { entity: WorkshopEntity }) {
           branchId={branchId ? Number(branchId) : undefined}
           customers={customers}
           vehicles={vehicles}
+          products={products}
+          warehouses={warehouses}
+          permissions={entity.permissions}
           open={receiveOpen}
           onOpenChange={setReceiveOpen}
           onCreated={id => {
