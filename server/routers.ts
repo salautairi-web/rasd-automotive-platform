@@ -445,6 +445,8 @@ export const appRouter = router({
               make: vehicles.make,
               model: vehicles.model,
               modelYear: vehicles.modelYear,
+              plateNo: vehicles.plateNo,
+              color: vehicles.color,
               lifecycleStatus: vehicles.lifecycleStatus,
             })
             .from(vehicles)
@@ -584,6 +586,8 @@ export const appRouter = router({
           make: z.string().trim().min(2).max(80),
           model: z.string().trim().min(1).max(80),
           modelYear: z.number().int().optional(),
+          plateNo: z.string().trim().max(32).optional(),
+          color: z.string().trim().max(60).optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -628,6 +632,8 @@ export const appRouter = router({
             make: input.make,
             model: input.model,
             modelYear: input.modelYear,
+            plateNo: input.plateNo,
+            color: input.color,
             vehicleNo,
           });
         await createAuditLog({
@@ -650,6 +656,8 @@ export const appRouter = router({
           make: z.string().trim().min(2).max(80),
           model: z.string().trim().min(1).max(80),
           modelYear: z.number().int().optional(),
+          plateNo: z.string().trim().max(32).optional(),
+          color: z.string().trim().max(60).optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -701,6 +709,8 @@ export const appRouter = router({
             make: input.make,
             model: input.model,
             modelYear: input.modelYear,
+            plateNo: input.plateNo,
+            color: input.color,
           })
           .where(eq(vehicles.id, input.vehicleId));
         await createAuditLog({

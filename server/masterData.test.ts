@@ -6,6 +6,14 @@ const panel = readFileSync(
   new URL("../client/src/components/EntityMasterDataPanel.tsx", import.meta.url),
   "utf8"
 );
+const catalog = readFileSync(
+  new URL("../shared/vehicleCatalog.ts", import.meta.url),
+  "utf8"
+);
+const receiveDialog = readFileSync(
+  new URL("../client/src/components/WorkshopReceiveDialog.tsx", import.meta.url),
+  "utf8"
+);
 
 describe("entity master data contract", () => {
   it("exposes entity-scoped list and creation procedures", () => {
@@ -21,6 +29,20 @@ describe("entity master data contract", () => {
     expect(panel).toContain("trpc.masterData.createCustomer.useMutation");
     expect(panel).toContain("trpc.masterData.createVehicle.useMutation");
     expect(panel).toContain("utils.masterData.list.invalidate");
+  });
+
+  it("supports catalog vehicle selection and preserves customer linking", () => {
+    expect(catalog).toContain('key: "Toyota"');
+    expect(catalog).toContain('key: "Hyundai"');
+    expect(panel).toContain("VEHICLE_CATALOG");
+    expect(panel).toContain("plateNo");
+    expect(panel).toContain("color");
+    expect(router).toContain("plateNo: vehicles.plateNo");
+    expect(router).toContain("color: vehicles.color");
+    expect(router).toContain("customerId: input.customerId");
+    expect(receiveDialog).toContain("customerId, vin: newVehicle.vin.trim()");
+    expect(receiveDialog).toContain("VEHICLE_COLORS");
+    expect(receiveDialog).toContain("item.customerId === Number(form.customerId)");
   });
 
   it("is mounted in both operational entities", () => {

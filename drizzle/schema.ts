@@ -130,6 +130,8 @@ export const vehicles = mysqlTable("vehicles", {
   make: varchar("make", { length: 80 }).notNull(),
   model: varchar("model", { length: 80 }).notNull(),
   modelYear: int("modelYear"),
+  plateNo: varchar("plateNo", { length: 32 }),
+  color: varchar("color", { length: 60 }),
   lifecycleStatus: varchar("lifecycleStatus", { length: 40 }).default("imported").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({ vehicleEntityNo: uniqueIndex("vehicles_entity_no_unique").on(table.businessEntityId, table.vehicleNo) }));
