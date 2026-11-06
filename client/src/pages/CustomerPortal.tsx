@@ -5,7 +5,6 @@ import CustomerLinkRequestPanel from "@/components/CustomerLinkRequestPanel";
 import CustomerServiceRequests from "@/components/CustomerServiceRequests";
 import CustomerAccessPanel from "@/components/CustomerAccessPanel";
 import CustomerAccountDialog from "@/components/CustomerAccountDialog";
-import CustomerRegistrationSetupPanel from "@/components/CustomerRegistrationSetupPanel";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -219,11 +218,6 @@ export default function CustomerPortal() {
           initialMode={path.endsWith("/register") ? "register" : "login"}
           onAuthenticated={signedIn}
         />
-        {auth.user?.role === "admin" && !local.data && (
-          <div dir="rtl" className="mx-auto max-w-6xl px-4 pb-8">
-            <CustomerRegistrationSetupPanel />
-          </div>
-        )}
       </>
     );
   if (local.isLoading || (auth.loading && !local.data) || isLeaving)
@@ -337,20 +331,6 @@ export default function CustomerPortal() {
             )}
           </div>
         </section>
-        {auth.user?.role === "admin" && !local.data && (
-          <>
-            <CustomerRegistrationSetupPanel />
-            <p className="text-sm text-slate-500">
-              لإنشاء حساب عميل مستقل:{" "}
-              <Link
-                href="/customer-portal/register"
-                className="text-blue-600 underline"
-              >
-                فتح نموذج التسجيل
-              </Link>
-            </p>
-          </>
-        )}
         {account.isError ? (
           <ErrorState retry={() => void account.refetch()} />
         ) : account.isLoading ? (

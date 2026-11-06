@@ -62,12 +62,23 @@ export const registerSchema = z
     phone: phoneSchema,
     password: passwordSchema,
     confirmPassword: z.string().max(128, "تأكيد كلمة المرور طويل جداً"),
-    businessEntityId: z.number().int().positive("اختر شركة الخدمة"),
+    businessEntityId: z.number().int().positive("اختر شركة الخدمة").optional(),
+    businessEntityIds: z
+      .array(z.number().int().positive())
+      .min(1, "اختر كيان خدمة واحداً على الأقل")
+      .max(12, "يمكن اختيار 12 كيان خدمة كحد أقصى")
+      .optional(),
     acceptTerms: z.literal(true, {
       message: "يلزم الموافقة على إنشاء حساب الخدمة",
     }),
   })
   .superRefine((value, ctx) => {
+    if (!value.businessEntityId && !value.businessEntityIds?.length)
+      ctx.addIssue({
+        code: "custom",
+        path: ["businessEntityIds"],
+        message: "اختر كيان خدمة واحداً على الأقل",
+      });
     if (value.password !== value.confirmPassword)
       ctx.addIssue({
         code: "custom",

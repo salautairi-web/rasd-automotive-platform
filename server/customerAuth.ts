@@ -447,25 +447,39 @@ export const customerAuthRouter = router({
       await consumeAttempts(db, [
         [`signup-ip:${clientIp(ctx.req)}`, SIGNUP_IP_LIMIT],
       ]);
-      const configured = await configuredEntity(db, input.businessEntityId);
-      if (!configured)
+      const entityIds = Array.from(
+        new Set(
+          input.businessEntityIds?.length
+            ? input.businessEntityIds
+            : input.businessEntityId
+              ? [input.businessEntityId]
+              : []
+        )
+      );
+      if (!entityIds.length)
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "التسجيل غير متاح لهذا الكيان",
+          message: "اختر كيان خدمة واحداً على الأقل",
+        });
+      const configuredEntities = await Promise.all(
+        entityIds.map(entityId => configuredEntity(db, entityId))
+      );
+      if (configuredEntities.some(entity => !entity))
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "أحد كيانات الخدمة المختارة غير متاح للتسجيل",
         });
       const passwordHash = await hashCustomerPassword(input.password);
       const now = new Date();
       try {
         const result = await db.transaction(async (tx: any) => {
-          const lockedSetting = await configuredEntity(
-            tx,
-            input.businessEntityId,
-            true
+          const lockedSettings = await Promise.all(
+            entityIds.map(entityId => configuredEntity(tx, entityId, true))
           );
-          if (!lockedSetting)
+          if (lockedSettings.some(setting => !setting))
             throw new TRPCError({
               code: "BAD_REQUEST",
-              message: "التسجيل غير متاح لهذا الكيان",
+              message: "أحد كيانات الخدمة المختارة لم يعد متاحاً للتسجيل",
             });
           const userInsert = await tx
             .insert(users)
@@ -482,19 +496,6 @@ export const customerAuthRouter = router({
             .insert(customerCredentials)
             .values({ userId, email, phone, passwordHash, status: "active" });
           const credentialId = Number(credentialInsert[0].insertId);
-          const customerNo = `CUS-${randomUUID().replaceAll("-", "").slice(0, 20).toUpperCase()}`;
-          const customerInsert = await tx
-            .insert(customers)
-            .values({
-              customerNo,
-              organizationId: lockedSetting.organizationId,
-              businessEntityId: input.businessEntityId,
-              nameAr: input.name.trim(),
-              phone,
-              email,
-              status: "active",
-            });
-          const customerId = Number(customerInsert[0].insertId);
           const portalUserInsert = await tx
             .insert(portalUsers)
             .values({
@@ -504,11 +505,22 @@ export const customerAuthRouter = router({
               verifiedAt: null,
             });
           const portalUserId = Number(portalUserInsert[0].insertId);
-          const profileInsert = await tx
-            .insert(portalProfiles)
-            .values({
+          const profileIds: number[] = [];
+          for (const setting of lockedSettings) {
+            const customerNo = `CUS-${randomUUID().replaceAll("-", "").slice(0, 20).toUpperCase()}`;
+            const customerInsert = await tx.insert(customers).values({
+              customerNo,
+              organizationId: setting.organizationId,
+              businessEntityId: setting.entityId,
+              nameAr: input.name.trim(),
+              phone,
+              email,
+              status: "active",
+            });
+            const customerId = Number(customerInsert[0].insertId);
+            const profileInsert = await tx.insert(portalProfiles).values({
               userId,
-              businessEntityId: input.businessEntityId,
+              businessEntityId: setting.entityId,
               profileType: "customer",
               localRecordType: "customer",
               localRecordId: customerId,
@@ -516,29 +528,28 @@ export const customerAuthRouter = router({
               status: "active",
               linkedAt: now,
             });
-          const profileId = Number(profileInsert[0].insertId);
-          await tx
-            .insert(portalEntityRelationships)
-            .values({
+            profileIds.push(Number(profileInsert[0].insertId));
+            await tx.insert(portalEntityRelationships).values({
               portalUserId,
-              businessEntityId: input.businessEntityId,
+              businessEntityId: setting.entityId,
               relationshipType: "customer",
               sourceProfileId: customerId,
               status: "active",
-              permissionsJson: JSON.stringify(["own.portal"]),
+              permissionsJson: JSON.stringify(["own.portal", "entity.access"]),
             });
+          }
           const session = await insertCustomerSession(tx, credentialId);
           await tx
             .insert(portalAudit)
             .values(
               auditValues({
                 userId,
-                businessEntityId: input.businessEntityId,
+                businessEntityId: entityIds[0],
                 action: "customer.register",
                 outcome: "success",
               })
             );
-          return { userId, credentialId, session, profileId };
+          return { userId, credentialId, session, profileIds };
         });
         setCustomerSessionCookie(ctx.res, ctx.req, result.session.token);
         return {

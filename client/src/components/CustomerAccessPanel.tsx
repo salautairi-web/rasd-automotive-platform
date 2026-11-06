@@ -35,7 +35,7 @@ export default function CustomerAccessPanel({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [entityId, setEntityId] = useState("");
+  const [entityIds, setEntityIds] = useState<string[]>([]);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -77,9 +77,12 @@ export default function CustomerAccessPanel({
     },
   });
   const pending = login.isPending || register.isPending;
-  const selectedEntity =
-    entityId ||
-    (entities.data?.length === 1 ? String(entities.data[0].id) : "");
+  const selectedEntityIds =
+    entityIds.length > 0
+      ? entityIds
+      : entities.data?.length === 1
+        ? [String(entities.data[0].id)]
+        : [];
   const changeMode = (next: "login" | "register") => {
     if (pending) return;
     setMode(next);
@@ -105,7 +108,7 @@ export default function CustomerAccessPanel({
         phone,
         password,
         confirmPassword,
-        businessEntityId: Number(selectedEntity),
+        businessEntityIds: selectedEntityIds.map(Number),
         acceptTerms,
       });
       if (!parsed.success) {
@@ -295,27 +298,41 @@ export default function CustomerAccessPanel({
                   الدولة.
                 </p>
                 <div>
-                  <Label htmlFor="customer-company">شركة الخدمة</Label>
-                  <select
-                    id="customer-company"
-                    className="mt-2 h-11 w-full rounded-xl border bg-background px-3 text-sm"
-                    value={selectedEntity}
-                    required
-                    disabled={pending || entities.isLoading || entities.isError}
-                    onChange={e => {
-                      setError("");
-                      setEntityId(e.target.value);
-                    }}
-                  >
-                    <option value="">
-                      {entities.isLoading ? "تحميل الشركات…" : "اختر الشركة"}
-                    </option>
-                    {entities.data?.map(entity => (
-                      <option key={entity.id} value={entity.id}>
-                        {entity.nameAr}
-                      </option>
-                    ))}
-                  </select>
+                  <Label>الخدمات أو الكيانات المطلوبة</Label>
+                  <p className="mt-1 text-xs leading-6 text-slate-500">
+                    اختر كياناً واحداً أو أكثر. لن تظهر لك الكيانات الأخرى بعد
+                    الدخول إلا بعد طلب إضافة خدمة جديدة.
+                  </p>
+                  <div className="mt-2 space-y-2 rounded-xl border bg-slate-50 p-3">
+                    {entities.isLoading ? (
+                      <p className="text-sm text-slate-500">تحميل الخدمات…</p>
+                    ) : (
+                      entities.data?.map(entity => {
+                        const value = String(entity.id);
+                        const checked = selectedEntityIds.includes(value);
+                        return (
+                          <label
+                            key={entity.id}
+                            className="flex cursor-pointer items-center gap-3 rounded-lg bg-white p-3 text-sm"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              disabled={pending || entities.isError}
+                              onCheckedChange={next => {
+                                setError("");
+                                setEntityIds(current =>
+                                  next
+                                    ? Array.from(new Set([...current, value]))
+                                    : current.filter(id => id !== value)
+                                );
+                              }}
+                            />
+                            <span>{entity.nameAr}</span>
+                          </label>
+                        );
+                      })
+                    )}
+                  </div>
                   {entities.isError && (
                     <p role="alert" className="mt-2 text-xs text-rose-600">
                       تعذر تحميل شركات الخدمة.{" "}
@@ -451,7 +468,7 @@ export default function CustomerAccessPanel({
               disabled={
                 pending ||
                 (mode === "register" &&
-                  (!acceptTerms || !selectedEntity || !entities.data?.length))
+                  (!acceptTerms || !selectedEntityIds.length || !entities.data?.length))
               }
             >
               {pending ? (

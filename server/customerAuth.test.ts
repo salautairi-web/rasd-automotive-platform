@@ -263,7 +263,7 @@ describe("Isolated registration and login", () => {
     expect(
       state.writes.find(r => r.table === "portal_entity_relationships").values
         .sourceProfileId
-    ).toBe(102);
+    ).toBe(103);
     expect(
       state.writes.find(r => r.table === "portal_users").values.verifiedAt
     ).toBeNull();

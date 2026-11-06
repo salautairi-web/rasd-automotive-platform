@@ -28,6 +28,20 @@ export default function CustomerServiceRequests({
     entityName: string;
   };
 }) {
+  const entityText = scope.entityName.toLocaleLowerCase();
+  const serviceKeys: CustomerServiceKey[] =
+    entityText.includes("ورشة") || entityText.includes("workshop")
+      ? ["workshop"]
+      : entityText.includes("قطع") || entityText.includes("parts")
+        ? ["parts"]
+        : entityText.includes("تأجير") || entityText.includes("rental")
+          ? ["rental"]
+          : entityText.includes("مبيعات") || entityText.includes("sales")
+            ? ["sales"]
+            : customerServices.map(service => service.key);
+  const visibleServices = customerServices.filter(service =>
+    serviceKeys.includes(service.key)
+  );
   const [serviceKey, setServiceKey] = useState<CustomerServiceKey | null>(null);
   const [subject, setSubject] = useState("");
   const [details, setDetails] = useState("");
@@ -92,7 +106,7 @@ export default function CustomerServiceRequests({
         )}
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {customerServices.map(service => {
+        {visibleServices.map(service => {
           const Icon =
             service.icon === "wrench"
               ? Wrench
