@@ -32,7 +32,7 @@ import { Input } from "./ui/input";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "نظرة عامة", path: "/" },
-  { icon: ShieldCheck, label: "مركز التحكم المؤسسي", path: "/admin/control-center" },
+  { icon: PanelRight, label: "البوابات", path: "/access-portals" },
   { icon: Command, label: "دليل الاختصارات", path: "/help/shortcuts" },
   { icon: Building2, label: "الهيكل المؤسسي", path: "/organization" },
   { icon: Landmark, label: "سجل كيانات الأعمال", path: "/erp/entities" },
@@ -43,8 +43,6 @@ const menuItems = [
   { icon: Wrench, label: "الورشة", path: "/workshop" },
   { icon: KeyRound, label: "تأجير السيارات", path: "/rental" },
   { icon: Ship, label: "الاستيراد والتصدير", path: "/import-export" },
-  { icon: Globe2, label: "البوابة الموحدة", path: "/portal" },
-  { icon: Globe2, label: "حسابات وخدمات العملاء", path: "/customer-portal" },
   { icon: Command, label: "مركز العمليات", path: "/operations" },
   { icon: Zap, label: "مركز الأتمتة", path: "/automation" },
   { icon: AlertTriangle, label: "الإنذار المبكر", path: "/early-warnings" },
@@ -84,7 +82,7 @@ const menuItems = [
 ];
 const primaryMenuPaths = new Set([
   "/",
-  "/admin/control-center",
+  "/access-portals",
   "/help/shortcuts",
   "/sales",
   "/parts",
