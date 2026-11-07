@@ -134,6 +134,10 @@ export const vehicles = mysqlTable("vehicles", {
   plateNo: varchar("plateNo", { length: 32 }),
   plateCountry: varchar("plateCountry", { length: 12 }),
   color: varchar("color", { length: 60 }),
+  odometerValue: int("odometerValue").default(0).notNull(),
+  odometerUnit: mysqlEnum("odometerUnit", ["km", "mile"]).default("km").notNull(),
+  nextServiceOdometer: int("nextServiceOdometer"),
+  nextServiceAt: timestamp("nextServiceAt"),
   lifecycleStatus: varchar("lifecycleStatus", { length: 40 }).default("imported").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({ vehicleEntityNo: uniqueIndex("vehicles_entity_no_unique").on(table.businessEntityId, table.vehicleNo) }));
@@ -903,6 +907,19 @@ export const portalV2Messages = mysqlTable("portal_v2_messages", { id: int("id")
 export const portalV2Notifications = mysqlTable("portal_v2_notifications", { id: int("id").autoincrement().primaryKey(), portalUserId: int("portalUserId").notNull(), businessEntityId: int("businessEntityId"), eventKey: varchar("eventKey", { length: 140 }).notNull(), channel: mysqlEnum("channel", ["in_app", "email", "sms", "push"]).notNull(), title: varchar("title", { length: 220 }).notNull(), body: text("body").notNull(), dedupeKey: varchar("dedupeKey", { length: 180 }).notNull(), readAt: timestamp("readAt"), createdAt: timestamp("createdAt").defaultNow().notNull() }, (t) => ({ dedupe: uniqueIndex("portal_v2_notification_dedupe_unique").on(t.portalUserId, t.dedupeKey) }));
 export const portalPreferences = mysqlTable("portal_preferences", { id: int("id").autoincrement().primaryKey(), portalUserId: int("portalUserId").notNull(), businessEntityId: int("businessEntityId"), language: varchar("language", { length: 12 }).default("ar").notNull(), currency: varchar("currency", { length: 3 }), notificationsJson: text("notificationsJson").notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
 export const portalAudit = mysqlTable("portal_audit", { id: int("id").autoincrement().primaryKey(), portalUserId: int("portalUserId"), businessEntityId: int("businessEntityId"), relationshipId: int("relationshipId"), action: varchar("action", { length: 120 }).notNull(), resourceType: varchar("resourceType", { length: 100 }).notNull(), resourceId: varchar("resourceId", { length: 120 }), outcome: mysqlEnum("outcome", ["success", "failure", "denied"]).notNull(), correlationId: varchar("correlationId", { length: 100 }).notNull(), createdAt: timestamp("createdAt").defaultNow().notNull() });
+export const portalServiceAccessRequests = mysqlTable("portal_service_access_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  portalUserId: int("portalUserId").notNull(),
+  relationshipId: int("relationshipId").notNull(),
+  requestedBusinessEntityId: int("requestedBusinessEntityId").notNull(),
+  requestedServicesJson: text("requestedServicesJson").notNull(),
+  requesterNote: varchar("requesterNote", { length: 1000 }).notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "cancelled"]).default("pending").notNull(),
+  reviewedBy: int("reviewedBy"),
+  reviewNote: text("reviewNote"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewedAt"),
+}, (t) => ({ requestEntity: uniqueIndex("portal_service_access_request_unique").on(t.portalUserId, t.requestedBusinessEntityId, t.status) }));
 
 
 // Step 24 — Communication Platform: provider-neutral, entity-scoped, auditable.

@@ -3,6 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import CustomerLinkRequestPanel from "@/components/CustomerLinkRequestPanel";
 import CustomerServiceRequests from "@/components/CustomerServiceRequests";
+import CustomerServiceAccessPanel from "@/components/CustomerServiceAccessPanel";
+import CustomerVehicleManager from "@/components/CustomerVehicleManager";
 import CustomerAccessPanel from "@/components/CustomerAccessPanel";
 import CustomerAccountDialog from "@/components/CustomerAccountDialog";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -35,6 +37,7 @@ import {
   ChevronLeft,
   Clock3,
   FileText,
+  Gauge,
   Headphones,
   LogIn,
   LogOut,
@@ -62,6 +65,7 @@ type Scope = {
   businessEntityId: number;
   relationshipId: number;
   entityName: string;
+  serviceOptions: Array<{ id: number; nameAr: string; entityType: string | null }>;
 };
 type Priority = "low" | "normal" | "high" | "urgent";
 const relationshipLabels: Record<string, string> = {
@@ -375,6 +379,7 @@ export default function CustomerPortal() {
                 businessEntityId: relationship.businessEntityId,
                 relationshipId: relationship.id,
                 entityName: relationship.entityName,
+                serviceOptions: account.data?.serviceOptions ?? [],
               }}
             />
           </>
@@ -490,6 +495,7 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
   if (dashboard.isLoading || !dashboard.data) return <Loading />;
   return (
     <>
+      <CustomerServiceAccessPanel scope={input} options={scope.serviceOptions} requests={dashboard.data.serviceAccessRequests} />
       <CustomerServiceRequests scope={scope} />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -539,6 +545,13 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
             icon: Headphones,
             tone: "bg-amber-50 text-amber-600",
             action: () => setTab("support"),
+          },
+          {
+            label: "تنبيهات صيانة",
+            value: dashboard.data.maintenanceAlerts.length,
+            icon: Gauge,
+            tone: "bg-rose-50 text-rose-600",
+            action: () => setTab("profile"),
           },
         ].map(m => (
           <button
@@ -761,41 +774,8 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
               </CardContent>
             </Card>
           </div>
-          <div className="mt-5 grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <ShoppingBag size={18} className="text-violet-600" />
-                  مركباتي
-                </CardTitle>
-                <p className="text-xs text-slate-500">
-                  المركبات المرتبطة بملفك داخل الكيان الحالي فقط.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboard.data.customerVehicles.map(vehicle => (
-                  <div key={vehicle.id} className="rounded-xl border p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium">
-                          {vehicle.make} {vehicle.model}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {vehicle.vehicleNo} · سنة الصنع {vehicle.modelYear || "غير محددة"}
-                        </p>
-                      </div>
-                      <Badge variant="secondary">{vehicle.status}</Badge>
-                    </div>
-                    <p className="mt-2 text-xs text-slate-500" dir="ltr">
-                      VIN: {vehicle.vin}
-                    </p>
-                  </div>
-                ))}
-                {!dashboard.data.customerVehicles.length && (
-                  <Empty>لا توجد مركبات مرتبطة بهذا الملف.</Empty>
-                )}
-              </CardContent>
-            </Card>
+          <div className="mt-5 grid gap-5">
+            <CustomerVehicleManager scope={input} vehicles={dashboard.data.customerVehicles} onChanged={() => void dashboard.refetch()} />
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -824,6 +804,7 @@ function CustomerWorkspace({ scope }: { scope: Scope }) {
               </CardContent>
             </Card>
           </div>
+          {dashboard.data.maintenanceAlerts.length > 0 && <Card className="mt-5 border-amber-200 bg-amber-50/60 shadow-sm"><CardHeader><CardTitle className="flex items-center gap-2 text-base text-amber-900"><Gauge size={18} /> تنبيهات الصيانة الحالية</CardTitle></CardHeader><CardContent className="grid gap-2 sm:grid-cols-2">{dashboard.data.maintenanceAlerts.map(alert => <div key={`${alert.vehicleId}-${alert.kind}`} className="rounded-xl bg-white p-3"><p className="font-medium text-amber-950">{alert.title}</p><p className="mt-1 text-xs text-amber-800">{alert.vehicleNo} · {alert.detail}</p></div>)}</CardContent></Card>}
         </TabsContent>
         <TabsContent value="activity" className="mt-5">
           <Card className="border-0 shadow-sm">
